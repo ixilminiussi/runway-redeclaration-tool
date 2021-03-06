@@ -54,14 +54,10 @@ public class Main extends Application {
         row4.setPercentHeight(25);
         main.getRowConstraints().addAll(row1, row2, row3, row4);
 
-        StackPane fillerImage = new StackPane();
-        Label runwayFillerLabel = new Label("runway");
-        fillerImage.getChildren().add(runwayFillerLabel);
-        fillerImage.setPadding(new Insets(20, 20, 20, 20));
-        fillerImage.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+        RunwayGraphics runwayGraphics = new RunwayGraphics();
 
 
-        main.add(fillerImage, 0, 0, 2, 4);
+        main.add(runwayGraphics.getAnchorPane(), 0, 0, 2, 4);
 
         root.getChildren().add(main);
 
