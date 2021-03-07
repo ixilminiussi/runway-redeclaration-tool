@@ -96,24 +96,34 @@ public class Runway {
         this.slopeRatio = slopeRatio;
     }
 
-    int TORA;
-    int TODA;
-    int ASDA;
-    int LDA;
-    int displacedThreshold;
-    int stripEnd;
-    int EGR;
-    int RESA;
-    int blastAllowance;
-    int stopway;
-    int clearway;
-    int slopeRatio;
+    public void setDirection(Directions direction) { this.direction = direction; }
+
+    public Directions getDirection() { return direction; }
+
+    private String name;
+    private String airport;
+    private int TORA;
+    private int TODA;
+    private int ASDA;
+    private int LDA;
+    private int displacedThreshold;
+    private int stripEnd;
+    private int EGR;
+    private int RESA;
+    private int blastAllowance;
+    private int stopway;
+    private int clearway;
+    private int slopeRatio;
+    private Directions direction;
+
 
     public AffectedRunway recalculate(Obstruction obst) {
         return new AffectedRunway(this, obst);
     }
 
-    public Runway(int TORA, int TODA, int ASDA, int LDA, int displacedThreshold, int stripEnd, int EGR, int RESA, int blastAllowance, int stopway, int clearway) {
+    public Runway(String name, String airport, int TORA, int TODA, int ASDA, int LDA, int displacedThreshold, int stripEnd, int EGR, int RESA, int blastAllowance, int stopway, int clearway, Directions direction) {
+        this.name = name;
+        this.airport = airport;
         this.TORA = TORA;
         this.TODA = TODA;
         this.ASDA = ASDA;
@@ -125,6 +135,7 @@ public class Runway {
         this.blastAllowance = blastAllowance;
         this.stopway = stopway;
         this.clearway = clearway;
+        this.direction = direction;
     }
 }
 

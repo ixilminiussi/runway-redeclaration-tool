@@ -9,6 +9,7 @@ public class AffectedRunway {
     public AffectedRunway(Runway originalRunway, Obstruction obstruction) {
         this.originalRunway = originalRunway;
         this.obstruction = obstruction;
+        recalculate(obstruction);
     }
 
     public void recalculate (Obstruction obstruction) {
