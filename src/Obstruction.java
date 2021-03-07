@@ -1,6 +1,15 @@
 public class Obstruction {
+    String name;
     int height;
     int length;
+
+    Obstruction(String name, int height, int length, int distThresh, int distCentre) {
+        this.name = name;
+        this.height = height;
+        this.length = length;
+        this.distanceFromThreshold = distThresh;
+        this.distanceFromCentre = distCentre;
+    }
 
     public int getHeight() {
         return height;

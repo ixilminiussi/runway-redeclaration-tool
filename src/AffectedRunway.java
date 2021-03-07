@@ -9,11 +9,13 @@ public class AffectedRunway {
     public AffectedRunway(Runway originalRunway, Obstruction obstruction) {
         this.originalRunway = originalRunway;
         this.obstruction = obstruction;
+        recalculate(obstruction);
     }
 
-    public void recalculate (Obstruction obstructio) {
+    public void recalculate (Obstruction obstruction) {
         // replace obstruction and change all values but original runway is the same
         // landing over / take off away
+        this.obstruction = obstruction;
         if (obstruction.getDistanceFromThreshold() < (originalRunway.getTORA() + originalRunway.getDisplacedThreshold())/2) {
             TORA = Math.min(originalRunway.getTORA() - originalRunway.getBlastAllowance() - obstruction.getDistanceFromThreshold() - originalRunway.getDisplacedThreshold(),
                     originalRunway.getTORA() - originalRunway.getStripEnd() - originalRunway.getRESA() - obstruction.getDistanceFromThreshold());
