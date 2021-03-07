@@ -1,5 +1,45 @@
-
 public class Runway {
+    private String name, airport;
+    private int TORA, TODA, ASDA, LDA, displacedThreshold, stripEnd, EGR, RESA, blastAllowance, stopway, clearway, slopeRatio;
+    private Directions direction;
+
+    public AffectedRunway recalculate(Obstruction obst) {
+        return new AffectedRunway(this, obst);
+    }
+
+    public Runway(String name, String airport, int TORA, int TODA, int ASDA, int LDA, int displacedThreshold, int stripEnd, int EGR, int RESA, int blastAllowance, int stopway, int clearway, Directions direction) {
+        this.name = name;
+        this.airport = airport;
+        this.TORA = TORA;
+        this.TODA = TODA;
+        this.ASDA = ASDA;
+        this.LDA = LDA;
+        this.displacedThreshold = displacedThreshold;
+        this.stripEnd = stripEnd;
+        this.EGR = EGR;
+        this.RESA = RESA;
+        this.blastAllowance = blastAllowance;
+        this.stopway = stopway;
+        this.clearway = clearway;
+        this.direction = direction;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAirport() {
+        return airport;
+    }
+
+    public void setAirport(String airport) {
+        this.airport = airport;
+    }
+
     public int getTORA() {
         return TORA;
     }
@@ -96,45 +136,11 @@ public class Runway {
         this.slopeRatio = slopeRatio;
     }
 
-    public void setDirection(Directions direction) { this.direction = direction; }
-
-    public Directions getDirection() { return direction; }
-
-    private String name;
-    private String airport;
-    private int TORA;
-    private int TODA;
-    private int ASDA;
-    private int LDA;
-    private int displacedThreshold;
-    private int stripEnd;
-    private int EGR;
-    private int RESA;
-    private int blastAllowance;
-    private int stopway;
-    private int clearway;
-    private int slopeRatio;
-    private Directions direction;
-
-
-    public AffectedRunway recalculate(Obstruction obst) {
-        return new AffectedRunway(this, obst);
+    public Directions getDirection() {
+        return direction;
     }
 
-    public Runway(String name, String airport, int TORA, int TODA, int ASDA, int LDA, int displacedThreshold, int stripEnd, int EGR, int RESA, int blastAllowance, int stopway, int clearway, Directions direction) {
-        this.name = name;
-        this.airport = airport;
-        this.TORA = TORA;
-        this.TODA = TODA;
-        this.ASDA = ASDA;
-        this.LDA = LDA;
-        this.displacedThreshold = displacedThreshold;
-        this.stripEnd = stripEnd;
-        this.EGR = EGR;
-        this.RESA = RESA;
-        this.blastAllowance = blastAllowance;
-        this.stopway = stopway;
-        this.clearway = clearway;
+    public void setDirection(Directions direction) {
         this.direction = direction;
     }
 }

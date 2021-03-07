@@ -1,12 +1,9 @@
 public class AffectedRunway {
-    int TORA;
-    int TODA;
-    int ASDA;
-    int LDA;
-    Runway originalRunway;
-    Obstruction obstruction;
+    private int TORA, TODA, ASDA, LDA;
+    private Runway originalRunway;
+    private Obstruction obstruction;
 
-    public AffectedRunway(Runway originalRunway, Obstruction obstruction) {
+    AffectedRunway(Runway originalRunway, Obstruction obstruction) {
         this.originalRunway = originalRunway;
         this.obstruction = obstruction;
         recalculate(obstruction);
@@ -32,4 +29,51 @@ public class AffectedRunway {
         }
     }
 
+    public int getTORA() {
+        return TORA;
+    }
+
+    public void setTORA(int TORA) {
+        this.TORA = TORA;
+    }
+
+    public int getTODA() {
+        return TODA;
+    }
+
+    public void setTODA(int TODA) {
+        this.TODA = TODA;
+    }
+
+    public int getASDA() {
+        return ASDA;
+    }
+
+    public void setASDA(int ASDA) {
+        this.ASDA = ASDA;
+    }
+
+    public int getLDA() {
+        return LDA;
+    }
+
+    public void setLDA(int LDA) {
+        this.LDA = LDA;
+    }
+
+    public Runway getOriginalRunway() {
+        return originalRunway;
+    }
+
+    public void setOriginalRunway(Runway originalRunway) {
+        this.originalRunway = originalRunway;
+    }
+
+    public Obstruction getObstruction() {
+        return obstruction;
+    }
+
+    public void setObstruction(Obstruction obstruction) {
+        this.obstruction = obstruction;
+    }
 }
