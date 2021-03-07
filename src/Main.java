@@ -53,6 +53,12 @@ public class Main extends Application {
         main.add(runwayGraphics.getAnchorPane(), 0, 0, 2, 4);
 
         ConfigPanel configPanel = new ConfigPanel();
+        /*
+        TODO for me or anyone else:
+        add event to apply buttons in config panel that updates graphics
+        configPanel.getAffectedRunway() returns affectedrunway if valid and null if not
+        configPanel.getApplyButton().setOnAction((event) -> {//update graphics}) should work
+         */
         main.add(configPanel, 2, 0, 1, 3);
 
         root.getChildren().add(main);

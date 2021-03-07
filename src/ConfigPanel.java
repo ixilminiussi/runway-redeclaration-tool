@@ -11,7 +11,8 @@ import java.util.Arrays;
 
 public class ConfigPanel extends ScrollPane {
 
-    private ComboBox<String> runwayPresets, directionBox, obstPresets;
+    private ComboBox<String> runwayPresets, obstPresets;
+    private ComboBox<Directions> directionBox;
     private Label runwayConfigText, runwayText, nameText, airportText, TORAText, TODAText,
             ASDAText, LDAText, displacedText, directionText, stripEndText, egrText, resaText,
             blastText, stopwayText, clearwayText, obstConfigText, obstText, obstName, obstHeightText,
@@ -85,11 +86,12 @@ public class ConfigPanel extends ScrollPane {
 
         String name = nameTextField.textProperty().getValue();
         String airport = nameTextField.textProperty().getValue();
+        Directions direction = directionBox.getValue();
         return new Runway(name, airport, runwayValues.get(0),
                 runwayValues.get(1), runwayValues.get(2), runwayValues.get(3),
                 runwayValues.get(4), runwayValues.get(5), runwayValues.get(6),
                 runwayValues.get(7), runwayValues.get(8), runwayValues.get(9),
-                runwayValues.get(10));
+                runwayValues.get(10), direction);
     }
 
     public Boolean areFieldsValid() {
@@ -198,7 +200,7 @@ public class ConfigPanel extends ScrollPane {
         runwayPresets.getItems().addAll("Heathrow - 09L", "Heathrow - 027R");
 
         directionBox = new ComboBox<>();
-        directionBox.getItems().addAll("Landing", "Taking Off");
+        directionBox.getItems().addAll(Directions.LANDING, Directions.TAKING_OFF);
 
         obstPresets = new ComboBox<>();
         obstPresets.setPrefWidth(400);
@@ -291,6 +293,19 @@ public class ConfigPanel extends ScrollPane {
         configWindow.getChildren().addAll(runwayConfigText, runwayConfigPane, obstConfigText, obstConfigPane);
     }
 
+    public Button getSaveRunwayPreset() {
+        return saveRunwayPreset;
+    }
 
+    public Button getApplyRunway() {
+        return applyRunway;
+    }
 
+    public Button getSaveObstPreset() {
+        return saveObstPreset;
+    }
+
+    public Button getApplyObst() {
+        return applyObst;
+    }
 }
