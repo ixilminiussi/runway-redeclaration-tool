@@ -6,7 +6,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
-import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -53,6 +52,7 @@ public class ConfigPanel extends ScrollPane {
                 stopwayTextField, clearwayTextField));
     }
 
+    // return AffectedRunway object of the current configuration
     public AffectedRunway getAffectedRunway() {
 
         Runway runway = getRunway();
@@ -64,6 +64,7 @@ public class ConfigPanel extends ScrollPane {
         }
     }
 
+    // return currently outlined obstruction object
     public Obstruction getObstruction() {
         if(!areFieldsValid()) {
             return null;
@@ -80,6 +81,8 @@ public class ConfigPanel extends ScrollPane {
 
     }
 
+    // return currently outlined runway object
+    // TODO add proper support for defaults/optional fields (if blank use defaults)
     public Runway getRunway() {
         if(!areFieldsValid()) {
             return null;
@@ -100,6 +103,7 @@ public class ConfigPanel extends ScrollPane {
                 runwayValues.get(10), direction);
     }
 
+    // check if the config currently has any invalid fields
     public Boolean areFieldsValid() {
         try {
             ArrayList<TextField> tempList = new ArrayList<>();
@@ -116,7 +120,7 @@ public class ConfigPanel extends ScrollPane {
             }
             for (TextField textField : runwayStringTextFields) {
                 String val = textField.textProperty().getValue();
-                if (val.length() <= 0 || val.length() >= 16) { // arbitrary limit to name size just putting
+                if (val.length() <= 0 || val.length() >= 16) { // arbitrary limit to name size
                     return false;
                 }
             }
@@ -128,6 +132,7 @@ public class ConfigPanel extends ScrollPane {
         }
     }
 
+    // setup actual panel
     private void setupScrollPane() {
         this.setFitToWidth(true);
         configWindow = new VBox();
@@ -136,6 +141,7 @@ public class ConfigPanel extends ScrollPane {
         this.setPadding(new Insets(5));
     }
 
+    // initialise all the labels for fields
     private void createLabels() {
         runwayConfigText = new Label("Runway Configuration");
         Font defaultFont = Font.getDefault();
@@ -170,6 +176,7 @@ public class ConfigPanel extends ScrollPane {
         distCentreText = new Label("Distance from Centreline: ");
     }
 
+    // initialise all the textfields
     private void createTextFields() {
         nameTextField = new TextField();
         airportTextField = new TextField();
@@ -192,6 +199,7 @@ public class ConfigPanel extends ScrollPane {
         distCentreTextField = new TextField();
     }
 
+    // initialise buttons
     private void createButtons() {
         saveRunwayPreset = new Button("Save Runway as Preset");
         applyRunway = new Button("Apply");
@@ -200,6 +208,7 @@ public class ConfigPanel extends ScrollPane {
         applyObst = new Button("Apply");
     }
 
+    // initialise comboboxes
     private void createComboBoxes() {
         directionBox = new ComboBox<>();
         directionBox.getItems().addAll(Directions.LANDING, Directions.TAKING_OFF);
@@ -229,6 +238,7 @@ public class ConfigPanel extends ScrollPane {
         populateObstFields(obstPresetCombo.getValue());
     }
 
+    // fill in textfields with specific values from selected runway
     private void populateRunwayFields(Runway runway) {
         nameTextField.textProperty().setValue(runway.getName());
         airportTextField.textProperty().setValue(runway.getAirport());
@@ -246,6 +256,7 @@ public class ConfigPanel extends ScrollPane {
         clearwayTextField.textProperty().setValue(Integer.toString(runway.getClearway()));
     }
 
+    // fill in textfields with values of a specific obstruction
     private void populateObstFields(Obstruction obstruction) {
         obstNameTextField.textProperty().setValue(obstruction.getName());
         obstHeightTextField.textProperty().setValue(Integer.toString(obstruction.getHeight()));
@@ -254,6 +265,7 @@ public class ConfigPanel extends ScrollPane {
         distCentreTextField.textProperty().setValue(Integer.toString(obstruction.getDistanceFromCentre()));
     }
 
+    // initialise config panel by adding all the fields
     private void addFieldsToConfig() {
         GridPane runwayConfigPane = new GridPane();
         runwayConfigPane.setPadding(new Insets(10));
@@ -340,6 +352,7 @@ public class ConfigPanel extends ScrollPane {
         configWindow.getChildren().addAll(runwayConfigText, runwayConfigPane, obstConfigText, obstConfigPane);
     }
 
+    // temp function, fill arraylists of presets
     private void populateDefaults() {
         presetRunways = new ArrayList<>();
         presetRunways.add(new Runway(

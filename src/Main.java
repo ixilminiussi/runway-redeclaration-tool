@@ -4,21 +4,19 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
-import java.util.ArrayList;
 
 public class Main extends Application {
 
-    private ArrayList<TextField> runwayIntTextFields, runwayStringTextFields, obstIntTextFields;
-    private ConfigPanel configPanel;
-    private RunwayGraphics runwayGraphics;
-    private AffectedRunway currentRunway;
+    private ConfigPanel configPanel; // config module
+    private RunwayGraphics runwayGraphics; // graphics module
+    private AffectedRunway currentRunway; // calculation module
 
     public static void main(String[] args) {
         launch(args);
     }
 
     @Override
-    public void start(Stage stage) {
+    public void start(Stage stage) { // initialise window
         stage.setTitle("Runway Re-declaration");
         VBox root = setUpMainGUI();
         setupConfigButtons();
@@ -27,6 +25,7 @@ public class Main extends Application {
         stage.show();
     }
 
+    // add functionality to buttons in config panel to update the graphical view
     private void setupConfigButtons() {
         Button runwayApply = configPanel.getApplyRunway();
         runwayApply.setOnMouseClicked((event) -> {
@@ -52,10 +51,9 @@ public class Main extends Application {
                 // TODO runwayGraphics.draw();
             }
         });
-
-
     }
 
+    // create the main vbox and gridpane that the modules will run in
     private VBox setUpMainGUI() {
         MenuBar menuBar = new MenuBar();
         Menu file = new Menu("File");
