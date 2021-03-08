@@ -10,6 +10,11 @@ public class Obstruction {
         this.distanceFromCentre = distCentre;
     }
 
+    @Override
+    public String toString() { 
+        return name;
+    } 
+
     public String getName() {
         return name;
     }
