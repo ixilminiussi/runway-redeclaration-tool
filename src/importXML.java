@@ -1,30 +1,40 @@
 // XML file importer using DOM Structure
 
 import java.io.File;
+import java.util.ArrayList;
 import javax.xml.parsers.*;
 import org.w3c.dom.*;
 
 public class importXML {
     private String filename;
+    private DocumentBuilderFactory dbFactory;
+    private DocumentBuilder dBuilder;
+    private Document doc;
+
 
     // TODO: implement error catching here - not XML, file not found, etc.
-    importXML(String filename){
+    importXML(String filename) throws Exception {
         this.filename = filename;
+
+        // throws file not found exception if
+        File inputFile = new File(filename);
+
+        // initialise document
+        // create a DocumentBuilder and load XML file as a document
+        try {
+            this.dbFactory = DocumentBuilderFactory.newInstance();
+            this.dBuilder = dbFactory.newDocumentBuilder();
+            this.doc = dBuilder.parse(inputFile);
+            doc.getDocumentElement().normalize();
+        } catch (Exception e) {
+            throw new Exception("Could not create document builder");
+        }
     }
 
     public Obstruction importObsFromXML() {
-        // try opening file - if invalid filename provided, throw error.
-        // error - get
-        File inputFile = new File(filename);
         Obstruction newObstruction;
 
         try {
-            // create a DocumentBuilder and load XML file as a document
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(inputFile);
-            doc.getDocumentElement().normalize();
-
             // get a list of all obstructions from the XML file
             NodeList nodeList = doc.getElementsByTagName("obstruction");
 
@@ -47,33 +57,24 @@ public class importXML {
         }
     }
 
-    public Runway importRunwayFromXML() {
-        // try opening file - if invalid filename provided, throw error.
-        File inputFile = new File(filename);
+    public ArrayList<Runway> importRunwaysFromXML() {
+        // get a list of all runways from the XML files
+        NodeList runwayNodes = doc.getElementsByTagName("runway");
 
-        try {
-            // create a DocumentBuilder and load XML file as a document
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(inputFile);
-            doc.getDocumentElement().normalize();
-
-            // get a list of all obstructions from the XML file
-            NodeList nodeList = doc.getElementsByTagName("runway");
-
-            // get first node from list. throws exception if no nodes exist for it.
-            Node n = nodeList.item(0);
-            if (n == null) {
-                throw new NullPointerException("Empty list");
-            }
-
-            return newRunwayFromElement((Element) n);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+        // if list empty, throw exception
+        if (runwayNodes.getLength() == 0) {
+            throw new NullPointerException("Emptyu list - XML file contains no runways");
         }
+
+        // iterate over all runways and add them as objects to array list
+        ArrayList<Runway> runwayObjects = new ArrayList<Runway>();
+        for (int i = 0, len = runwayNodes.getLength(); i < len; i++) {
+            runwayObjects.add(newRunwayFromElement((Element) runwayNodes.item(i)));
+        }
+
+        return runwayObjects;
     }
+
 
     // function that, given an obstruction element, returns an obstruction object
     private Obstruction newObsFromElement (Element n) {
@@ -100,7 +101,7 @@ public class importXML {
         int blastAllowance = getIntTagValue(n,"blastAllowance");
         int stopway = getIntTagValue(n,"stopway");
         int clearway = getIntTagValue(n,"clearway");
-        Directions direction = null; // TODO: what to do with these?
+        Directions direction = Directions.valueOf(getTagValue(n, "direction"));
 
         return new Runway(name, airport, TORA, TODA, ASDA, LDA, displacedThreshold, stripEnd, EGR, RESA,
                 blastAllowance, stopway, clearway, direction);
@@ -119,9 +120,11 @@ public class importXML {
         }
     }
 
-
-    public static void main(String args[]) {
-        importXML testing = new importXML("src/testrunway1.xml");
-        System.out.println(testing.importRunwayFromXML().getAirport());
+    public static void main(String args[]) throws Exception {
+        importXML testing = new importXML("src/test3runways.xml");
+        ArrayList<Runway> runwaysTest = testing.importRunwaysFromXML();
+        for (Runway runway : runwaysTest) {
+            System.out.println(runway.getName() + " - TORA: " + runway.getTORA());
+        }
     }
 }
