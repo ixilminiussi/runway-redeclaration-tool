@@ -10,7 +10,7 @@
         <displacedThreshold>0</displacedThreshold>
         <stripEnd>60</stripEnd>
         <EGR>50</EGR>
-        <RESA>240</RESA>
+        <RESA></RESA>
         <blastAllowance>300</blastAllowance>
         <stopway>0</stopway>
         <clearway>0</clearway>

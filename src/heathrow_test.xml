@@ -48,4 +48,20 @@
         <clearway>0</clearway>
         <direction>TAKING_OFF</direction>
     </runway>
+    <runway>
+        <name>27L</name>
+        <airport>London Heathrow Airport</airport>
+        <TORA>3660</TORA>
+        <TODA>3660</TODA>
+        <ASDA>3660</ASDA>
+        <LDA>3660</LDA>
+        <displacedThreshold>0</displacedThreshold>
+        <stripEnd>60</stripEnd>
+        <EGR>50</EGR>
+        <RESA>240</RESA>
+        <blastAllowance>300</blastAllowance>
+        <stopway>0</stopway>
+        <clearway>0</clearway>
+        <direction>LANDING</direction>
+    </runway>
 </runways>
