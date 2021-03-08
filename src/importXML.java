@@ -1,9 +1,15 @@
-// XML file importer using DOM Structure
+/**
+ * SEGP 2021
+ * Group 44
+ * Class for importing Runways and Obstructions from an XML file in the DOM structure
+ */
+
 
 import java.io.File;
 import java.util.ArrayList;
 import javax.xml.parsers.*;
 import org.w3c.dom.*;
+
 
 public class importXML {
     private String filename;
@@ -14,7 +20,7 @@ public class importXML {
 
     /**
      * @param filename The filename of the XML file to be imported
-     * @throws Exception
+     * @throws Exception If file could not be opened
      */
     importXML(String filename) throws Exception {
         this.filename = filename;
@@ -30,7 +36,7 @@ public class importXML {
             this.doc = dBuilder.parse(inputFile);
             doc.getDocumentElement().normalize();
         } catch (Exception e) {
-            throw new Exception("Could not create document builder");
+            throw new Exception("File not found");
         }
     }
 
@@ -160,18 +166,5 @@ public class importXML {
      */
     private int getIntTagValue(Element n, String tag) {
         return Integer.parseInt(getTagValue(n, tag));
-    }
-
-    public static void main(String args[]) throws Exception {
-        importXML testing = new importXML("src/test3obs.xml");
-        ArrayList<Obstruction> obsTest = testing.importObstructionsFromXML();
-        for (Obstruction obs : obsTest) {
-            System.out.println(obs.getName() + " - Height: " + obs.getHeight());
-        }
-        importXML runTest = new importXML("src/test3runways.xml");
-        ArrayList<Runway> runwaysTest = runTest.importRunwaysFromXML();
-        for (Runway r : runwaysTest) {
-            System.out.println(r.getName() + " - TORA: " + r.getTORA());
-        }
     }
 }
