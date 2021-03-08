@@ -24,6 +24,11 @@ public class Runway {
         this.direction = direction;
     }
 
+    @Override
+    public String toString() { 
+        return name + " - " + airport ": " + direction;
+    } 
+
     public String getName() {
         return name;
     }
