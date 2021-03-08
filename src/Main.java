@@ -1,9 +1,7 @@
 import javafx.application.Application;
-import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -11,7 +9,9 @@ import java.util.ArrayList;
 public class Main extends Application {
 
     private ArrayList<TextField> runwayIntTextFields, runwayStringTextFields, obstIntTextFields;
-
+    private ConfigPanel configPanel;
+    private RunwayGraphics runwayGraphics;
+    private AffectedRunway currentRunway;
 
     public static void main(String[] args) {
         launch(args);
@@ -20,7 +20,43 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) {
         stage.setTitle("Runway Re-declaration");
+        VBox root = setUpMainGUI();
+        setupConfigButtons();
+        stage.setScene(new Scene(root, 1000, 600));
+        stage.setMaximized(true);
+        stage.show();
+    }
 
+    private void setupConfigButtons() {
+        Button runwayApply = configPanel.getApplyRunway();
+        runwayApply.setOnMouseClicked((event) -> {
+            Runway runway = configPanel.getRunway();
+            if (runway == null) {
+                // TODO error popup here
+                System.out.println("Invalid Parameters");
+            } else {
+                Obstruction obstruction = currentRunway.getObstruction();
+                currentRunway = runway.recalculate(obstruction);
+                // TODO runwayGraphics.draw();
+            }
+        });
+
+        Button obsApply = configPanel.getApplyObst();
+        obsApply.setOnMouseClicked((event) -> {
+            Obstruction obstruction = configPanel.getObstruction();
+            if (obstruction == null) {
+                // TODO error popup here
+                System.out.println("Invalid Parameters");
+            } else {
+                currentRunway.recalculate(obstruction);
+                // TODO runwayGraphics.draw();
+            }
+        });
+
+
+    }
+
+    private VBox setUpMainGUI() {
         MenuBar menuBar = new MenuBar();
         Menu file = new Menu("File");
         Menu settings = new Menu("Settings");
@@ -47,26 +83,15 @@ public class Main extends Application {
         row4.setPercentHeight(25);
         main.getRowConstraints().addAll(row1, row2, row3, row4);
 
-        RunwayGraphics runwayGraphics = new RunwayGraphics();
-
-
+        runwayGraphics = new RunwayGraphics();
         main.add(runwayGraphics.getAnchorPane(), 0, 0, 2, 4);
 
-        ConfigPanel configPanel = new ConfigPanel();
-        /*
-        TODO for me or anyone else:
-        add event to apply buttons in config panel that updates graphics
-        configPanel.getAffectedRunway() returns affectedrunway if valid and null if not
-        configPanel.getApplyButton().setOnAction((event) -> {//update graphics}) should work
-         */
+        configPanel = new ConfigPanel();
         main.add(configPanel, 2, 0, 1, 3);
 
         root.getChildren().add(main);
         VBox.setVgrow(main, Priority.ALWAYS);
-
-        stage.setScene(new Scene(root, 1000, 600));
-        stage.setMaximized(true);
-        stage.show();
+        return root;
     }
 
 }

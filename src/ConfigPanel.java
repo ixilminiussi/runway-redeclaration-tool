@@ -6,12 +6,14 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
+import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class ConfigPanel extends ScrollPane {
 
-    private ComboBox<String> runwayPresets, obstPresets;
+    private ComboBox<Runway> runwayPresetCombo;
+    private ComboBox<Obstruction> obstPresetCombo;
     private ComboBox<Directions> directionBox;
     private Label runwayConfigText, runwayText, nameText, airportText, TORAText, TODAText,
             ASDAText, LDAText, displacedText, directionText, stripEndText, egrText, resaText,
@@ -25,14 +27,18 @@ public class ConfigPanel extends ScrollPane {
     private VBox configWindow;
     private Button saveRunwayPreset, applyRunway, saveObstPreset, applyObst;
     private ArrayList<TextField> runwayIntTextFields, runwayStringTextFields, obstIntTextFields, optionalFields;
+    private ArrayList<Runway> presetRunways;
+    private ArrayList<Obstruction> presetObstructions;
 
     ConfigPanel() {
+        populateDefaults();
         setupScrollPane();
         createLabels();
         createTextFields();
         createComboBoxes();
         createButtons();
         addFieldsToConfig();
+
 
         runwayIntTextFields = new ArrayList<>(Arrays.asList(TORATextField,
                 TODATextField, ASDATextField, LDATextField, displacedTextField,
@@ -195,16 +201,57 @@ public class ConfigPanel extends ScrollPane {
     }
 
     private void createComboBoxes() {
-        runwayPresets = new ComboBox<>();
-        runwayPresets.setPrefWidth(400);
-        runwayPresets.getItems().addAll("Heathrow - 09L", "Heathrow - 027R");
-
         directionBox = new ComboBox<>();
         directionBox.getItems().addAll(Directions.LANDING, Directions.TAKING_OFF);
 
-        obstPresets = new ComboBox<>();
-        obstPresets.setPrefWidth(400);
-        obstPresets.getItems().addAll("None", "Big Boulder");
+        runwayPresetCombo = new ComboBox<>();
+        runwayPresetCombo.setPrefWidth(400);
+        for (Runway runway : presetRunways) {
+            runwayPresetCombo.getItems().add(runway);
+        }
+        runwayPresetCombo.setOnAction((event) -> {
+            Runway runway = runwayPresetCombo.getValue();
+            populateRunwayFields(runway);
+        });
+        runwayPresetCombo.setValue(presetRunways.get(0));
+        populateRunwayFields(runwayPresetCombo.getValue());
+
+        obstPresetCombo = new ComboBox<>();
+        obstPresetCombo.setPrefWidth(400);
+        for (Obstruction obstruction : presetObstructions) {
+            obstPresetCombo.getItems().add(obstruction);
+        }
+        obstPresetCombo.setOnAction((event) -> {
+            Obstruction obstruction = obstPresetCombo.getValue();
+            populateObstFields(obstruction);
+});
+        obstPresetCombo.setValue(presetObstructions.get(0));
+        populateObstFields(obstPresetCombo.getValue());
+    }
+
+    private void populateRunwayFields(Runway runway) {
+        nameTextField.textProperty().setValue(runway.getName());
+        airportTextField.textProperty().setValue(runway.getAirport());
+        TORATextField.textProperty().setValue(Integer.toString(runway.getTORA()));
+        TODATextField.textProperty().setValue(Integer.toString(runway.getTODA()));
+        ASDATextField.textProperty().setValue(Integer.toString(runway.getASDA()));
+        LDATextField.textProperty().setValue(Integer.toString(runway.getLDA()));
+        displacedTextField.textProperty().setValue(Integer.toString(runway.getDisplacedThreshold()));
+        directionBox.valueProperty().setValue(runway.getDirection());
+        stripEndTextField.textProperty().setValue(Integer.toString(runway.getStripEnd()));
+        egrTextField.textProperty().setValue(Integer.toString(runway.getEGR()));
+        resaTextField.textProperty().setValue(Integer.toString(runway.getRESA()));
+        blastTextField.textProperty().setValue(Integer.toString(runway.getBlastAllowance()));
+        stopwayTextField.textProperty().setValue(Integer.toString(runway.getStopway()));
+        clearwayTextField.textProperty().setValue(Integer.toString(runway.getClearway()));
+    }
+
+    private void populateObstFields(Obstruction obstruction) {
+        obstNameTextField.textProperty().setValue(obstruction.getName());
+        obstHeightTextField.textProperty().setValue(Integer.toString(obstruction.getHeight()));
+        obstLengthTextField.textProperty().setValue(Integer.toString(obstruction.getLength()));
+        distThreshTextField.textProperty().setValue(Integer.toString(obstruction.getDistanceFromThreshold()));
+        distCentreTextField.textProperty().setValue(Integer.toString(obstruction.getDistanceFromCentre()));
     }
 
     private void addFieldsToConfig() {
@@ -226,7 +273,7 @@ public class ConfigPanel extends ScrollPane {
         runwayConfigPane.getColumnConstraints().addAll(col1, col2, col3, col4);
 
         runwayConfigPane.add(runwayText, 0, 0);
-        runwayConfigPane.add(runwayPresets, 1, 0, 3, 1);
+        runwayConfigPane.add(runwayPresetCombo, 1, 0, 3, 1);
         runwayConfigPane.add(nameText, 0, 1);
         runwayConfigPane.add(nameTextField, 1, 1);
         runwayConfigPane.add(airportText, 2, 1);
@@ -276,7 +323,7 @@ public class ConfigPanel extends ScrollPane {
         obstConfigPane.getColumnConstraints().addAll(col1, col2, col3, col4);
 
         obstConfigPane.add(obstText, 0, 0);
-        obstConfigPane.add(obstPresets, 1, 0, 3, 1);
+        obstConfigPane.add(obstPresetCombo, 1, 0, 3, 1);
         obstConfigPane.add(obstName, 0, 1);
         obstConfigPane.add(obstNameTextField, 1, 1, 3, 1);
         obstConfigPane.add(obstHeightText, 0, 2);
@@ -291,6 +338,23 @@ public class ConfigPanel extends ScrollPane {
         obstConfigPane.add(applyObst, 2, 4);
 
         configWindow.getChildren().addAll(runwayConfigText, runwayConfigPane, obstConfigText, obstConfigPane);
+    }
+
+    private void populateDefaults() {
+        presetRunways = new ArrayList<>();
+        presetRunways.add(new Runway(
+                "09R", "Heathrow", 3660, 3660,
+                3660, 3353, 307, 0,
+                50, 240, 300, 0, 0, Directions.LANDING
+        ));
+
+
+        presetObstructions = new ArrayList<>();
+        presetObstructions = new ArrayList<>();
+        presetObstructions.add(new Obstruction("Nothing",
+                0, 0, 0, 0));
+        presetObstructions.add(new Obstruction("Suspiciously Placed Boulder",
+                25, 25, 2853, 20));
     }
 
     public Button getSaveRunwayPreset() {
