@@ -19,6 +19,8 @@ public class importXML {
 
 
     /**
+     * Constructor
+     * XML file can contain either Runways, Obstructions OR both
      * @param filename The filename of the XML file to be imported
      * @throws Exception If file could not be opened
      */
