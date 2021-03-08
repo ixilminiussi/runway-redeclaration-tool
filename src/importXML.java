@@ -12,11 +12,10 @@ public class importXML {
     private Document doc;
 
 
-    // TODO: implement error catching here - not XML, file not found, etc.
     importXML(String filename) throws Exception {
         this.filename = filename;
 
-        // throws file not found exception if
+        // throws file not found exception if fails
         File inputFile = new File(filename);
 
         // initialise document
@@ -31,39 +30,13 @@ public class importXML {
         }
     }
 
-    public Obstruction importObsFromXML() {
-        Obstruction newObstruction;
-
-        try {
-            // get a list of all obstructions from the XML file
-            NodeList nodeList = doc.getElementsByTagName("obstruction");
-
-            // get first node from list. throws exception if no nodes exist for it.
-            Node n = nodeList.item(0);
-            if (n == null) {
-                throw new NullPointerException("Empty list");
-            }
-
-            // parse and open
-            newObstruction = newObsFromElement((Element) n);
-
-            // testing: print new obstruction
-            System.out.println(newObstruction.getHeight());
-            return newObstruction;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     public ArrayList<Runway> importRunwaysFromXML() {
         // get a list of all runways from the XML files
         NodeList runwayNodes = doc.getElementsByTagName("runway");
 
         // if list empty, throw exception
         if (runwayNodes.getLength() == 0) {
-            throw new NullPointerException("Emptyu list - XML file contains no runways");
+            throw new NullPointerException("Empty list - XML file contains no runways");
         }
 
         // iterate over all runways and add them as objects to array list
@@ -76,13 +49,31 @@ public class importXML {
     }
 
 
+    public ArrayList<Obstruction> importObstructionsFromXML() {
+        // get a list of all runways from the XML files
+        NodeList obstructionNodes = doc.getElementsByTagName("obstruction");
+
+        // if list empty, throw exception
+        if (obstructionNodes.getLength() == 0) {
+            throw new NullPointerException("Empty list - XML file contains no obstructions");
+        }
+
+        // iterate over all runways and add them as objects to array list
+        ArrayList<Obstruction> obstructionObjects = new ArrayList<Obstruction>();
+        for (int i = 0, len = obstructionNodes.getLength(); i < len; i++) {
+            obstructionObjects.add(newObsFromElement((Element) obstructionNodes.item(i)));
+        }
+
+        return obstructionObjects;
+    }
+
     // function that, given an obstruction element, returns an obstruction object
     private Obstruction newObsFromElement (Element n) {
         String name = getTagValue(n,"name");
-        int height = getIntTagValue(n,"height");
-        int length = getIntTagValue(n,"length");
-        int distanceFromThreshold = getIntTagValue(n,"distFromThreshold");
-        int distanceFromCentre = getIntTagValue(n,"distFromCentre");
+        int height = getPositiveIntTagValue(n,"height");
+        int length = getPositiveIntTagValue(n,"length");
+        int distanceFromThreshold = getPositiveIntTagValue(n,"distFromThreshold");
+        int distanceFromCentre = getPositiveIntTagValue(n,"distFromCentre");
         return new Obstruction(name, height, length, distanceFromThreshold, distanceFromCentre);
     }
 
@@ -90,17 +81,17 @@ public class importXML {
     private Runway newRunwayFromElement (Element n) {
         String name = getTagValue(n,"name");
         String airport = getTagValue(n, "airport");
-        int TORA = getIntTagValue(n,"TORA");
-        int TODA = getIntTagValue(n,"TODA");
-        int ASDA = getIntTagValue(n,"ASDA");
-        int LDA = getIntTagValue(n,"LDA");
-        int displacedThreshold = getIntTagValue(n,"displacedThreshold");
-        int stripEnd = getIntTagValue(n,"stripEnd");
-        int EGR = getIntTagValue(n,"EGR");
-        int RESA = getIntTagValue(n,"RESA");
-        int blastAllowance = getIntTagValue(n,"blastAllowance");
-        int stopway = getIntTagValue(n,"stopway");
-        int clearway = getIntTagValue(n,"clearway");
+        int TORA = getPositiveIntTagValue(n,"TORA");
+        int TODA = getPositiveIntTagValue(n,"TODA");
+        int ASDA = getPositiveIntTagValue(n,"ASDA");
+        int LDA = getPositiveIntTagValue(n,"LDA");
+        int displacedThreshold = getPositiveIntTagValue(n,"displacedThreshold");
+        int stripEnd = getPositiveIntTagValue(n,"stripEnd");
+        int EGR = getPositiveIntTagValue(n,"EGR");
+        int RESA = getPositiveIntTagValue(n,"RESA");
+        int blastAllowance = getPositiveIntTagValue(n,"blastAllowance");
+        int stopway = getPositiveIntTagValue(n,"stopway");
+        int clearway = getPositiveIntTagValue(n,"clearway");
         Directions direction = Directions.valueOf(getTagValue(n, "direction"));
 
         return new Runway(name, airport, TORA, TODA, ASDA, LDA, displacedThreshold, stripEnd, EGR, RESA,
@@ -111,13 +102,16 @@ public class importXML {
         return n.getElementsByTagName(tag).item(0).getTextContent();
     }
 
-    // TODO: Current error handling sets fields to -1 if empty. Handle this properly.
-    private int getIntTagValue(Element n, String tag) {
-        try {
-            return Integer.parseInt(getTagValue(n, tag));
-        } catch (NumberFormatException e) {
-            return -1;
+    private int getPositiveIntTagValue(Element n, String tag) {
+        int value =  Integer.parseInt(getTagValue(n, tag));
+        if (value < 0) {
+            throw new IllegalArgumentException(tag + " value cannot be negative");
         }
+        return value;
+    }
+
+    private int getIntTagValue(Element n, String tag) {
+        return Integer.parseInt(getTagValue(n, tag));
     }
 
     public static void main(String args[]) throws Exception {
