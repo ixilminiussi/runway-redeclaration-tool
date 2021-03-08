@@ -26,7 +26,7 @@ public class Runway {
 
     @Override
     public String toString() { 
-        return name + " - " + airport ": " + direction;
+        return name + " - " + airport + ": " + direction;
     } 
 
     public String getName() {
