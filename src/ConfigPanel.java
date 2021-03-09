@@ -354,20 +354,15 @@ public class ConfigPanel extends ScrollPane {
 
     // temp function, fill arraylists of presets
     private void populateDefaults() {
-        presetRunways = new ArrayList<>();
-        presetRunways.add(new Runway(
-                "09R", "Heathrow", 3660, 3660,
-                3660, 3353, 307, 0,
-                50, 240, 300, 0, 0, Directions.LANDING
-        ));
-
-
-        presetObstructions = new ArrayList<>();
-        presetObstructions = new ArrayList<>();
-        presetObstructions.add(new Obstruction("Nothing",
-                0, 0, 0, 0));
-        presetObstructions.add(new Obstruction("Suspiciously Placed Boulder",
-                25, 25, 2853, 20));
+        try {
+            importXML importXML = new importXML("src/presets.xml");
+            presetRunways = importXML.importRunwaysFromXML();
+            presetObstructions = importXML.importObstructionsFromXML();
+        } catch (Exception e) {
+            System.out.println(e);
+            presetRunways = new ArrayList<>();
+            presetObstructions = new ArrayList<>();
+        }
     }
 
     public Button getSaveRunwayPreset() {
