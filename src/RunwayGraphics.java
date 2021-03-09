@@ -5,44 +5,99 @@ import javafx.geometry.Pos;
 import javafx.geometry.Orientation;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
+import javafx.scene.paint.*;
 import javafx.scene.shape.*;
+import javafx.scene.canvas.*;
 
 public class RunwayGraphics {
+    
+    //makes shape for runway topView depending on shape, will change to take in more parameters
+    public static GraphicsContext getRunwayShape(GraphicsContext gc) {
+
+        double xOffset = gc.getCanvas().getWidth() - 485;
+        double yOffset = (gc.getCanvas().getHeight() - 180) / 2;
+
+        gc.setStroke(Color.BLACK);
+        gc.setFill(Color.DARKSEAGREEN);
+        gc.fillRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
+        gc.strokeRect(0, 0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
+
+        gc.translate(0, yOffset);
+
+        gc.setFill(Color.DODGERBLUE);
+
+        gc.beginPath();
+        gc.moveTo(0, 30);
+        gc.lineTo(85, 30);
+        gc.lineTo(120, 0);
+        gc.lineTo(360 + xOffset, 0);
+        gc.lineTo(400 + xOffset, 30);
+        gc.lineTo(485 + xOffset, 30);
+        gc.lineTo(485 + xOffset, 150);
+        gc.lineTo(400 + xOffset, 150); 
+        gc.lineTo(360 + xOffset, 180); 
+        gc.lineTo(120, 180);
+        gc.lineTo(85, 150); 
+        gc.lineTo(0, 150);
+        gc.fill();
+        gc.closePath();
+
+        gc.setFill(Color.LIGHTGRAY);
+        gc.fillRect(40, 70, 405 + xOffset, 40);
+        gc.setFill(Color.WHITE);
+        gc.fillRect(60, 75, 30, 30);
+        gc.fillRect(395 + xOffset, 75, 30, 30);
+        gc.setStroke(Color.WHITE);
+        gc.setLineWidth(3.0);
+        gc.setLineDashes(6, 5, 1, 5);
+        gc.strokeLine(130, 90, 350 + xOffset, 90);
+
+        return gc;
+    }
+
+    //make shape for runwaySideView, will also change to incorporate more parameters
+    public static GraphicsContext getRunwaySlice(GraphicsContext gc) {
+
+        double xOffset = gc.getCanvas().getWidth() - 485;
+        double yOffset = (gc.getCanvas().getHeight() - 20) / 2;
+
+        gc.translate(0, yOffset);
+
+        gc.setStroke(Color.BLACK);
+        gc.setLineWidth(1);
+        gc.setLineDashes(1);
+        gc.strokeRect(0, 0, gc.getCanvas().getWidth(), 20);
+
+        gc.setFill(Color.DODGERBLUE);
+        gc.fillRect(0, 0, 485 + xOffset, 20);
+
+        gc.setFill(Color.LIGHTGRAY);
+        gc.fillRect(40, 0, 405 + xOffset, 10);
+
+        gc.setFill(Color.WHITE);
+        gc.fillRect(60, 0, 30, 2);
+        gc.fillRect(395 + xOffset, 0, 30, 2);
+        gc.setStroke(Color.WHITE);
+        gc.setLineWidth(2.0);
+        gc.setLineDashes(6, 5, 1, 5);
+        gc.strokeLine(130, 1, 350 + xOffset, 1);
+
+        return gc;
+    }
     
     public static AnchorPane getAnchorPane() {
 
         AnchorPane runwayDisplayAnchor = new AnchorPane();
 
-        //top view visuals (yet to add measurements)
-        Rectangle paneRoad = new Rectangle();
-        paneRoad.setWidth(470);
-        paneRoad.setHeight(50);
-        paneRoad.setFill(Color.LIGHTGRAY);
-        Path clearedField = new Path();
-        MoveTo moveTo = new MoveTo(); moveTo.setX(0.0f); moveTo.setY(0.0f);
-        LineTo line0 = new LineTo(); LineTo line1 = new LineTo(); LineTo line2 = new LineTo(); 
-        LineTo line3 = new LineTo(); LineTo line4 = new LineTo(); LineTo line5 = new LineTo(); 
-        LineTo line6 = new LineTo(); LineTo line7 = new LineTo(); LineTo line8 = new LineTo(); 
-        LineTo line9 = new LineTo(); LineTo line10 = new LineTo(); LineTo line11 = new LineTo();
-        line0.setX(0f); line0.setY(-55f); line1.setX(80f); line1.setY(-55f); line2.setX(150f); line2.setY(-105f);
-        line3.setX(400f); line3.setY(-105f); line4.setX(470f); line4.setY(-55f); line5.setX(550f); line5.setY(-55f); 
-        line6.setX(550f); line6.setY(55f); line7.setX(470f); line7.setY(55f); line8.setX(400f); line8.setY(105f); 
-        line9.setX(150f); line9.setY(105f); line10.setX(80f); line10.setY(55f); line11.setX(0f); line11.setY(55f); 
-        ClosePath closePath = new ClosePath();
-        clearedField.getElements().addAll(moveTo, line0, line1, line2, line3, line4, line5, line6, line7, line8, line9, line10, line11, closePath);
-        clearedField.setFill(Color.DODGERBLUE);
-        clearedField.setStrokeWidth(0.0);
-        Line line = new Line();
-        line.setStartX(-180); line.setStartY(0.0);
-        line.setEndX(180); line.setEndY(0);
-        line.setStroke(Color.WHITE); line.setStrokeWidth(2.0);
+        //top view visuals (yet to add measurements
 
+        Canvas topViewCanvas = new Canvas (800,300);
         StackPane topView = new StackPane();
         topView.setAlignment(Pos.CENTER);
-        topView.getChildren().addAll(clearedField, paneRoad, line);
-        topView.setScaleX(2);
-        topView.setScaleY(2);
+        topView.getChildren().add(topViewCanvas);
+        GraphicsContext topGc = topViewCanvas.getGraphicsContext2D();
+
+        topGc = getRunwayShape(topGc);
 
         runwayDisplayAnchor.setTopAnchor(topView, 0.0);
         runwayDisplayAnchor.setBottomAnchor(topView, 0.0);
@@ -50,20 +105,13 @@ public class RunwayGraphics {
         runwayDisplayAnchor.setRightAnchor(topView, 0.0);
 
         //side view visuals (yet to add measurements/VERY not done)
-        Line clearedField2 = new Line();
-        clearedField2.setStartX(-275); clearedField2.setStartY(0.0);
-        clearedField2.setEndX(275); clearedField2.setEndY(0.0);
-        clearedField2.setStroke(Color.DODGERBLUE); clearedField2.setStrokeWidth(4.0);
-        Line paneRoad2 = new Line();
-        paneRoad2.setStartX(-235); paneRoad2.setStartY(0);
-        paneRoad2.setEndX(235); paneRoad2.setEndY(0);
-        paneRoad2.setStroke(Color.LIGHTGRAY); paneRoad2.setStrokeWidth(4.0);
-
+        Canvas sideViewCanvas = new Canvas (800,400);
         StackPane sideView = new StackPane();
         sideView.setAlignment(Pos.CENTER);
-        sideView.getChildren().addAll(clearedField2, paneRoad2);
-        sideView.setScaleX(2);
-        sideView.setScaleY(2);
+        sideView.getChildren().add(sideViewCanvas);
+        GraphicsContext sideGc = sideViewCanvas.getGraphicsContext2D();
+
+        sideGc = getRunwaySlice(sideGc);
 
         runwayDisplayAnchor.setTopAnchor(sideView, 0.0);
         runwayDisplayAnchor.setBottomAnchor(sideView, 0.0);
