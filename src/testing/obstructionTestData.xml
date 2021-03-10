@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<obstructions>
+    <obstruction type="plane">
+        <name>Boeing 737</name>
+        <height>12</height>
+        <length>40</length>
+        <distFromThreshold>10</distFromThreshold>
+        <distFromCentre>20</distFromCentre>
+    </obstruction>
+    <obstruction type="plane">
+        <name>Boeing 767</name>
+        <height>12</height>
+        <length>40</length>
+        <distFromThreshold>10</distFromThreshold>
+        <distFromCentre>20</distFromCentre>
+    </obstruction>
+    <obstruction type="plane">
+        <name>Boeing 747</name>
+        <height>15</height>
+        <length>60</length>
+        <distFromThreshold>10</distFromThreshold>
+        <distFromCentre>20</distFromCentre>
+    </obstruction>
+</obstructions>

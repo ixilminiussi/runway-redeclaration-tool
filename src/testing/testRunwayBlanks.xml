@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <runways>
     <runway type="plane">
-        <name>27R</name>
-        <airport>London Heathrow Airport</airport>
-        <TORA>3884</TORA>
+        <name></name>
+        <airport></airport>
+        <TORA></TORA>
         <TODA>3962</TODA>
         <ASDA>3884</ASDA>
         <LDA>3884</LDA>
