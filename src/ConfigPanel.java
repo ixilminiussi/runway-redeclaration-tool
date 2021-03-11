@@ -6,6 +6,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -24,7 +25,7 @@ public class ConfigPanel extends ScrollPane {
             stopwayTextField, clearwayTextField, obstNameTextField, obstHeightTextField,
             obstLengthTextField, distThreshTextField, distCentreTextField;
     private VBox configWindow;
-    private Button saveRunwayPreset, applyRunway, saveObstPreset, applyObst;
+    private Button saveRunwayPreset, removeRunwayPreset, applyRunway, saveObstPreset, removeObstPreset, applyObst;
     private ArrayList<TextField> runwayIntTextFields, runwayStringTextFields, obstIntTextFields, optionalFields;
     private ArrayList<Runway> presetRunways;
     private ArrayList<Obstruction> presetObstructions;
@@ -78,7 +79,6 @@ public class ConfigPanel extends ScrollPane {
         String name = obstNameTextField.textProperty().getValue();
         return new Obstruction(name, obstValues.get(0), obstValues.get(1),
                 obstValues.get(2), obstValues.get(3));
-
     }
 
     // return currently outlined runway object
@@ -94,7 +94,7 @@ public class ConfigPanel extends ScrollPane {
         }
 
         String name = nameTextField.textProperty().getValue();
-        String airport = nameTextField.textProperty().getValue();
+        String airport = airportTextField.textProperty().getValue();
         Directions direction = directionBox.getValue();
         return new Runway(name, airport, runwayValues.get(0),
                 runwayValues.get(1), runwayValues.get(2), runwayValues.get(3),
@@ -113,20 +113,20 @@ public class ConfigPanel extends ScrollPane {
                 String val = textField.textProperty().getValue();
                 if (!(val.equals("") && (optionalFields.contains(textField)))) {
                     int value = Integer.parseInt(val);
-                    if (value <= 0 || value >= 999999) {
+                    if (value < 0 || value >= 999999) {
                         return false;
                     }
                 }
             }
             for (TextField textField : runwayStringTextFields) {
                 String val = textField.textProperty().getValue();
-                if (val.length() <= 0 || val.length() >= 16) { // arbitrary limit to name size
+                if (val.length() <= 0 || val.length() >= 32) { // arbitrary limit to name size
                     return false;
                 }
             }
 
             String obstName = obstNameTextField.textProperty().getValue();
-            return obstName.length() > 0 && obstName.length() < 16;
+            return obstName.length() > 0 && obstName.length() < 32;
         } catch (NumberFormatException e) {
             return false;
         }
@@ -202,10 +202,110 @@ public class ConfigPanel extends ScrollPane {
     // initialise buttons
     private void createButtons() {
         saveRunwayPreset = new Button("Save Runway as Preset");
-        applyRunway = new Button("Apply");
+        saveRunwayPreset.setOnMouseClicked((event) -> {
+            Runway runway = getRunway();
+            if(runway == null) {
+                System.out.println("Invalid Runway Parameters");
+                // error dialogue
+            } else {
+                presetRunways.add(runway);
+                runwayPresetCombo.getItems().add(runway);
+                runwayPresetCombo.setValue(runway);
+                populateRunwayFields(runway);
+                try {
+                    exportXML.exportBothToXML("src/test_presets.xml", presetObstructions, presetRunways);
+                } catch (Exception e) {
+                    System.out.println(e);
+                    // error dialogue
+                }
+            }
+        });
+        removeRunwayPreset = new Button("Delete Current Runway Preset");
+        removeRunwayPreset.setOnMouseClicked((event) -> {
+            Runway runway = getRunway();
+            if(runway == null) {
+                System.out.println("Invalid Runway Parameters");
+            } else {
+                Runway toRemove = getRunwayFromName(runway.getName());
+                if (toRemove == null) {
+                    // error dialogue
+                } else {
+                    presetRunways.remove(toRemove);
+                    runwayPresetCombo.getItems().remove(toRemove);
+                    runwayPresetCombo.setValue(runwayPresetCombo.getItems().get(0));
+                    populateRunwayFields(runwayPresetCombo.getValue());
+                    try {
+                        exportXML.exportBothToXML("src/test_presets.xml", presetObstructions, presetRunways);
+                    } catch (Exception e) {
+                        System.out.println(e);
+                        // error dialogue
+                    }
+                }
+            }
+        });
+        applyRunway = new Button("Render");
 
         saveObstPreset = new Button("Save Obstacle as Preset");
-        applyObst = new Button("Apply");
+        saveObstPreset.setOnMouseClicked((event) -> {
+            Obstruction obstruction = getObstruction();
+            if(obstruction == null) {
+                System.out.println("Invalid Obstruction Parameters");
+                // error dialogue
+            } else {
+                presetObstructions.add(obstruction);
+                obstPresetCombo.getItems().add(obstruction);
+                obstPresetCombo.setValue(obstruction);
+                populateObstFields(obstruction);
+                try {
+                    exportXML.exportBothToXML("src/test_presets.xml", presetObstructions, presetRunways);
+                } catch (Exception e) {
+                    System.out.println(e);
+                    // error dialogue
+                }
+            }
+        });
+        removeObstPreset = new Button("Delete Current Obstacle Preset");
+        removeObstPreset.setOnMouseClicked((event) -> {
+            Obstruction obstruction = getObstruction();
+            if(obstruction == null) {
+                System.out.println("Invalid Runway Parameters");
+            } else {
+                Obstruction toRemove = getObstructionFromName(obstruction.getName());
+                if (toRemove == null) {
+                    // error dialogue
+                } else {
+                    presetObstructions.remove(toRemove);
+                    obstPresetCombo.getItems().remove(toRemove);
+                    obstPresetCombo.setValue(obstPresetCombo.getItems().get(0));
+                    populateObstFields(obstPresetCombo.getValue());
+                    try {
+                        exportXML.exportBothToXML("src/test_presets.xml", presetObstructions, presetRunways);
+                    } catch (Exception e) {
+                        System.out.println(e);
+                        // error dialogue
+                    }
+                }
+            }
+        });
+        applyObst = new Button("Render");
+    }
+
+    private Runway getRunwayFromName(String name) {
+        for(Runway runway : presetRunways) {
+            if (runway.getName().equals(name)) {
+                return runway;
+            }
+        }
+        return null;
+    }
+
+    private Obstruction getObstructionFromName(String name) {
+        for(Obstruction obstruction : presetObstructions) {
+            if (obstruction.getName().equals(name)) {
+                return obstruction;
+            }
+        }
+        return null;
     }
 
     // initialise comboboxes
@@ -324,8 +424,10 @@ public class ConfigPanel extends ScrollPane {
 
         TitledPane optionals = new TitledPane("Optional Parameters", optionalGridPane);
         runwayConfigPane.add(optionals, 0, 5, 4, 1);
-        runwayConfigPane.add(saveRunwayPreset, 1, 6);
-        runwayConfigPane.add(applyRunway, 2, 6);
+        runwayConfigPane.add(saveRunwayPreset, 0, 6);
+        runwayConfigPane.add(removeRunwayPreset, 1, 6, 2, 1);
+        runwayConfigPane.add(applyRunway, 3, 6);
+        optionals.setExpanded(false);
 
         GridPane obstConfigPane = new GridPane();
         obstConfigPane.setPadding(new Insets(10));
@@ -346,8 +448,9 @@ public class ConfigPanel extends ScrollPane {
         obstConfigPane.add(distThreshTextField, 1, 3);
         obstConfigPane.add(distCentreText, 2, 3);
         obstConfigPane.add(distCentreTextField, 3, 3);
-        obstConfigPane.add(saveObstPreset, 1, 4);
-        obstConfigPane.add(applyObst, 2, 4);
+        obstConfigPane.add(saveObstPreset, 0, 4);
+        obstConfigPane.add(removeObstPreset, 1, 4, 2, 1);
+        obstConfigPane.add(applyObst, 3, 4);
 
         configWindow.getChildren().addAll(runwayConfigText, runwayConfigPane, obstConfigText, obstConfigPane);
     }
@@ -355,7 +458,7 @@ public class ConfigPanel extends ScrollPane {
     // temp function, fill arraylists of presets
     private void populateDefaults() {
         try {
-            importXML importXML = new importXML("src/presets.xml");
+            importXML importXML = new importXML("src/test_presets.xml");
             presetRunways = importXML.importRunwaysFromXML();
             presetObstructions = importXML.importObstructionsFromXML();
         } catch (Exception e) {
