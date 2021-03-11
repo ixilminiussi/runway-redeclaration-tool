@@ -130,7 +130,7 @@ public class Main extends Application {
     private String fileChooserGetPath() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter("Runway/Obstruction Files", "*.xml"));
-        String currentPath = Paths.get("./xml").toAbsolutePath().normalize().toString();
+        String currentPath = Paths.get("src/xml").toAbsolutePath().normalize().toString();
         fileChooser.setInitialDirectory(new File(currentPath));
         File selectedFile = fileChooser.showOpenDialog(stage);
         return selectedFile.getAbsolutePath();
