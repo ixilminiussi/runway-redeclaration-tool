@@ -1,5 +1,5 @@
 
-public class Tests {
+public class TestCalculations {
 
     public static void main(String[] args) {
     	//Setup Runways

@@ -211,7 +211,7 @@ public class ConfigPanel extends ScrollPane {
                 runwayPresetCombo.setValue(runway);
                 populateRunwayFields(runway);
                 try {
-                    exportXML.exportBothToXML("src/presets.xml", presetObstructions, presetRunways);
+                    exportXML.exportBothToXML("src/xml/presets.xml", presetObstructions, presetRunways);
                 } catch (Exception e) {
                     configError("The file could not be exported.\n" + e);
                 }
@@ -232,7 +232,7 @@ public class ConfigPanel extends ScrollPane {
                     runwayPresetCombo.setValue(runwayPresetCombo.getItems().get(0));
                     populateRunwayFields(runwayPresetCombo.getValue());
                     try {
-                        exportXML.exportBothToXML("src/presets.xml", presetObstructions, presetRunways);
+                        exportXML.exportBothToXML("src/xml/presets.xml", presetObstructions, presetRunways);
                     } catch (Exception e) {
                         configError("The file could not be exported.\n" + e);
                     }
@@ -252,7 +252,7 @@ public class ConfigPanel extends ScrollPane {
                 obstPresetCombo.setValue(obstruction);
                 populateObstFields(obstruction);
                 try {
-                    exportXML.exportBothToXML("src/presets.xml", presetObstructions, presetRunways);
+                    exportXML.exportBothToXML("src/xml/presets.xml", presetObstructions, presetRunways);
                 } catch (Exception e) {
                     configError("The file could not be exported.\n" + e);
                 }
@@ -273,7 +273,7 @@ public class ConfigPanel extends ScrollPane {
                     obstPresetCombo.setValue(obstPresetCombo.getItems().get(0));
                     populateObstFields(obstPresetCombo.getValue());
                     try {
-                        exportXML.exportBothToXML("src/presets.xml", presetObstructions, presetRunways);
+                        exportXML.exportBothToXML("src/xml/presets.xml", presetObstructions, presetRunways);
                     } catch (Exception e) {
                         configError("The file could not be exported.\n" + e);
                     }
@@ -310,7 +310,7 @@ public class ConfigPanel extends ScrollPane {
             }
         }
         try {
-            exportXML.exportBothToXML("src/presets.xml", presetObstructions, presetRunways);
+            exportXML.exportBothToXML("src/xml/presets.xml", presetObstructions, presetRunways);
         } catch (Exception e) {
             configError("The file could not be exported.\n" + e);
         }
@@ -327,7 +327,7 @@ public class ConfigPanel extends ScrollPane {
             }
         }
         try {
-            exportXML.exportBothToXML("src/presets.xml", presetObstructions, presetRunways);
+            exportXML.exportBothToXML("src/xml/presets.xml", presetObstructions, presetRunways);
         } catch (Exception e) {
             configError("The file could not be exported.\n" + e);
         }
@@ -341,7 +341,7 @@ public class ConfigPanel extends ScrollPane {
         presetObstructions = new ArrayList<>();
         presetRunways = new ArrayList<>();
         try {
-            exportXML.exportBothToXML("src/presets.xml", presetObstructions, presetRunways);
+            exportXML.exportBothToXML("src/xml/presets.xml", presetObstructions, presetRunways);
         } catch (Exception e) {
             configError("The file could not be exported.\n" + e);
         }
@@ -534,7 +534,7 @@ public class ConfigPanel extends ScrollPane {
     // temp function, fill arraylists of presets
     private void populateDefaults() {
         try {
-            importXML importXML = new importXML("src/presets.xml");
+            importXML importXML = new importXML("src/xml/presets.xml");
             presetRunways = importXML.importRunwaysFromXML();
             presetObstructions = importXML.importObstructionsFromXML();
         } catch (Exception e) {

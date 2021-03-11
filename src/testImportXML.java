@@ -14,7 +14,7 @@ public class testImportXML {
 
     @Test (expected = IllegalArgumentException.class)
     public void testNegValue() throws Exception{
-        importXML testing = new importXML("src/testing/testRunwayNegValue.xml");
+        importXML testing = new importXML("src/test_xml/testRunwayNegValue.xml");
 
         ArrayList<Runway> test = testing.importRunwaysFromXML();
         Runway runway = test.get(0);
@@ -24,7 +24,7 @@ public class testImportXML {
     @Test
     public void testRunway27R() {
         try {
-            importXML testing = new importXML("src/testing/test27R.xml");
+            importXML testing = new importXML("src/test_xml/test27R.xml");
             ArrayList<Runway> test = testing.importRunwaysFromXML();
             Runway runway = test.get(0);
             assertEquals(1, test.size());
@@ -39,7 +39,7 @@ public class testImportXML {
 
     @Test
     public void testBlankXML() throws Exception{
-        importXML testing = new importXML("src/testing/testRunwayBlanks.xml");
+        importXML testing = new importXML("src/test_xml/testRunwayBlanks.xml");
         try {
             ArrayList<Runway> runwaysTest = testing.importRunwaysFromXML();
             fail("Exception not thrown");
@@ -50,7 +50,7 @@ public class testImportXML {
 
     @Test
     public void testImportingFourRunways() throws Exception{
-        importXML testing = new importXML("src/testing/heathrowTestData.xml");
+        importXML testing = new importXML("src/test_xml/heathrowTestData.xml");
         ArrayList<Runway> test = testing.importRunwaysFromXML();
         assertEquals(4, test.size());
     }
