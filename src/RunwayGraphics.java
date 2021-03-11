@@ -159,6 +159,46 @@ public class RunwayGraphics {
         runwayDisplayAnchor.setBorder(new Border(new BorderStroke(Color.CRIMSON, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         runwayDisplayAnchor.setBackground(new Background(new BackgroundFill(Color.LIGHTCYAN, CornerRadii.EMPTY, Insets.EMPTY)));
 
+        topView.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        topView.setOnScroll(
+                e -> {
+                    if (e.isShortcutDown() && e.getDeltaY() != 0) {
+                        if (e.getDeltaY() < 0) {
+                            topView.setScaleX(Math.max(topView.getScaleX() - 0.1, 0.5));
+                        } else {
+                            topView.setScaleX(Math.min(topView.getScaleX() + 0.1, 5.0));
+                        }
+                        topView.setScaleY(topView.getScaleX());
+                        e.consume(); // prevents ScrollEvent from reaching ScrollPane
+                    }
+                });
+
+
+        sideView.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        sideView.setOnScroll(
+                e -> {
+                    if (e.isShortcutDown() && e.getDeltaY() != 0) {
+                        if (e.getDeltaY() < 0) {
+                            sideView.setScaleX(Math.max(sideView.getScaleX() - 0.1, 0.5));
+                        } else {
+                            sideView.setScaleX(Math.min(sideView.getScaleX() + 0.1, 5.0));
+                        }
+                        sideView.setScaleY(sideView.getScaleX());
+                        e.consume(); // prevents ScrollEvent from reaching ScrollPane
+                    }
+                });
+
+        topViewCanvas.setOnMouseDragged(e -> {
+            //topViewCanvas.setTranslateX(e.getX() + 400);
+            topViewCanvas.setTranslateX(e.getX() + 400);
+            e.consume();
+        });
+
+        sideViewCanvas.setOnMouseDragged(e -> {
+            sideViewCanvas.setTranslateX(e.getX() + 400);
+            e.consume();
+        });
+
         return runwayDisplayAnchor;
     }
 
