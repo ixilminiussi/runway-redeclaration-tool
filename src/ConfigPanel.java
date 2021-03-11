@@ -6,7 +6,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -126,7 +125,7 @@ public class ConfigPanel extends ScrollPane {
             }
 
             String obstName = obstNameTextField.textProperty().getValue();
-            return obstName.length() > 0 && obstName.length() < 32;
+            return obstName.length() > 0 && obstName.length() < 64;
         } catch (NumberFormatException e) {
             return false;
         }
@@ -205,8 +204,7 @@ public class ConfigPanel extends ScrollPane {
         saveRunwayPreset.setOnMouseClicked((event) -> {
             Runway runway = getRunway();
             if(runway == null) {
-                System.out.println("Invalid Runway Parameters");
-                // error dialogue
+                configError("One of the parameters in the runway or obstruction was invalid!");
             } else {
                 presetRunways.add(runway);
                 runwayPresetCombo.getItems().add(runway);
@@ -215,8 +213,7 @@ public class ConfigPanel extends ScrollPane {
                 try {
                     exportXML.exportBothToXML("src/test_presets.xml", presetObstructions, presetRunways);
                 } catch (Exception e) {
-                    System.out.println(e);
-                    // error dialogue
+                    configError("The file could not be exported.\n" + e);
                 }
             }
         });
@@ -224,11 +221,11 @@ public class ConfigPanel extends ScrollPane {
         removeRunwayPreset.setOnMouseClicked((event) -> {
             Runway runway = getRunway();
             if(runway == null) {
-                System.out.println("Invalid Runway Parameters");
+                configError("One of the parameters in the runway or obstruction was invalid!");
             } else {
                 Runway toRemove = getRunwayFromName(runway.getName());
                 if (toRemove == null) {
-                    // error dialogue
+                    configError("This runway is not saved!");
                 } else {
                     presetRunways.remove(toRemove);
                     runwayPresetCombo.getItems().remove(toRemove);
@@ -237,8 +234,7 @@ public class ConfigPanel extends ScrollPane {
                     try {
                         exportXML.exportBothToXML("src/test_presets.xml", presetObstructions, presetRunways);
                     } catch (Exception e) {
-                        System.out.println(e);
-                        // error dialogue
+                        configError("The file could not be exported.\n" + e);
                     }
                 }
             }
@@ -249,8 +245,7 @@ public class ConfigPanel extends ScrollPane {
         saveObstPreset.setOnMouseClicked((event) -> {
             Obstruction obstruction = getObstruction();
             if(obstruction == null) {
-                System.out.println("Invalid Obstruction Parameters");
-                // error dialogue
+                configError("One of the parameters in the runway or obstruction was invalid!");
             } else {
                 presetObstructions.add(obstruction);
                 obstPresetCombo.getItems().add(obstruction);
@@ -259,8 +254,7 @@ public class ConfigPanel extends ScrollPane {
                 try {
                     exportXML.exportBothToXML("src/test_presets.xml", presetObstructions, presetRunways);
                 } catch (Exception e) {
-                    System.out.println(e);
-                    // error dialogue
+                    configError("The file could not be exported.\n" + e);
                 }
             }
         });
@@ -268,11 +262,11 @@ public class ConfigPanel extends ScrollPane {
         removeObstPreset.setOnMouseClicked((event) -> {
             Obstruction obstruction = getObstruction();
             if(obstruction == null) {
-                System.out.println("Invalid Runway Parameters");
+                configError("One of the parameters in the runway or obstruction was invalid!");
             } else {
                 Obstruction toRemove = getObstructionFromName(obstruction.getName());
                 if (toRemove == null) {
-                    // error dialogue
+                    configError("This obstruction is not saved!");
                 } else {
                     presetObstructions.remove(toRemove);
                     obstPresetCombo.getItems().remove(toRemove);
@@ -281,8 +275,7 @@ public class ConfigPanel extends ScrollPane {
                     try {
                         exportXML.exportBothToXML("src/test_presets.xml", presetObstructions, presetRunways);
                     } catch (Exception e) {
-                        System.out.println(e);
-                        // error dialogue
+                        configError("The file could not be exported.\n" + e);
                     }
                 }
             }
@@ -466,6 +459,14 @@ public class ConfigPanel extends ScrollPane {
             presetRunways = new ArrayList<>();
             presetObstructions = new ArrayList<>();
         }
+    }
+
+    private void configError(String errorMessage) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText("Configuration Error");
+        alert.setContentText(errorMessage);
+        alert.showAndWait();
     }
 
     public Button getSaveRunwayPreset() {
