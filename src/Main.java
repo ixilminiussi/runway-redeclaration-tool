@@ -2,7 +2,11 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
+import java.io.File;
+import java.nio.file.Paths;
 
 
 public class Main extends Application {
@@ -10,13 +14,16 @@ public class Main extends Application {
     private ConfigPanel configPanel; // config module
     private RunwayGraphics runwayGraphics; // graphics module
     private AffectedRunway currentRunway; // calculation module
+    private Stage stage;
 
     public static void main(String[] args) {
+        System.out.println("If you're reading this I compiled and ran");
         launch(args);
     }
 
     @Override
     public void start(Stage stage) { // initialise window
+        this.stage = stage;
         stage.setTitle("Runway Re-declaration");
         VBox root = setUpMainGUI();
         setupConfigButtons();
@@ -31,8 +38,11 @@ public class Main extends Application {
         runwayApply.setOnMouseClicked((event) -> {
             Runway runway = configPanel.getRunway();
             if (runway == null) {
-                // TODO error popup here
-                System.out.println("Invalid Parameters");
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Configuration Error");
+                alert.setContentText("One of the parameters in the runway or obstruction was invalid!");
+                alert.showAndWait();
             } else {
                 Obstruction obstruction = currentRunway.getObstruction();
                 currentRunway = runway.recalculate(obstruction);
@@ -44,8 +54,11 @@ public class Main extends Application {
         obsApply.setOnMouseClicked((event) -> {
             Obstruction obstruction = configPanel.getObstruction();
             if (obstruction == null) {
-                // TODO error popup here
-                System.out.println("Invalid Parameters");
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Configuration Error");
+                alert.setContentText("One of the parameters in the runway or obstruction was invalid!");
+                alert.showAndWait();
             } else {
                 currentRunway.recalculate(obstruction);
                 // TODO runwayGraphics.draw();
@@ -56,10 +69,7 @@ public class Main extends Application {
     // create the main vbox and gridpane that the modules will run in
     private VBox setUpMainGUI() {
         MenuBar menuBar = new MenuBar();
-        Menu file = new Menu("File");
-        Menu settings = new Menu("Settings");
-        menuBar.getMenus().addAll(file, settings);
-
+        setupMenus(menuBar);
         VBox root = new VBox(menuBar);
 
         GridPane main = new GridPane();
@@ -90,6 +100,40 @@ public class Main extends Application {
         root.getChildren().add(main);
         VBox.setVgrow(main, Priority.ALWAYS);
         return root;
+    }
+
+    private void setupMenus(MenuBar menuBar) {
+        Menu file = new Menu("File");
+        Menu settings = new Menu("Settings");
+        menuBar.getMenus().addAll(file, settings);
+        MenuItem importNewPresets = new MenuItem("Import New Presets");
+        importNewPresets.setOnAction((event) -> {
+            String path = fileChooserGetPath();
+            try {
+                importXML importXML = new importXML(path);
+                configPanel.addRunwaysFromXML(importXML.importRunwaysFromXML());
+                configPanel.addObstructionsFromXML(importXML.importObstructionsFromXML());
+            } catch (Exception e) {
+                // error dialogue
+            }
+        });
+
+        MenuItem clearPresets = new MenuItem("Clear All Presets");
+        clearPresets.setOnAction((event) -> {
+            configPanel.clearPresets();
+            // show "all presets cleared" dialogue
+        });
+
+        file.getItems().addAll(importNewPresets, clearPresets);
+    }
+
+    private String fileChooserGetPath() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter("Runway/Obstruction Files", "*.xml"));
+        String currentPath = Paths.get(".").toAbsolutePath().normalize().toString();
+        fileChooser.setInitialDirectory(new File(currentPath));
+        File selectedFile = fileChooser.showOpenDialog(stage);
+        return selectedFile.getAbsolutePath();
     }
 
 }

@@ -211,7 +211,7 @@ public class ConfigPanel extends ScrollPane {
                 runwayPresetCombo.setValue(runway);
                 populateRunwayFields(runway);
                 try {
-                    exportXML.exportBothToXML("src/test_presets.xml", presetObstructions, presetRunways);
+                    exportXML.exportBothToXML("src/presets.xml", presetObstructions, presetRunways);
                 } catch (Exception e) {
                     configError("The file could not be exported.\n" + e);
                 }
@@ -223,7 +223,7 @@ public class ConfigPanel extends ScrollPane {
             if(runway == null) {
                 configError("One of the parameters in the runway or obstruction was invalid!");
             } else {
-                Runway toRemove = getRunwayFromName(runway.getName());
+                Runway toRemove = getRunwayFromName(runway.getName(), runway.getAirport());
                 if (toRemove == null) {
                     configError("This runway is not saved!");
                 } else {
@@ -232,7 +232,7 @@ public class ConfigPanel extends ScrollPane {
                     runwayPresetCombo.setValue(runwayPresetCombo.getItems().get(0));
                     populateRunwayFields(runwayPresetCombo.getValue());
                     try {
-                        exportXML.exportBothToXML("src/test_presets.xml", presetObstructions, presetRunways);
+                        exportXML.exportBothToXML("src/presets.xml", presetObstructions, presetRunways);
                     } catch (Exception e) {
                         configError("The file could not be exported.\n" + e);
                     }
@@ -252,7 +252,7 @@ public class ConfigPanel extends ScrollPane {
                 obstPresetCombo.setValue(obstruction);
                 populateObstFields(obstruction);
                 try {
-                    exportXML.exportBothToXML("src/test_presets.xml", presetObstructions, presetRunways);
+                    exportXML.exportBothToXML("src/presets.xml", presetObstructions, presetRunways);
                 } catch (Exception e) {
                     configError("The file could not be exported.\n" + e);
                 }
@@ -273,7 +273,7 @@ public class ConfigPanel extends ScrollPane {
                     obstPresetCombo.setValue(obstPresetCombo.getItems().get(0));
                     populateObstFields(obstPresetCombo.getValue());
                     try {
-                        exportXML.exportBothToXML("src/test_presets.xml", presetObstructions, presetRunways);
+                        exportXML.exportBothToXML("src/presets.xml", presetObstructions, presetRunways);
                     } catch (Exception e) {
                         configError("The file could not be exported.\n" + e);
                     }
@@ -283,9 +283,9 @@ public class ConfigPanel extends ScrollPane {
         applyObst = new Button("Render");
     }
 
-    private Runway getRunwayFromName(String name) {
+    private Runway getRunwayFromName(String name, String airport) {
         for(Runway runway : presetRunways) {
-            if (runway.getName().equals(name)) {
+            if (runway.getName().equals(name) && runway.getAirport().equals(airport)) {
                 return runway;
             }
         }
@@ -301,6 +301,74 @@ public class ConfigPanel extends ScrollPane {
         return null;
     }
 
+    public void addRunwaysFromXML(ArrayList<Runway> runways) {
+        for(Runway runway : runways) {
+            Runway exists = getRunwayFromName(runway.getName(), runway.getAirport());
+            if(exists == null) {
+                presetRunways.add(runway);
+                runwayPresetCombo.getItems().add(runway);
+            }
+        }
+        try {
+            exportXML.exportBothToXML("src/presets.xml", presetObstructions, presetRunways);
+        } catch (Exception e) {
+            configError("The file could not be exported.\n" + e);
+        }
+        runwayPresetCombo.setValue(presetRunways.get(0));
+        populateRunwayFields(runwayPresetCombo.getValue());
+    }
+
+    public void addObstructionsFromXML(ArrayList<Obstruction> obstructions) {
+        for(Obstruction obstruction : obstructions) {
+            Obstruction exists = getObstructionFromName(obstruction.getName());
+            if(exists == null) {
+                presetObstructions.add(obstruction);
+                obstPresetCombo.getItems().add(obstruction);
+            }
+        }
+        try {
+            exportXML.exportBothToXML("src/presets.xml", presetObstructions, presetRunways);
+        } catch (Exception e) {
+            configError("The file could not be exported.\n" + e);
+        }
+        obstPresetCombo.setValue(presetObstructions.get(0));
+        populateObstFields(obstPresetCombo.getValue());
+    }
+
+    public void clearPresets() {
+        runwayPresetCombo.getItems().removeAll(presetRunways);
+        obstPresetCombo.getItems().removeAll(presetObstructions);
+        presetObstructions = new ArrayList<>();
+        presetRunways = new ArrayList<>();
+        try {
+            exportXML.exportBothToXML("src/presets.xml", presetObstructions, presetRunways);
+        } catch (Exception e) {
+            configError("The file could not be exported.\n" + e);
+        }
+        clearTextFields();
+    }
+
+    private void clearTextFields() {
+        nameTextField.textProperty().setValue("");
+        airportTextField.textProperty().setValue("");
+        TORATextField.textProperty().setValue("");
+        TODATextField.textProperty().setValue("");
+        ASDATextField.textProperty().setValue("");
+        LDATextField.textProperty().setValue("");
+        displacedTextField.textProperty().setValue("");
+        stripEndTextField.textProperty().setValue("");
+        egrTextField.textProperty().setValue("");
+        resaTextField.textProperty().setValue("");
+        blastTextField.textProperty().setValue("");
+        stopwayTextField.textProperty().setValue("");
+        clearwayTextField.textProperty().setValue("");
+        obstNameTextField.textProperty().setValue("");
+        obstHeightTextField.textProperty().setValue("");
+        obstLengthTextField.textProperty().setValue("");
+        distThreshTextField.textProperty().setValue("");
+        distCentreTextField.textProperty().setValue("");
+    }
+
     // initialise comboboxes
     private void createComboBoxes() {
         directionBox = new ComboBox<>();
@@ -313,10 +381,17 @@ public class ConfigPanel extends ScrollPane {
         }
         runwayPresetCombo.setOnAction((event) -> {
             Runway runway = runwayPresetCombo.getValue();
-            populateRunwayFields(runway);
+            try {
+                populateRunwayFields(runway);
+            } catch (NullPointerException e) {
+                System.out.println("No presets available");
+            }
         });
-        runwayPresetCombo.setValue(presetRunways.get(0));
-        populateRunwayFields(runwayPresetCombo.getValue());
+
+        if(presetRunways.size() > 0) {
+            runwayPresetCombo.setValue(presetRunways.get(0));
+            populateRunwayFields(runwayPresetCombo.getValue());
+        }
 
         obstPresetCombo = new ComboBox<>();
         obstPresetCombo.setPrefWidth(400);
@@ -325,10 +400,18 @@ public class ConfigPanel extends ScrollPane {
         }
         obstPresetCombo.setOnAction((event) -> {
             Obstruction obstruction = obstPresetCombo.getValue();
-            populateObstFields(obstruction);
-});
-        obstPresetCombo.setValue(presetObstructions.get(0));
-        populateObstFields(obstPresetCombo.getValue());
+            try {
+                populateObstFields(obstruction);
+            } catch (NullPointerException e) {
+                System.out.println("No presets available");
+            }
+        });
+
+        if(presetObstructions.size() > 0) {
+            obstPresetCombo.setValue(presetObstructions.get(0));
+            populateObstFields(obstPresetCombo.getValue());
+        }
+
     }
 
     // fill in textfields with specific values from selected runway
@@ -451,7 +534,7 @@ public class ConfigPanel extends ScrollPane {
     // temp function, fill arraylists of presets
     private void populateDefaults() {
         try {
-            importXML importXML = new importXML("src/test_presets.xml");
+            importXML importXML = new importXML("src/presets.xml");
             presetRunways = importXML.importRunwaysFromXML();
             presetObstructions = importXML.importObstructionsFromXML();
         } catch (Exception e) {
