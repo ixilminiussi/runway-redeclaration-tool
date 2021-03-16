@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<runways>
+    <runway type="plane">
+        <name>27R</name>
+        <airport>London Heathrow Airport</airport>
+        <TORA>3884</TORA>
+        <TODA>3962</TODA>
+        <ASDA>3884</ASDA>
+        <LDA>3884</LDA>
+        <displacedThreshold>0</displacedThreshold>
+        <stripEnd>60</stripEnd>
+        <EGR>50</EGR>
+        <RESA>0</RESA>
+        <blastAllowance>300</blastAllowance>
+        <stopway>0</stopway>
+        <clearway>0</clearway>
+        <direction>LANDING</direction>
+    </runway>
+</runways>
