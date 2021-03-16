@@ -95,9 +95,11 @@ public class Main extends Application {
 
         configPanel = new ConfigPanel();
         main.add(configPanel, 2, 0, 1, 3);
-        
-        runwayGraphics = new RunwayGraphics(configPanel.getAffectedRunway());
+
+        runwayGraphics = new RunwayGraphics();
         main.add(runwayGraphics.getRunwayGraphics(), 0, 0, 2, 4);
+
+        currentRunway = configPanel.getAffectedRunway();
 
         root.getChildren().add(main);
         VBox.setVgrow(main, Priority.ALWAYS);
