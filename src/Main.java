@@ -27,6 +27,7 @@ public class Main extends Application {
         stage.setTitle("Runway Re-declaration");
         VBox root = setUpMainGUI();
         setupConfigButtons();
+        currentRunway = configPanel.getAffectedRunway();
         stage.setScene(new Scene(root, 1000, 600));
         stage.setMaximized(true);
         stage.show();
@@ -46,6 +47,7 @@ public class Main extends Application {
             } else {
                 Obstruction obstruction = currentRunway.getObstruction();
                 currentRunway = runway.recalculate(obstruction);
+                System.out.println(currentRunway.getOriginalRunway());
                 // TODO runwayGraphics.draw();
             }
         });
@@ -61,6 +63,7 @@ public class Main extends Application {
                 alert.showAndWait();
             } else {
                 currentRunway.recalculate(obstruction);
+                System.out.println(currentRunway.getOriginalRunway());
                 // TODO runwayGraphics.draw();
             }
         });
