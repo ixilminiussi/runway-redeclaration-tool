@@ -27,6 +27,7 @@ public class Main extends Application {
         stage.setTitle("Runway Re-declaration");
         VBox root = setUpMainGUI();
         setupConfigButtons();
+        currentRunway = configPanel.getAffectedRunway();
         stage.setScene(new Scene(root, 1000, 600));
         stage.setMaximized(true);
         stage.show();
@@ -46,8 +47,8 @@ public class Main extends Application {
             } else {
                 Obstruction obstruction = currentRunway.getObstruction();
                 currentRunway = runway.recalculate(obstruction);
-                runwayGraphics.setAffectedRunway(currentRunway);
-                runwayGraphics.draw();
+                System.out.println(currentRunway.getOriginalRunway());
+                // TODO runwayGraphics.draw();
             }
         });
 
@@ -62,8 +63,8 @@ public class Main extends Application {
                 alert.showAndWait();
             } else {
                 currentRunway.recalculate(obstruction);
-                runwayGraphics.setAffectedRunway(currentRunway);
-                runwayGraphics.draw();
+                System.out.println(currentRunway.getOriginalRunway());
+                // TODO runwayGraphics.draw();
             }
         });
     }
@@ -93,13 +94,11 @@ public class Main extends Application {
         row4.setPercentHeight(25);
         main.getRowConstraints().addAll(row1, row2, row3, row4);
 
+        runwayGraphics = new RunwayGraphics();
+        main.add(runwayGraphics.getAnchorPane(), 0, 0, 2, 4);
+
         configPanel = new ConfigPanel();
         main.add(configPanel, 2, 0, 1, 3);
-
-        runwayGraphics = new RunwayGraphics();
-        main.add(runwayGraphics.getRunwayGraphics(), 0, 0, 2, 4);
-
-        currentRunway = configPanel.getAffectedRunway();
 
         root.getChildren().add(main);
         VBox.setVgrow(main, Priority.ALWAYS);
