@@ -95,7 +95,7 @@ public class Main extends Application {
         main.getRowConstraints().addAll(row1, row2, row3, row4);
 
         runwayGraphics = new RunwayGraphics();
-        main.add(runwayGraphics.getAnchorPane(), 0, 0, 2, 4);
+        main.add(runwayGraphics.getRunwayGraphics(), 0, 0, 2, 4);
 
         configPanel = new ConfigPanel();
         main.add(configPanel, 2, 0, 1, 3);
