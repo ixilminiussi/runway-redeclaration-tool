@@ -567,4 +567,12 @@ public class ConfigPanel extends ScrollPane {
     public Button getApplyObst() {
         return applyObst;
     }
+
+    public ArrayList<Obstruction> getPresetObstructions() {
+        return presetObstructions;
+    }
+
+    public ArrayList<Runway> getPresetRunways() {
+        return presetRunways;
+    }
 }

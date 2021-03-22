@@ -118,13 +118,34 @@ public class Main extends Application {
             }
         });
 
+        // export all runways and obstructions
+        MenuItem exportRunwaysAndObstructions = new MenuItem("Export objects");
+        exportRunwaysAndObstructions.setOnAction((event) -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Export runways and obstructions");
+            String filename = fileChooser.showSaveDialog(stage).getAbsolutePath();
+
+            // ensure filename has .xml extension
+            if (!filename.substring(filename.length() - 4).equals(".xml")) {
+                filename = filename.concat(".xml");
+            }
+
+            try {
+                exportXML.exportBothToXML(filename, configPanel.getPresetObstructions(), configPanel.getPresetRunways());
+            } catch (Exception e) {
+                Alert errorMessage = new Alert(Alert.AlertType.ERROR);
+                errorMessage.setContentText("An error occurred exporting the file");
+                errorMessage.show();
+            }
+        });
+
         MenuItem clearPresets = new MenuItem("Clear All Presets");
         clearPresets.setOnAction((event) -> {
             configPanel.clearPresets();
             // show "all presets cleared" dialogue
         });
 
-        file.getItems().addAll(importNewPresets, clearPresets);
+        file.getItems().addAll(importNewPresets, exportRunwaysAndObstructions, clearPresets);
     }
 
     private String fileChooserGetPath() {
