@@ -1,3 +1,7 @@
+package sample;
+
+import java.awt.event.MouseEvent;
+import java.beans.EventHandler;
 import java.util.ArrayList;
 
 import javafx.beans.value.ChangeListener;
@@ -40,6 +44,10 @@ public class RunwayGraphics {
     Color roadColor, stripeColor, warningColor, clearedAreaColor, hudColor, backgroundColor, outlineColor, obstacleColor1, obstacleColor2;
     Background paneBackground, hudBackground;
 
+    double orgSceneX, orgSceneY;
+    double orgTranslateX, orgTranslateY;
+
+
 
     public AnchorPane getRunwayGraphics() {
 
@@ -79,7 +87,6 @@ public class RunwayGraphics {
         setupSplitView();
         setupButtons();
         draw();
-        setupShortcuts();
 
         //where the graphics happen
         runwayDisplayAnchor.setBorder(new Border(new BorderStroke(Color.LIGHTSTEELBLUE, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
@@ -92,7 +99,7 @@ public class RunwayGraphics {
         drawTopView(800, 400);
         drawSideView(800, 300);
 
-        //centers elements 
+        //centers elements
         runwayDisplayAnchor.setTopAnchor(topView, 0.0);
         runwayDisplayAnchor.setBottomAnchor(topView, 0.0);
         runwayDisplayAnchor.setLeftAnchor(topView, 0.0);
@@ -102,7 +109,7 @@ public class RunwayGraphics {
         runwayDisplayAnchor.setBottomAnchor(sideView, 0.0);
         runwayDisplayAnchor.setLeftAnchor(sideView, 0.0);
         runwayDisplayAnchor.setRightAnchor(sideView, 0.0);
-        
+
         runwayDisplayAnchor.setTopAnchor(splitView, 0.0);
         runwayDisplayAnchor.setBottomAnchor(splitView, 0.0);
         runwayDisplayAnchor.setLeftAnchor(splitView, 0.0);
@@ -112,13 +119,13 @@ public class RunwayGraphics {
         runwayDisplayAnchor.getChildren().clear();
         switch (viewSelect.getSelectionModel().getSelectedIndex()) {
             case 0: runwayDisplayAnchor.getChildren().addAll(topView, viewSelect, filtersVBoxContainer);
-                    break;
+                break;
             case 1: runwayDisplayAnchor.getChildren().addAll(sideView, viewSelect, filtersVBoxContainer);
-                    break;
+                break;
             case 3: splitView.getItems().clear();
-                    splitView.getItems().addAll(topView, sideView);
-                    runwayDisplayAnchor.getChildren().addAll(splitView, viewSelect, filtersVBoxContainer);
-                    break;
+                splitView.getItems().addAll(topView, sideView);
+                runwayDisplayAnchor.getChildren().addAll(splitView, viewSelect, filtersVBoxContainer);
+                break;
         }
 
         showMeasurements();
@@ -157,7 +164,7 @@ public class RunwayGraphics {
     }
 
     public void showTORA() {
-        
+
         double TORALength = affectedRunway.getTORA();
 
         sideGc = drawMeasurement(sideGc, String.valueOf(TORALength), thresholdMargin, 20 , getLengthRelativeToRunway(TORALength), Orientation.HORIZONTAL);
@@ -178,7 +185,7 @@ public class RunwayGraphics {
     }
 
     public void showTODA() {
-        
+
         double TODALength = affectedRunway.getTODA();
 
         //represented by a line going from first threshold to the end, regardless of length relative to TODA (aesthetic / clarity choice)
@@ -217,7 +224,7 @@ public class RunwayGraphics {
         sideGc.strokeRect(x, -height, length, height);
         sideGc.translate(-thresholdMargin, -(sideGc.getCanvas().getHeight() - sideViewPixelHeight) / 2);
     }
-    
+
     //draws a line between 2 points with a measure/label displayed next to it
     public GraphicsContext drawMeasurement(GraphicsContext gc, String label, double x, double y, double length, Orientation o) {
 
@@ -242,7 +249,7 @@ public class RunwayGraphics {
                 gc.setTextBaseline(VPos.TOP);
                 gc.setTextAlign(TextAlignment.CENTER);
                 gc.strokeText(label, x + (length/2), y + 4);
-            break;
+                break;
             case VERTICAL :
                 //main line
                 gc.setLineDashes(2, 2, 1, 2);
@@ -257,7 +264,7 @@ public class RunwayGraphics {
                 gc.setTextBaseline(VPos.CENTER);
                 gc.setTextAlign(TextAlignment.LEFT);
                 gc.strokeText(label, x + 4, y + (length/2));
-            break;
+                break;
         }
 
         gc.translate(0, -gc.getCanvas().getHeight()/2);
@@ -292,9 +299,9 @@ public class RunwayGraphics {
 
         for(CheckBox checkBox : filtersList) {
             checkBox.selectedProperty().addListener(
-                (ObservableValue<? extends Boolean> ov, Boolean oldVal, Boolean newVal) -> {
-                    draw();
-                }
+                    (ObservableValue<? extends Boolean> ov, Boolean oldVal, Boolean newVal) -> {
+                        draw();
+                    }
             );
         }
 
@@ -322,13 +329,13 @@ public class RunwayGraphics {
                 runwayDisplayAnchor.getChildren().clear();
                 switch (newSelected.intValue()) {
                     case 0: runwayDisplayAnchor.getChildren().addAll(topView, viewSelect, filtersVBoxContainer);
-                            break;
+                        break;
                     case 1: runwayDisplayAnchor.getChildren().addAll(sideView, viewSelect, filtersVBoxContainer);
-                            break;
+                        break;
                     case 3: splitView.getItems().clear();
-                            splitView.getItems().addAll(topView, sideView);
-                            runwayDisplayAnchor.getChildren().addAll(splitView, viewSelect, filtersVBoxContainer);
-                            break;
+                        splitView.getItems().addAll(topView, sideView);
+                        runwayDisplayAnchor.getChildren().addAll(splitView, viewSelect, filtersVBoxContainer);
+                        break;
                 }
             }
         });
@@ -342,6 +349,35 @@ public class RunwayGraphics {
         topView = new StackPane();
         topView.setAlignment(Pos.CENTER);
         topView.getChildren().add(topViewCanvas);
+
+        topViewCanvas.setOnMousePressed(e -> {
+            orgSceneX = e.getSceneX();
+            //orgSceneY = e.getSceneY();
+            orgTranslateX = ((Canvas) (e.getSource())).getTranslateX();
+            //orgTranslateY = ((Canvas)(e.getSource())).getTranslateY();
+        });
+        topViewCanvas.setOnMouseDragged(e -> {
+            double offsetX = e.getSceneX() - orgSceneX;
+            //double offsetY = e.getSceneY() - orgSceneY;
+            double newTranslateX = orgTranslateX + offsetX;
+            //double newTranslateY = orgTranslateY + offsetY;
+            ((Canvas) (e.getSource())).setTranslateX(newTranslateX);
+            //((Canvas) (e.getSource())).setTranslateY(newTranslateY);
+        });
+
+        topView.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        topView.setOnScroll(
+                e -> {
+                    if (e.isShortcutDown() && e.getDeltaY() != 0) {
+                        if (e.getDeltaY() < 0) {
+                            topView.setScaleX(Math.max(topView.getScaleX() - 0.1, 0.5));
+                        } else {
+                            topView.setScaleX(Math.min(topView.getScaleX() + 0.1, 5.0));
+                        }
+                        topView.setScaleY(topView.getScaleX());
+                        e.consume(); // prevents ScrollEvent from reaching ScrollPane
+                    }
+                });
 
         //-------DRAW CANVAS-------
         double yOffset = (canvasHeight - 180) / 2;
@@ -364,10 +400,10 @@ public class RunwayGraphics {
         topGc.lineTo(canvasWidth - 85, 30);
         topGc.lineTo(canvasWidth, 30);
         topGc.lineTo(canvasWidth, 150);
-        topGc.lineTo(canvasWidth - 85, 150); 
-        topGc.lineTo(canvasWidth - 125, 180); 
+        topGc.lineTo(canvasWidth - 85, 150);
+        topGc.lineTo(canvasWidth - 125, 180);
         topGc.lineTo(120, 180);
-        topGc.lineTo(85, 150); 
+        topGc.lineTo(85, 150);
         topGc.lineTo(0, 150);
         topGc.fill();
         topGc.closePath();
@@ -404,6 +440,7 @@ public class RunwayGraphics {
 
         topView.setScaleX(1);
         topView.setScaleY(1);
+
     }
 
     public void drawSideView(double canvasWidth, double canvasHeight) {
@@ -411,9 +448,39 @@ public class RunwayGraphics {
         sideViewCanvas = new Canvas (canvasWidth, canvasHeight);
         sideGc = sideViewCanvas.getGraphicsContext2D();
 
+        sideViewCanvas.setOnMousePressed(e -> {
+            orgSceneX = e.getSceneX();
+            //orgSceneY = e.getSceneY();
+            orgTranslateX = ((Canvas) (e.getSource())).getTranslateX();
+            //orgTranslateY = ((Canvas)(e.getSource())).getTranslateY();
+        });
+        sideViewCanvas.setOnMouseDragged(e -> {
+            double offsetX = e.getSceneX() - orgSceneX;
+            //double offsetY = e.getSceneY() - orgSceneY;
+            double newTranslateX = orgTranslateX + offsetX;
+            //double newTranslateY = orgTranslateY + offsetY;
+            ((Canvas) (e.getSource())).setTranslateX(newTranslateX);
+            //((Canvas) (e.getSource())).setTranslateY(newTranslateY);
+        });
+
         sideView = new StackPane();
         sideView.setAlignment(Pos.CENTER);
         sideView.getChildren().add(sideViewCanvas);
+
+        sideView.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        // OR sideView
+        sideViewCanvas.setOnScroll(
+                e -> {
+                    if (e.isShortcutDown() && e.getDeltaY() != 0) {
+                        if (e.getDeltaY() < 0) {
+                            sideView.setScaleX(Math.max(sideView.getScaleX() - 0.1, 0.5));
+                        } else {
+                            sideView.setScaleX(Math.min(sideView.getScaleX() + 0.1, 5.0));
+                        }
+                        sideView.setScaleY(sideView.getScaleX());
+                        e.consume(); // prevents ScrollEvent from reaching ScrollPane
+                    }
+                });
 
         //-------DRAW CANVAS-------
         sideGc.translate(0, (canvasHeight - sideViewPixelHeight) / 2);
@@ -431,7 +498,7 @@ public class RunwayGraphics {
         sideGc.setFill(createHatch(warningColor, roadColor));
         sideGc.fillRect(stopwayMargin, 0, (runwayMargin - stopwayMargin), 10);
         sideGc.fillRect(runwayMargin + runwayPixelLength, 0, (runwayMargin - stopwayMargin), 10);
-        
+
         //threshold
         sideGc.setFill(stripeColor);
         sideGc.fillRect(thresholdMargin, 0, 30, 8);
@@ -461,50 +528,6 @@ public class RunwayGraphics {
         splitView = new SplitPane();
         splitView.setOrientation(Orientation.VERTICAL);
         splitView.setBackground(paneBackground);
-    }
-
-    //temporary name
-    public void setupShortcuts() {
-        //----------SCROLL OPTIONS----------
-        topView.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
-        topView.setOnScroll(
-                e -> {
-                    if (e.isShortcutDown() && e.getDeltaY() != 0) {
-                        if (e.getDeltaY() < 0) {
-                            topView.setScaleX(Math.max(topView.getScaleX() - 0.1, 0.5));
-                        } else {
-                            topView.setScaleX(Math.min(topView.getScaleX() + 0.1, 5.0));
-                        }
-                        topView.setScaleY(topView.getScaleX());
-                        e.consume(); // prevents ScrollEvent from reaching ScrollPane
-                    }
-                });
-
-
-        sideView.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
-        sideView.setOnScroll(
-                e -> {
-                    if (e.isShortcutDown() && e.getDeltaY() != 0) {
-                        if (e.getDeltaY() < 0) {
-                            sideView.setScaleX(Math.max(sideView.getScaleX() - 0.1, 0.5));
-                        } else {
-                            sideView.setScaleX(Math.min(sideView.getScaleX() + 0.1, 5.0));
-                        }
-                        sideView.setScaleY(sideView.getScaleX());
-                        e.consume(); // prevents ScrollEvent from reaching ScrollPane
-                    }
-                });
-
-        topViewCanvas.setOnMouseDragged(e -> {
-            //topViewCanvas.setTranslateX(e.getX() + 400);
-            topViewCanvas.setTranslateX(e.getX() + 400);
-            e.consume();
-        });
-
-        sideViewCanvas.setOnMouseDragged(e -> {
-            sideViewCanvas.setTranslateX(e.getX() + 400);
-            e.consume();
-        });
     }
 
     //taken from https://stackoverflow.com/questions/39297719/javafx-create-hatchstyles-something-like-of-c-sharp-net
