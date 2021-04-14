@@ -149,8 +149,8 @@ public class RunwayGraphics {
     }
 
     public void showObstacle() {
-        drawObstacle(affectedRunway.getObstacle().getDistanceFromThreshold(), affectedRunway.getObstacle().getDistanceFromCentre(), 
-                affectedRunway.getObstacle().getLength(), affectedRunway.getObstacle().getHeight());
+        drawObstacle(affectedRunway.getObstruction().getDistanceFromThreshold(), affectedRunway.getObstruction().getDistanceFromCentre(),
+                affectedRunway.getObstruction().getLength(), affectedRunway.getObstruction().getHeight());
     }
 
     public void showObstacleDistances() {
