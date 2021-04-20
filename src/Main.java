@@ -100,6 +100,7 @@ public class Main extends Application {
 
         runwayGraphics = new RunwayGraphics();
         runwayGraphics.setAffectedRunway(currentRunway);
+
         main.add(runwayGraphics.getRunwayGraphics(), 0, 0, 2, 4);
 
         root.getChildren().add(main);
@@ -129,7 +130,16 @@ public class Main extends Application {
             // show "all presets cleared" dialogue
         });
 
-        file.getItems().addAll(importNewPresets, clearPresets);
+        MenuItem showCalculations = new MenuItem("Show Calculations");
+        showCalculations.setOnAction((event) -> {
+            Stage stage2 = new Stage();
+            Scene scene2 = new Scene(currentRunway.getCalculationDisplay(), 720, 480);
+            stage2.setScene(scene2);
+            stage2.show();
+
+        });
+
+        file.getItems().addAll(importNewPresets, clearPresets, showCalculations);
     }
 
     private String fileChooserGetPath() {
