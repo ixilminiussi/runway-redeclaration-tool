@@ -51,7 +51,8 @@ public class Main extends Application {
                 Obstruction obstruction = currentRunway.getObstruction();
                 currentRunway = runway.recalculate(obstruction);
                 System.out.println(currentRunway.getOriginalRunway());
-                // TODO runwayGraphics.draw();
+                runwayGraphics.setAffectedRunway(currentRunway);
+                runwayGraphics.draw();
             }
         });
 
@@ -68,7 +69,9 @@ public class Main extends Application {
                 historyPanel.addHistoryEntry(compareChanges(obstruction));
                 currentRunway.recalculate(obstruction);
                 System.out.println(currentRunway.getOriginalRunway());
-                // TODO runwayGraphics.draw();
+                runwayGraphics.setAffectedRunway(currentRunway);
+                runwayGraphics.draw();
+
             }
         });
     }
@@ -164,13 +167,16 @@ public class Main extends Application {
         row4.setPercentHeight(25);
         main.getRowConstraints().addAll(row1, row2, row3, row4);
 
-        runwayGraphics = new RunwayGraphics();
-        main.add(runwayGraphics.getAnchorPane(), 0, 0, 2, 4);
 
         historyPanel = new HistoryPanel();
         configPanel = new ConfigPanel(historyPanel);
         currentRunway = configPanel.getAffectedRunway();
         main.add(configPanel, 2, 0, 1, 3);
+
+        runwayGraphics = new RunwayGraphics();
+        runwayGraphics.setAffectedRunway(currentRunway);
+        runwayGraphics.draw();
+        main.add(runwayGraphics.getRunwayGraphics(), 0, 0, 2, 4);
 
 
         main.add(historyPanel, 2, 3);
