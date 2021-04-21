@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Orientation;
@@ -27,9 +28,11 @@ public class RunwayGraphics {
     SplitPane splitView;
 
     //buttons
-    VBox filtersVBox;
+    VBox filtersVBox, labelsVBox;
+    GridPane filtersGridPane;
     CheckBox displacedThresholdBox, TORABox, LDABox, ASDABox, TODABox, obstacleBox, obstacleDistancesBox;
-    HBox filtersVBoxContainer;
+    Label displacedThresholdLabel, TORALabel, LDALabel, ASDALabel, TODALabel, obstacleLabel, obstacleDistancesLabel;
+    HBox filtersGridPaneContainer;
     ChoiceBox viewSelect;
 
     //used as reference when applying real life distances to the drawing, picked solely for clarity, each margin is taken, added from the previous margin
@@ -44,7 +47,7 @@ public class RunwayGraphics {
     int spacing = 20;
 
     //color palette
-    Color roadColor, stripeColor, warningColor, clearedAreaColor, hudColor, backgroundColor, outlineColor, obstacleColor1, obstacleColor2;
+    Color roadColor, stripeColor, warningColor, clearedAreaColor, hudColor, backgroundColor, outlineColor, obstacleColor1, obstacleColor2, grassColor;
     Background paneBackground, hudBackground;
 
     double orgSceneX, orgSceneY;
@@ -74,6 +77,7 @@ public class RunwayGraphics {
         clearedAreaColor = Color.DODGERBLUE;
         hudColor = Color.LIGHTSTEELBLUE;
         backgroundColor = Color.LIGHTCYAN;
+        grassColor = Color.DARKSEAGREEN;
         outlineColor = Color.BLACK;
         obstacleColor1 = Color.FIREBRICK;
         obstacleColor2 = Color.CRIMSON;
@@ -81,10 +85,9 @@ public class RunwayGraphics {
         hudBackground = new Background(new BackgroundFill(hudColor, CornerRadii.EMPTY, Insets.EMPTY));
 
         setupSplitView();
-        setupButtons();
 
         //where the graphics happen
-        runwayDisplayAnchor.setBorder(new Border(new BorderStroke(Color.LIGHTSTEELBLUE, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+        runwayDisplayAnchor.setBorder(new Border(new BorderStroke(hudColor, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         runwayDisplayAnchor.setBackground(paneBackground);
     }
 
@@ -93,6 +96,8 @@ public class RunwayGraphics {
 
         drawTopView(CANVAS_WIDTH, 400);
         drawSideView(CANVAS_WIDTH, 300);
+
+        setupButtons();
 
         //centers elements
         runwayDisplayAnchor.setTopAnchor(topView, 0.0);
@@ -113,13 +118,13 @@ public class RunwayGraphics {
         //puts the appropriate pane on, according to the viewSelect choicebox
         runwayDisplayAnchor.getChildren().clear();
         switch (viewSelect.getSelectionModel().getSelectedIndex()) {
-            case 0: runwayDisplayAnchor.getChildren().addAll(topView, viewSelect, filtersVBoxContainer);
+            case 0: runwayDisplayAnchor.getChildren().addAll(topView, viewSelect, filtersGridPaneContainer);
                 break;
-            case 1: runwayDisplayAnchor.getChildren().addAll(sideView, viewSelect, filtersVBoxContainer);
+            case 1: runwayDisplayAnchor.getChildren().addAll(sideView, viewSelect, filtersGridPaneContainer);
                 break;
             case 3: splitView.getItems().clear();
                 splitView.getItems().addAll(topView, sideView);
-                runwayDisplayAnchor.getChildren().addAll(splitView, viewSelect, filtersVBoxContainer);
+                runwayDisplayAnchor.getChildren().addAll(splitView, viewSelect, filtersGridPaneContainer);
                 break;
         }
 
@@ -325,14 +330,33 @@ public class RunwayGraphics {
         //---------FILTERS----------
         //checkboxes to add measurements, currently for testing, eventually to give control to the user as to which information he wants to see/hide
         filtersVBox = new VBox();
+        labelsVBox = new VBox();
+        filtersGridPane = new GridPane();
+
+        Text showLabel = new Text(" show ");
+        showLabel.setStyle("-fx-font-weight: bold");
+        Text distancesLabel = new Text(" calculated distancese ");
+        distancesLabel.setStyle("-fx-font-weight: bold");
+
+        displacedThresholdLabel = new Label(" displaced threshold : " + String.valueOf(affectedRunway.getOriginalRunway().getDisplacedThreshold()));
+        TORALabel = new Label(" TORA : " + String.valueOf(affectedRunway.getTORA()));
+        LDALabel = new Label(" LDA : " + String.valueOf(affectedRunway.getLDA()));
+        ASDALabel = new Label( " ASDA : " + String.valueOf(affectedRunway.getASDA()));
+        TODALabel = new Label(" TODA : " + String.valueOf(affectedRunway.getTODA()));
+        obstacleLabel = new Label(" obstacle ");
+        obstacleDistancesLabel = new Label(" obstacle distances ");
+
+        labelsVBox.getChildren().addAll(displacedThresholdLabel, TORALabel, LDALabel, ASDALabel, TODALabel, obstacleLabel, obstacleDistancesLabel);
+        labelsVBox.setSpacing(5.0);
+
         ArrayList<CheckBox> filtersList = new ArrayList<CheckBox>();
-        displacedThresholdBox = new CheckBox(" displaced threshold ");
-        TORABox = new CheckBox(" TORA ");
-        LDABox = new CheckBox(" LDA ");
-        ASDABox = new CheckBox( " ASDA ");
-        TODABox = new CheckBox(" TODA ");
-        obstacleBox = new CheckBox(" obstacle ");
-        obstacleDistancesBox = new CheckBox(" obstacle distances ");
+        displacedThresholdBox = new CheckBox(" ");
+        TORABox = new CheckBox(" ");
+        LDABox = new CheckBox(" ");
+        ASDABox = new CheckBox(" ");
+        TODABox = new CheckBox(" ");
+        obstacleBox = new CheckBox(" ");
+        obstacleDistancesBox = new CheckBox(" ");
         filtersList.add(displacedThresholdBox); filtersList.add(TORABox); filtersList.add(LDABox); filtersList.add(ASDABox); filtersList.add(TODABox);
         filtersList.add(obstacleBox); filtersList.add(obstacleDistancesBox);
 
@@ -348,13 +372,32 @@ public class RunwayGraphics {
         }
 
         //only for styling purposes
-        filtersVBoxContainer = new HBox();
-        filtersVBoxContainer.getChildren().add(filtersVBox);
-        filtersVBoxContainer.setMargin(filtersVBox, new Insets(5.0, 5.0, 5.0, 5.0));
-        filtersVBoxContainer.setBackground(hudBackground);
+        filtersGridPaneContainer = new HBox();
+        filtersGridPaneContainer.getChildren().add(filtersGridPane);
+        filtersGridPaneContainer.setMargin(filtersGridPane, new Insets(5.0, 5.0, 5.0, 5.0));
+        filtersGridPaneContainer.setBackground(hudBackground);
 
-        runwayDisplayAnchor.setTopAnchor(filtersVBoxContainer, 0.0);
-        runwayDisplayAnchor.setRightAnchor(filtersVBoxContainer, 0.0);
+        ColumnConstraints col1 = new ColumnConstraints();
+        ColumnConstraints col2 = new ColumnConstraints();
+        col2.setHalignment(HPos.CENTER);
+        filtersGridPane.getColumnConstraints().addAll(col1,col1,col2);
+
+        //filler panes for styling
+        Pane pane1 = new Pane();
+        Pane pane2 = new Pane();
+        filtersGridPane.add(distancesLabel, 0, 0, 1, 1);
+        filtersGridPane.add(showLabel, 2, 0, 1, 1);
+        filtersGridPane.add(filtersVBox, 2, 2, 1, 1);
+        filtersGridPane.add(labelsVBox, 0, 2, 1, 1);
+        filtersGridPane.add(pane1, 0, 1, 3, 1);
+        filtersGridPane.add(pane2, 1, 0, 1, 3);
+        pane1.minWidth(0.5);
+        pane2.minHeight(0.5);
+        pane1.setStyle("-fx-border-color: black");
+        pane2.setStyle("-fx-border-color: black");
+
+        runwayDisplayAnchor.setTopAnchor(filtersGridPane, 0.0);
+        runwayDisplayAnchor.setRightAnchor(filtersGridPaneContainer, 0.0);
 
         //----------VIEW SELECT----------
         //changing views
@@ -370,13 +413,13 @@ public class RunwayGraphics {
                 //required to avoid duplicates
                 runwayDisplayAnchor.getChildren().clear();
                 switch (newSelected.intValue()) {
-                    case 0: runwayDisplayAnchor.getChildren().addAll(topView, viewSelect, filtersVBoxContainer);
+                    case 0: runwayDisplayAnchor.getChildren().addAll(topView, viewSelect, filtersGridPaneContainer);
                         break;
-                    case 1: runwayDisplayAnchor.getChildren().addAll(sideView, viewSelect, filtersVBoxContainer);
+                    case 1: runwayDisplayAnchor.getChildren().addAll(sideView, viewSelect, filtersGridPaneContainer);
                         break;
                     case 3: splitView.getItems().clear();
                         splitView.getItems().addAll(topView, sideView);
-                        runwayDisplayAnchor.getChildren().addAll(splitView, viewSelect, filtersVBoxContainer);
+                        runwayDisplayAnchor.getChildren().addAll(splitView, viewSelect, filtersGridPaneContainer);
                         break;
                 }
             }
@@ -428,7 +471,7 @@ public class RunwayGraphics {
         negMargin = 0;
 
         //main square
-        topGc.setFill(Color.DARKSEAGREEN);
+        topGc.setFill(grassColor);
         topGc.fillRect(0, 0, canvasWidth, canvasHeight);
 
         //cleared area
