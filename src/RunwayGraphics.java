@@ -1,5 +1,3 @@
-package sample;
-
 import java.awt.event.MouseEvent;
 import java.beans.EventHandler;
 import java.util.ArrayList;
@@ -34,11 +32,16 @@ public class RunwayGraphics {
     HBox filtersVBoxContainer;
     ChoiceBox viewSelect;
 
-    //used as reference when applying real life distances to the drawing
-    double runwayPixelLength, sideViewPixelHeight, topViewPixelHeight;
+    //used as reference when applying real life distances to the drawing, picked solely for clarity, each margin is taken, added from the previous margin
+    final int SIDE_VIEW_THICKNESS = 30, CLEARWAY_MARGIN = 40, STOPWAY_MARGIN = 30, RESA_MARGIN = 40, BLAST_ALLOWANCE_MARGIN = 30, CENTERLINE_MARGIN = 80, THRESHOLD_MARGIN = 2, THRESHOLD_LENGTH = 30;
     AffectedRunway affectedRunway;
-    double runwayMargin, thresholdMargin, stopwayMargin, centerlineMargin;
-    final double CLEARED_AREA = 75 * 2;
+    final int CLEARED_AREA = 75 * 2, CANVAS_WIDTH = 800; //don't change CANVAS_WIDTH unless you really have to, not hard-coded yet
+
+    //used as reference throughout the code, but fluid, prone to change depending on settings.
+    int runwayPL;
+    int posMargin = 0; //the margin before the runway starts
+    int negMargin = 0; //the margin before the runway ends
+    int spacing = 20;
 
     //color palette
     Color roadColor, stripeColor, warningColor, clearedAreaColor, hudColor, backgroundColor, outlineColor, obstacleColor1, obstacleColor2;
@@ -77,16 +80,8 @@ public class RunwayGraphics {
         paneBackground = new Background(new BackgroundFill(backgroundColor, CornerRadii.EMPTY, Insets.EMPTY));
         hudBackground = new Background(new BackgroundFill(hudColor, CornerRadii.EMPTY, Insets.EMPTY));
 
-        //used as reference for the drawing (purely aesthetic choices, might change down the line)
-        runwayMargin = 70.0;
-        stopwayMargin = 40.0;
-        thresholdMargin = 72.0;
-        centerlineMargin = 150.0;
-        sideViewPixelHeight = 30.0;
-
         setupSplitView();
         setupButtons();
-        draw();
 
         //where the graphics happen
         runwayDisplayAnchor.setBorder(new Border(new BorderStroke(Color.LIGHTSTEELBLUE, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
@@ -96,8 +91,8 @@ public class RunwayGraphics {
     //draws all elements from start, taking parameters/runway into account
     public void draw() {
 
-        drawTopView(800, 400);
-        drawSideView(800, 300);
+        drawTopView(CANVAS_WIDTH, 400);
+        drawSideView(CANVAS_WIDTH, 300);
 
         //centers elements
         runwayDisplayAnchor.setTopAnchor(topView, 0.0);
@@ -132,97 +127,133 @@ public class RunwayGraphics {
     }
 
     public void showMeasurements() {
-        if (displacedThresholdBox.isSelected()) {
-            showDisplacedThreshold();
-        }
-        if (TORABox.isSelected()) {
-            showTORA();
-        }
-        if (LDABox.isSelected()) {
-            showLDA();
-        }
-        if (ASDABox.isSelected()) {
-            showASDA();
-        }
-        if (TODABox.isSelected()) {
-            showTODA();
-        }
+
+        int spaceCount = 0;
+
         if (obstacleBox.isSelected()) {
             showObstacle();
         }
         if (obstacleDistancesBox.isSelected()) {
             showObstacleDistances();
         }
+        if (displacedThresholdBox.isSelected()) {
+            showDisplacedThreshold();
+            spaceCount ++;
+        }
+        if (TORABox.isSelected()) {
+            showTORA();
+            spaceCount ++;
+        }
+        if (LDABox.isSelected()) {
+            showLDA();
+            spaceCount ++;
+        }
+        if (ASDABox.isSelected()) {
+            showASDA();
+            spaceCount ++;
+        }
+        if (TODABox.isSelected()) {
+            showTODA();
+            spaceCount ++;
+        }
+
+        topGc.translate(0, -spaceCount * spacing);
     }
 
     public void showObstacle() {
-        drawObstacle(affectedRunway.getObstruction().getDistanceFromThreshold(), affectedRunway.getObstruction().getDistanceFromCentre(),
-                affectedRunway.getObstruction().getLength(), affectedRunway.getObstruction().getHeight());
+        Obstruction obs = affectedRunway.getObstruction();
+        drawObstacle(obs.getDistanceFromThreshold(), obs.getDistanceFromCentre(), obs.getLength(), obs.getHeight());
     }
 
     public void showObstacleDistances() {
     }
 
     public void showTORA() {
+        
+        double TORA = affectedRunway.getTORA();
 
-        double TORALength = affectedRunway.getTORA();
+        drawMeasurement(topGc, String.valueOf(TORA), CANVAS_WIDTH - negMargin, 0, -getLengthRelativeToRunway(TORA), Orientation.HORIZONTAL);
+        drawMeasurement(sideGc, String.valueOf(TORA), CANVAS_WIDTH - negMargin, 0, -getLengthRelativeToRunway(TORA), Orientation.HORIZONTAL);
 
-        sideGc = drawMeasurement(sideGc, String.valueOf(TORALength), thresholdMargin, 20 , getLengthRelativeToRunway(TORALength), Orientation.HORIZONTAL);
-        topGc = drawMeasurement(topGc, String.valueOf(TORALength), thresholdMargin, 25, getLengthRelativeToRunway(TORALength), Orientation.HORIZONTAL);
+        topGc.translate(0, spacing);
+        sideGc.translate(0, spacing);
     }
 
     public void showLDA() {
+        
+        double LDA = affectedRunway.getLDA();
 
+        drawMeasurement(topGc, String.valueOf(LDA), CANVAS_WIDTH - negMargin, 0, -getLengthRelativeToRunway(LDA), Orientation.HORIZONTAL);
+        drawMeasurement(sideGc, String.valueOf(LDA), CANVAS_WIDTH - negMargin, 0, -getLengthRelativeToRunway(LDA), Orientation.HORIZONTAL);
+
+        topGc.translate(0, spacing);
+        sideGc.translate(0, spacing);
     }
 
     public void showASDA() {
+        
+        double ASDA = affectedRunway.getASDA();
+        int offset = 0;
+        int margin = 0;
 
-    }
+        if (hasClearway()) { margin += CLEARWAY_MARGIN; }
+        if (hasStopway()) { offset += STOPWAY_MARGIN; }
 
-    //compared to getLengthRelativeToRunway(), is used rather for Y axis, and to make certain distances slightly longer and more visible
-    public double getLengthRelativeToClearway(double arg1) {
-        return (arg1 * 120) / CLEARED_AREA;
+        drawMeasurement(topGc, String.valueOf(ASDA), CANVAS_WIDTH - margin, 0, -getLengthRelativeToRunway(ASDA) - offset, Orientation.HORIZONTAL);
+        drawMeasurement(sideGc, String.valueOf(ASDA), CANVAS_WIDTH - margin, 0, -getLengthRelativeToRunway(ASDA) - offset, Orientation.HORIZONTAL);
+
+        topGc.translate(0, spacing);
+        sideGc.translate(0, spacing);
     }
 
     public void showTODA() {
+        
+        double TODA = affectedRunway.getTODA();
+        int offset = 0; //assumes that if there is a clearway/stopway, their length is too small to be taken in count, proned to change
 
-        double TODALength = affectedRunway.getTODA();
+        if (hasClearway()) { offset += CLEARWAY_MARGIN; }
+        if (hasStopway()) { offset += STOPWAY_MARGIN; }
+        
+        drawMeasurement(topGc, String.valueOf(TODA), CANVAS_WIDTH, 0, -getLengthRelativeToRunway(TODA) - offset, Orientation.HORIZONTAL);
+        drawMeasurement(sideGc, String.valueOf(TODA), CANVAS_WIDTH, 0, -getLengthRelativeToRunway(TODA) - offset, Orientation.HORIZONTAL);
 
-        //represented by a line going from first threshold to the end, regardless of length relative to TODA (aesthetic / clarity choice)
-        sideGc = drawMeasurement(sideGc, String.valueOf(TODALength), thresholdMargin, 20 , sideGc.getCanvas().getWidth() - thresholdMargin - 2, Orientation.HORIZONTAL);
-        topGc = drawMeasurement(topGc, String.valueOf(TODALength), thresholdMargin, 25, topGc.getCanvas().getWidth() - thresholdMargin - 2, Orientation.HORIZONTAL);
+        topGc.translate(0, spacing);
+        sideGc.translate(0, spacing);
     }
 
     public void showDisplacedThreshold() {
 
-        double displacedThresholdLength = affectedRunway.getOriginalRunway().getDisplacedThreshold();
+        double displacedThreshold = affectedRunway.getOriginalRunway().getDisplacedThreshold();
 
-        sideGc = drawMeasurement(sideGc, String.valueOf(displacedThresholdLength), thresholdMargin, 20 , getLengthRelativeToRunway(displacedThresholdLength), Orientation.HORIZONTAL);
-        topGc = drawMeasurement(topGc, String.valueOf(displacedThresholdLength), thresholdMargin, 25, getLengthRelativeToRunway(displacedThresholdLength), Orientation.HORIZONTAL);
+        drawMeasurement(topGc, String.valueOf(displacedThreshold), posMargin + THRESHOLD_MARGIN, 0, getLengthRelativeToRunway(displacedThreshold), Orientation.HORIZONTAL);
+        drawMeasurement(sideGc, String.valueOf(displacedThreshold), posMargin + THRESHOLD_MARGIN, 0, getLengthRelativeToRunway(displacedThreshold), Orientation.HORIZONTAL);
+
+        topGc.translate(0, spacing);
+        sideGc.translate(0, spacing);
     }
 
     public void drawObstacle(double arg1, double arg2, double arg3, double arg4) {
 
-        double x = getLengthRelativeToClearway(arg1);
-        double y = getLengthRelativeToClearway(arg2);
-        double length = getLengthRelativeToClearway(arg3);
-        double height = getLengthRelativeToClearway(arg4);
+        double x = getLengthRelativeToRunway(arg1);
+        double y = getLengthRelativeToRunway(arg2);
+        double length = getLengthRelativeToRunway(arg3);
+        double height = getLengthRelativeToRunway(arg4);
 
         topGc.setStroke(outlineColor);
         topGc.setFill(createGrid(obstacleColor2, obstacleColor1));
 
-        topGc.translate(thresholdMargin, topGc.getCanvas().getHeight() / 2);
+        topGc.translate(posMargin + THRESHOLD_MARGIN, topGc.getCanvas().getHeight() / 2);
         topGc.fillRect(x, -y - length, length, length);
         topGc.strokeRect(x, -y - length, length, length);
-        topGc.translate(-thresholdMargin, -topGc.getCanvas().getHeight() / 2);
+        topGc.translate(-(posMargin + THRESHOLD_MARGIN), -topGc.getCanvas().getHeight() / 2);
 
         sideGc.setStroke(outlineColor);
         sideGc.setFill(createGrid(obstacleColor2, obstacleColor1));
 
-        sideGc.translate(thresholdMargin, (sideGc.getCanvas().getHeight() - sideViewPixelHeight) / 2);
+        sideGc.translate(posMargin + THRESHOLD_MARGIN, (sideGc.getCanvas().getHeight() - SIDE_VIEW_THICKNESS) / 2);
         sideGc.fillRect(x, -height, length, height);
         sideGc.strokeRect(x, -height, length, height);
-        sideGc.translate(-thresholdMargin, -(sideGc.getCanvas().getHeight() - sideViewPixelHeight) / 2);
+        sideGc.translate(-(posMargin + THRESHOLD_MARGIN), -(sideGc.getCanvas().getHeight() - SIDE_VIEW_THICKNESS) / 2);
     }
 
     //draws a line between 2 points with a measure/label displayed next to it
@@ -241,14 +272,21 @@ public class RunwayGraphics {
                 gc.strokeLine(x, y, x + length, y);
                 //side lines
                 gc.setLineDashes(1);
-                gc.strokeLine(x, y, x+delimiter, y-delimiter);
-                gc.strokeLine(x, y, x+delimiter, y+delimiter);
-                gc.strokeLine(x + length, y, x + length - delimiter, y-delimiter);
-                gc.strokeLine(x + length, y, x + length - delimiter, y+delimiter);
+                if (length >= 0) {
+                    gc.strokeLine(x, y, x + delimiter, y - delimiter);
+                    gc.strokeLine(x, y, x + delimiter, y + delimiter);
+                    gc.strokeLine(x + length, y, x + length - delimiter, y - delimiter);
+                    gc.strokeLine(x + length, y, x + length - delimiter, y + delimiter);
+                } else {
+                    gc.strokeLine(x, y, x - delimiter, y - delimiter);
+                    gc.strokeLine(x, y, x - delimiter, y + delimiter);
+                    gc.strokeLine(x + length, y, x + length + delimiter, y - delimiter);
+                    gc.strokeLine(x + length, y, x + length + delimiter, y + delimiter);
+                }
 
                 gc.setTextBaseline(VPos.TOP);
                 gc.setTextAlign(TextAlignment.CENTER);
-                gc.strokeText(label, x + (length/2), y + 4);
+                gc.strokeText(label, x + (length/2), y);
                 break;
             case VERTICAL :
                 //main line
@@ -261,8 +299,10 @@ public class RunwayGraphics {
                 gc.strokeLine(x, y + length, x + delimiter, y + length - delimiter);
                 gc.strokeLine(x, y + length, x - delimiter, y + length - delimiter);
 
+                Text text = new Text(label);
                 gc.setTextBaseline(VPos.CENTER);
                 gc.setTextAlign(TextAlignment.LEFT);
+                gc.setFont(new Font(20));
                 gc.strokeText(label, x + 4, y + (length/2));
                 break;
         }
@@ -274,8 +314,10 @@ public class RunwayGraphics {
 
     private double getLengthRelativeToRunway(double meters) {
 
+        Runway runway = affectedRunway.getOriginalRunway();
+
         //simple rule of 3
-        return ((meters * (runwayPixelLength - ((thresholdMargin - runwayMargin) * 2))) / affectedRunway.getOriginalRunway().getTORA());
+        return ((meters * runwayPL) / runway.getTORA());
     }
 
     public void setupButtons() {
@@ -341,7 +383,7 @@ public class RunwayGraphics {
         });
     }
 
-    public void drawTopView(double canvasWidth, double canvasHeight) {
+    public void drawTopView(int canvasWidth, int canvasHeight) {
 
         topViewCanvas = new Canvas (canvasWidth, canvasHeight);
         topGc = topViewCanvas.getGraphicsContext2D();
@@ -350,6 +392,7 @@ public class RunwayGraphics {
         topView.setAlignment(Pos.CENTER);
         topView.getChildren().add(topViewCanvas);
 
+        //--------ZOOMING AND PANNING---------
         topViewCanvas.setOnMousePressed(e -> {
             orgSceneX = e.getSceneX();
             //orgSceneY = e.getSceneY();
@@ -380,59 +423,81 @@ public class RunwayGraphics {
                 });
 
         //-------DRAW CANVAS-------
-        double yOffset = (canvasHeight - 180) / 2;
+
+        posMargin = 0;
+        negMargin = 0;
 
         //main square
         topGc.setFill(Color.DARKSEAGREEN);
         topGc.fillRect(0, 0, canvasWidth, canvasHeight);
 
         //cleared area
-        topGc.translate(0, yOffset);
+        topGc.translate(0, canvasHeight / 2);
 
         topGc.setFill(clearedAreaColor);
 
         //keep it so that the clearedAreaWidth = 120p;
         topGc.beginPath();
-        topGc.moveTo(0, 30);
-        topGc.lineTo(85, 30);
-        topGc.lineTo(120, 0);
-        topGc.lineTo(canvasWidth - 125, 0);
-        topGc.lineTo(canvasWidth - 85, 30);
-        topGc.lineTo(canvasWidth, 30);
-        topGc.lineTo(canvasWidth, 150);
-        topGc.lineTo(canvasWidth - 85, 150);
-        topGc.lineTo(canvasWidth - 125, 180);
-        topGc.lineTo(120, 180);
-        topGc.lineTo(85, 150);
-        topGc.lineTo(0, 150);
+        topGc.moveTo(0, -60);
+        topGc.lineTo(85, -60);
+        topGc.lineTo(120, -90);
+        topGc.lineTo(canvasWidth - 125, -90);
+        topGc.lineTo(canvasWidth - 85, -60);
+        topGc.lineTo(canvasWidth, -60);
+        topGc.lineTo(canvasWidth, 60);
+        topGc.lineTo(canvasWidth - 85, 60);
+        topGc.lineTo(canvasWidth - 125, 90);
+        topGc.lineTo(120, 90);
+        topGc.lineTo(85, 60);
+        topGc.lineTo(0, 60);
         topGc.fill();
         topGc.closePath();
 
-        //runway
-        runwayPixelLength = canvasWidth - (runwayMargin * 2);
-        topGc.setFill(roadColor);
-        topGc.fillRect(runwayMargin, 70, runwayPixelLength, 40);
+        //draws RESA if the original runway has one(simply leaves a blank space)
+        if (hasRESA()) {
+            posMargin += RESA_MARGIN;
+        }
+        
+        //draws clearway if original runway has one(simply leaves a blank space)
+        if (hasClearway()) {
+            negMargin += CLEARWAY_MARGIN;
+        }
 
-        //stopway
         topGc.setFill(createHatch(warningColor, roadColor));
-        topGc.fillRect(stopwayMargin, 65, (runwayMargin - stopwayMargin), 50);
-        topGc.fillRect(runwayMargin + runwayPixelLength, 65, (runwayMargin - stopwayMargin), 50);
+
+        //draws blast allowance if original runway has one
+        if (hasBlastAllowance()) {
+            topGc.fillRect(posMargin, -25, BLAST_ALLOWANCE_MARGIN, 50);
+            posMargin += BLAST_ALLOWANCE_MARGIN;
+        }
+
+        //draws stopway if original runway has one
+        if (hasStopway()) {
+            topGc.fillRect(canvasWidth - negMargin - CLEARWAY_MARGIN, -25, CLEARWAY_MARGIN, 50);
+            negMargin += CLEARWAY_MARGIN;
+        }
+
+        //drawsRunway
+        runwayPL = canvasWidth - (posMargin + negMargin);
+        topGc.setFill(roadColor);
+        topGc.fillRect(posMargin, -20, runwayPL, 40);
 
         //threshold
         for (int i = 0; i < 3; i ++) {
             topGc.setFill(stripeColor);
-            topGc.fillRect(thresholdMargin, 75 + (i * 12), 30, 6);
-            topGc.fillRect(canvasWidth - thresholdMargin - 30, 75 + (i * 12), 30, 6);
-            topGc.setStroke(stripeColor);
+            topGc.fillRect(posMargin + THRESHOLD_MARGIN, -15 + (i * 12), THRESHOLD_LENGTH, 6);
+            topGc.fillRect(canvasWidth - negMargin - THRESHOLD_LENGTH - THRESHOLD_MARGIN, -15 + (i * 12), THRESHOLD_LENGTH, 6);
         }
+
+        topGc.setStroke(stripeColor);
 
         //centerline
         topGc.setLineWidth(3.0);
         topGc.setLineDashes(6, 8, 1, 8);
-        topGc.strokeLine(centerlineMargin, 90, canvasWidth - centerlineMargin, 90);
+        topGc.strokeLine(posMargin + CENTERLINE_MARGIN, 0, canvasWidth - negMargin - CENTERLINE_MARGIN, 0);
 
         //outline
-        topGc.translate(0, -yOffset);
+        topGc.translate(0, -canvasHeight / 2);
         topGc.setStroke(outlineColor);
         topGc.setLineWidth(1);
         topGc.setLineDashes(1);
@@ -440,10 +505,9 @@ public class RunwayGraphics {
 
         topView.setScaleX(1);
         topView.setScaleY(1);
-
     }
 
-    public void drawSideView(double canvasWidth, double canvasHeight) {
+    public void drawSideView(int canvasWidth, int canvasHeight) {
 
         sideViewCanvas = new Canvas (canvasWidth, canvasHeight);
         sideGc = sideViewCanvas.getGraphicsContext2D();
@@ -483,41 +547,64 @@ public class RunwayGraphics {
                 });
 
         //-------DRAW CANVAS-------
-        sideGc.translate(0, (canvasHeight - sideViewPixelHeight) / 2);
+
+        posMargin = 0;
+        negMargin = 0;
+
+        sideGc.translate(0, (canvasHeight - SIDE_VIEW_THICKNESS) / 2);
 
         //cleared area
         sideGc.setFill(clearedAreaColor);
-        sideGc.fillRect(0, 0, canvasWidth, sideViewPixelHeight);
+        sideGc.fillRect(0, 0, canvasWidth, SIDE_VIEW_THICKNESS);
 
-        //runway
-        runwayPixelLength = canvasWidth - (runwayMargin * 2);
-        sideGc.setFill(roadColor);
-        sideGc.fillRect(runwayMargin, 0, runwayPixelLength, 20);
+        //draws RESA if the original runway has one(simply leaves a blank space)
+        if (hasRESA()) {
+            posMargin += RESA_MARGIN;
+        }
+        
+        //draws clearway if original runway has one(simply leaves a blank space)
+        if (hasClearway()) {
+            negMargin += CLEARWAY_MARGIN;
+        }
 
-        //stopway
         sideGc.setFill(createHatch(warningColor, roadColor));
-        sideGc.fillRect(stopwayMargin, 0, (runwayMargin - stopwayMargin), 10);
-        sideGc.fillRect(runwayMargin + runwayPixelLength, 0, (runwayMargin - stopwayMargin), 10);
+
+        //draws blast allowance if original runway has one
+        if (hasBlastAllowance()) {
+            sideGc.fillRect(posMargin, 0, BLAST_ALLOWANCE_MARGIN, 10);
+            posMargin += BLAST_ALLOWANCE_MARGIN;
+        }
+
+        //draws stopway if original runway has one
+        if (hasStopway()) {
+            sideGc.fillRect(canvasWidth - negMargin - CLEARWAY_MARGIN, 0, CLEARWAY_MARGIN, 10);
+            negMargin += CLEARWAY_MARGIN;
+        }
+
+        //draws runway
+        runwayPL = canvasWidth - (posMargin + negMargin);
+        sideGc.setFill(roadColor);
+        sideGc.fillRect(posMargin, 0, runwayPL, 20);
 
         //threshold
         sideGc.setFill(stripeColor);
-        sideGc.fillRect(thresholdMargin, 0, 30, 8);
-        sideGc.fillRect(canvasWidth - thresholdMargin - 30, 0, 30, 8);
+        sideGc.fillRect(posMargin + THRESHOLD_MARGIN, 0, THRESHOLD_LENGTH, 8);
+        sideGc.fillRect(canvasWidth - negMargin - THRESHOLD_LENGTH - THRESHOLD_MARGIN, 0, THRESHOLD_LENGTH, 8);
 
         //centerline
         sideGc.setStroke(stripeColor);
         sideGc.setLineWidth(4.0);
         sideGc.setLineDashes(8, 10, 2, 10);
-        sideGc.strokeLine(centerlineMargin, 2, canvasWidth - centerlineMargin, 2);
-        sideGc.strokeLine(centerlineMargin, 4, canvasWidth - centerlineMargin, 4);
+        sideGc.strokeLine(posMargin + CENTERLINE_MARGIN, 2, canvasWidth - negMargin - CENTERLINE_MARGIN, 2);
+        sideGc.strokeLine(posMargin + CENTERLINE_MARGIN, 4, canvasWidth - negMargin - CENTERLINE_MARGIN, 4);
 
         //outline
         sideGc.setStroke(outlineColor);
         sideGc.setLineWidth(1);
         sideGc.setLineDashes(1);
-        sideGc.strokeRect(0, 0, canvasWidth, sideViewPixelHeight);
+        sideGc.strokeRect(0, 0, canvasWidth, SIDE_VIEW_THICKNESS);
 
-        sideGc.translate(0, -(canvasHeight - sideViewPixelHeight) / 2);
+        sideGc.translate(0, -(canvasHeight - SIDE_VIEW_THICKNESS) / 2);
 
         sideView.setScaleX(1);
         sideView.setScaleY(1);
@@ -563,4 +650,13 @@ public class RunwayGraphics {
 
         return imagePattern;
     }
+
+    //important boolean functions
+    boolean hasClearway() { return (affectedRunway.getOriginalRunway().getClearway() != 0); }
+
+    boolean hasStopway() { return (affectedRunway.getOriginalRunway().getStopway() != 0); }
+
+    boolean hasBlastAllowance() { return (affectedRunway.getOriginalRunway().getBlastAllowance() != 0); }
+
+    boolean hasRESA() { return (affectedRunway.getOriginalRunway().getRESA() != 0); }
 }

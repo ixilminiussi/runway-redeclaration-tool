@@ -47,7 +47,8 @@ public class Main extends Application {
                 Obstruction obstruction = currentRunway.getObstruction();
                 currentRunway = runway.recalculate(obstruction);
                 System.out.println(currentRunway.getOriginalRunway());
-                // TODO runwayGraphics.draw();
+                runwayGraphics.setAffectedRunway(currentRunway);
+                runwayGraphics.draw();
             }
         });
 
@@ -63,7 +64,8 @@ public class Main extends Application {
             } else {
                 currentRunway.recalculate(obstruction);
                 System.out.println(currentRunway.getOriginalRunway());
-                // TODO runwayGraphics.draw();
+                runwayGraphics.setAffectedRunway(currentRunway);
+                runwayGraphics.draw();
             }
         });
     }
@@ -100,6 +102,7 @@ public class Main extends Application {
 
         runwayGraphics = new RunwayGraphics();
         runwayGraphics.setAffectedRunway(currentRunway);
+        runwayGraphics.draw();
         main.add(runwayGraphics.getRunwayGraphics(), 0, 0, 2, 4);
 
         root.getChildren().add(main);
