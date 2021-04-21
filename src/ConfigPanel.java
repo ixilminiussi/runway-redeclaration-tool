@@ -28,8 +28,10 @@ public class ConfigPanel extends ScrollPane {
     private ArrayList<TextField> runwayIntTextFields, runwayStringTextFields, obstIntTextFields, optionalFields;
     private ArrayList<Runway> presetRunways;
     private ArrayList<Obstruction> presetObstructions;
+    private HistoryPanel historyPanel;
 
-    ConfigPanel() {
+    ConfigPanel(HistoryPanel historyPanel) {
+        this.historyPanel = historyPanel;
         populateDefaults();
         setupScrollPane();
         createLabels();
@@ -215,6 +217,7 @@ public class ConfigPanel extends ScrollPane {
                 } catch (Exception e) {
                     configError("The file could not be exported.\n" + e);
                 }
+                historyPanel.addHistoryEntry("PRESETS: added " + runway.getName() + " - " + runway.getAirport() + " to presets");
             }
         });
         removeRunwayPreset = new Button("Delete Current Runway Preset");
@@ -233,6 +236,7 @@ public class ConfigPanel extends ScrollPane {
                     populateRunwayFields(runwayPresetCombo.getValue());
                     try {
                         exportXML.exportBothToXML("src/xml/presets.xml", presetObstructions, presetRunways);
+                        historyPanel.addHistoryEntry("PRESETS: " + runway.getName() + " - " + runway.getAirport() + " removed from presets");
                     } catch (Exception e) {
                         configError("The file could not be exported.\n" + e);
                     }
@@ -253,6 +257,7 @@ public class ConfigPanel extends ScrollPane {
                 populateObstFields(obstruction);
                 try {
                     exportXML.exportBothToXML("src/xml/presets.xml", presetObstructions, presetRunways);
+                    historyPanel.addHistoryEntry("PRESETS: " + obstruction.getName() + " added to presets");
                 } catch (Exception e) {
                     configError("The file could not be exported.\n" + e);
                 }
@@ -274,6 +279,7 @@ public class ConfigPanel extends ScrollPane {
                     populateObstFields(obstPresetCombo.getValue());
                     try {
                         exportXML.exportBothToXML("src/xml/presets.xml", presetObstructions, presetRunways);
+                        historyPanel.addHistoryEntry("PRESETS: " + obstruction.getName() + " removed from presets");
                     } catch (Exception e) {
                         configError("The file could not be exported.\n" + e);
                     }
@@ -498,7 +504,7 @@ public class ConfigPanel extends ScrollPane {
         optionalGridPane.add(clearwayText, 2, 2);
         optionalGridPane.add(clearwayTextField, 3, 2);
 
-        TitledPane optionals = new TitledPane("Optional Parameters", optionalGridPane);
+        TitledPane optionals = new TitledPane("Extra Parameters", optionalGridPane);
         runwayConfigPane.add(optionals, 0, 5, 4, 1);
         runwayConfigPane.add(saveRunwayPreset, 0, 6);
         runwayConfigPane.add(removeRunwayPreset, 1, 6, 2, 1);
