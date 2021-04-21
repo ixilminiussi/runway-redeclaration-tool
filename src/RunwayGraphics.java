@@ -1,22 +1,31 @@
+package sample;
+
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.beans.EventHandler;
 import java.util.ArrayList;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Orientation;
 import javafx.geometry.VPos;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.*;
 import javafx.scene.canvas.*;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Polygon;
+import javafx.scene.shape.TriangleMesh;
 import javafx.scene.text.*;
 import javafx.scene.image.Image;
 import javafx.scene.shape.Line;
 import javafx.scene.Scene;
+import javafx.scene.text.Font;
+
+import static java.lang.Math.sqrt;
 
 public class RunwayGraphics {
 
@@ -28,12 +37,13 @@ public class RunwayGraphics {
     SplitPane splitView;
 
     //buttons
-    VBox filtersVBox, labelsVBox;
-    GridPane filtersGridPane;
-    CheckBox displacedThresholdBox, TORABox, LDABox, ASDABox, TODABox, obstacleBox, obstacleDistancesBox;
-    Label displacedThresholdLabel, TORALabel, LDALabel, ASDALabel, TODALabel, obstacleLabel, obstacleDistancesLabel;
-    HBox filtersGridPaneContainer;
+    VBox filtersVBox, filtersVBoxTwo, filtersVBoxThree;
+    CheckBox displacedThresholdBox, TORABox, LDABox, ASDABox, TODABox;
+    CheckBox obstacleBox, obstacleDistancesBox, clearwayBox, stopwayBox, RESABox;
+    CheckBox stripEndBox, blastProtBox, ALSBox, TOCSBox, runwayStripBox;
+    HBox filtersVBoxContainer;
     ChoiceBox viewSelect;
+    Obstruction obstruction;
 
     //used as reference when applying real life distances to the drawing, picked solely for clarity, each margin is taken, added from the previous margin
     final int SIDE_VIEW_THICKNESS = 30, CLEARWAY_MARGIN = 40, STOPWAY_MARGIN = 30, RESA_MARGIN = 40, BLAST_ALLOWANCE_MARGIN = 30, CENTERLINE_MARGIN = 80, THRESHOLD_MARGIN = 2, THRESHOLD_LENGTH = 30;
@@ -47,7 +57,7 @@ public class RunwayGraphics {
     int spacing = 20;
 
     //color palette
-    Color roadColor, stripeColor, warningColor, clearedAreaColor, hudColor, backgroundColor, outlineColor, obstacleColor1, obstacleColor2, grassColor;
+    Color dangerColor, safeColor, roadColor, stripeColor, warningColor, clearedAreaColor, hudColor, backgroundColor, outlineColor, obstacleColor1, obstacleColor2;
     Background paneBackground, hudBackground;
 
     double orgSceneX, orgSceneY;
@@ -65,19 +75,19 @@ public class RunwayGraphics {
         this.affectedRunway = affectedRunway;
     }
 
-
     public RunwayGraphics() {
 
         runwayDisplayAnchor = new AnchorPane();
 
         //color palette
+        dangerColor = Color.RED;
+        safeColor = Color.GREEN;
         roadColor = Color.LIGHTGRAY;
         stripeColor = Color.WHITE;
         warningColor = Color.GOLDENROD;
         clearedAreaColor = Color.DODGERBLUE;
         hudColor = Color.LIGHTSTEELBLUE;
         backgroundColor = Color.LIGHTCYAN;
-        grassColor = Color.DARKSEAGREEN;
         outlineColor = Color.BLACK;
         obstacleColor1 = Color.FIREBRICK;
         obstacleColor2 = Color.CRIMSON;
@@ -85,19 +95,19 @@ public class RunwayGraphics {
         hudBackground = new Background(new BackgroundFill(hudColor, CornerRadii.EMPTY, Insets.EMPTY));
 
         setupSplitView();
+        setupButtons();
 
         //where the graphics happen
-        runwayDisplayAnchor.setBorder(new Border(new BorderStroke(hudColor, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+        runwayDisplayAnchor.setBorder(new Border(new BorderStroke(Color.LIGHTSTEELBLUE, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         runwayDisplayAnchor.setBackground(paneBackground);
     }
 
     //draws all elements from start, taking parameters/runway into account
     public void draw() {
 
+
         drawTopView(CANVAS_WIDTH, 400);
         drawSideView(CANVAS_WIDTH, 300);
-
-        setupButtons();
 
         //centers elements
         runwayDisplayAnchor.setTopAnchor(topView, 0.0);
@@ -118,13 +128,13 @@ public class RunwayGraphics {
         //puts the appropriate pane on, according to the viewSelect choicebox
         runwayDisplayAnchor.getChildren().clear();
         switch (viewSelect.getSelectionModel().getSelectedIndex()) {
-            case 0: runwayDisplayAnchor.getChildren().addAll(topView, viewSelect, filtersGridPaneContainer);
+            case 0: runwayDisplayAnchor.getChildren().addAll(topView, viewSelect, filtersVBoxContainer);
                 break;
-            case 1: runwayDisplayAnchor.getChildren().addAll(sideView, viewSelect, filtersGridPaneContainer);
+            case 1: runwayDisplayAnchor.getChildren().addAll(sideView, viewSelect, filtersVBoxContainer);
                 break;
             case 3: splitView.getItems().clear();
                 splitView.getItems().addAll(topView, sideView);
-                runwayDisplayAnchor.getChildren().addAll(splitView, viewSelect, filtersGridPaneContainer);
+                runwayDisplayAnchor.getChildren().addAll(splitView, viewSelect, filtersVBoxContainer);
                 break;
         }
 
@@ -161,20 +171,75 @@ public class RunwayGraphics {
             showTODA();
             spaceCount ++;
         }
+        if (RESABox.isSelected()) {
+            showRESA();
+            spaceCount++;
+        }
+        if (blastProtBox.isSelected()) {
+            showBlastProtection();
+            spaceCount++;
+        }
+        if (TOCSBox.isSelected()) {
+            showTOCS();
+            spaceCount++;
+        }
 
         topGc.translate(0, -spaceCount * spacing);
     }
 
     public void showObstacle() {
-        Obstruction obs = affectedRunway.getObstruction();
-        drawObstacle(obs.getDistanceFromThreshold(), obs.getDistanceFromCentre(), obs.getLength(), obs.getHeight());
+
+        obstruction = affectedRunway.getObstruction();
+        //affectedRunway.recalculate(obstruction);
+        drawObstacle(obstruction.getDistanceFromThreshold(), obstruction.getDistanceFromCentre(), obstruction.getLength(), obstruction.getHeight());
     }
 
     public void showObstacleDistances() {
+
+        double OrigTODA = affectedRunway.getOriginalRunway().getTODA();
+        double NewTODA = affectedRunway.getTODA();
+        double OrigTORA = affectedRunway.getOriginalRunway().getTORA();
+        double NewTORA = affectedRunway.getTORA();
+        double OrigASDA = affectedRunway.getOriginalRunway().getASDA();
+        double NewASDA = affectedRunway.getASDA();
+        double OrigLDA = affectedRunway.getOriginalRunway().getLDA();
+        double NewLDA = affectedRunway.getLDA();
+
+        //double red = (affectedRunway.getOriginalRunway().getTORA() - affectedRunway.getTORA());
+        double red = OrigLDA - NewLDA;
+        double green = OrigLDA;
+
+
+
+        drawDangerZones(0, 200, red, 50, dangerColor, "");
+        drawDangerZones(red, 200, green, 50, safeColor, "");
+        drawTriangle(obstruction.getDistanceFromThreshold(), obstruction.getHeight(), red);
+    }
+
+    public void drawTriangle(double distanceFromThreshold, double height, double unsafeArea) {
+
+        double x1 = getLengthRelativeToRunway(distanceFromThreshold);
+        double y1 = getLengthRelativeToRunway(0);
+        double x2 = getLengthRelativeToRunway(distanceFromThreshold);
+        double y2 = - getLengthRelativeToRunway(height);
+        double x3 = getLengthRelativeToRunway(height*50);
+        double y3 = getLengthRelativeToRunway(0);
+
+        sideGc.setStroke(outlineColor);
+        sideGc.setFill(dangerColor);
+        sideGc.beginPath();
+        sideGc.translate(posMargin + THRESHOLD_MARGIN, (sideGc.getCanvas().getHeight() - SIDE_VIEW_THICKNESS) / 2);
+        sideGc.moveTo(x1, y1);
+        sideGc.lineTo(x2, y2);
+        sideGc.lineTo(x3, y3);
+        sideGc.lineTo(x1, y1);
+        sideGc.translate(-(posMargin + THRESHOLD_MARGIN), -(sideGc.getCanvas().getHeight() - SIDE_VIEW_THICKNESS) / 2);
+        sideGc.fill();
+        sideGc.closePath();
     }
 
     public void showTORA() {
-        
+
         double TORA = affectedRunway.getTORA();
 
         drawMeasurement(topGc, String.valueOf(TORA), CANVAS_WIDTH - negMargin, 0, -getLengthRelativeToRunway(TORA), Orientation.HORIZONTAL);
@@ -226,6 +291,33 @@ public class RunwayGraphics {
         sideGc.translate(0, spacing);
     }
 
+    public void showRESA() {
+
+        double NewLDA = affectedRunway.getLDA();
+        double RESA = affectedRunway.getOriginalRunway().getRESA();
+        double height = obstruction.getHeight();
+        System.out.println("RESA: " + affectedRunway.getOriginalRunway().getRESA());
+        System.out.println("strip end: " + affectedRunway.getOriginalRunway().getStripEnd());
+
+        double a = CANVAS_WIDTH - negMargin - (getLengthRelativeToRunway(NewLDA));
+
+
+        drawMeasurement(topGc, String.valueOf(RESA), a, 0, -getLengthRelativeToRunway(240), Orientation.HORIZONTAL);
+        drawMeasurement(sideGc, String.valueOf(RESA), a, 0, -getLengthRelativeToRunway(240), Orientation.HORIZONTAL);
+
+        topGc.translate(0, spacing);
+        sideGc.translate(0, spacing);
+
+    }
+
+    public void showBlastProtection() {
+
+    }
+
+    public void showTOCS() {
+
+    }
+
     public void showDisplacedThreshold() {
 
         double displacedThreshold = affectedRunway.getOriginalRunway().getDisplacedThreshold();
@@ -235,6 +327,22 @@ public class RunwayGraphics {
 
         topGc.translate(0, spacing);
         sideGc.translate(0, spacing);
+    }
+
+    public void drawDangerZones(double x1, double y1, double length1, double height1, Color fill, String label) {
+
+        double x = getLengthRelativeToRunway(x1);
+        double y = getLengthRelativeToRunway(y1);
+        double length = getLengthRelativeToRunway(height1*50);
+        double height = getLengthRelativeToRunway(height1);
+
+        topGc.setStroke(outlineColor);
+        topGc.setFill(createGrid(fill, fill));
+
+        topGc.translate(posMargin + THRESHOLD_MARGIN, topGc.getCanvas().getHeight() / 2);
+        topGc.fillRect(x, -y, length, height);
+        topGc.strokeRect(x, -y, length, height);
+        topGc.translate(-(posMargin + THRESHOLD_MARGIN), -topGc.getCanvas().getHeight() / 2);
     }
 
     public void drawObstacle(double arg1, double arg2, double arg3, double arg4) {
@@ -329,39 +437,35 @@ public class RunwayGraphics {
 
         //---------FILTERS----------
         //checkboxes to add measurements, currently for testing, eventually to give control to the user as to which information he wants to see/hide
+        filtersVBoxTwo = new VBox();
         filtersVBox = new VBox();
-        labelsVBox = new VBox();
-        filtersGridPane = new GridPane();
-
-        Text showLabel = new Text(" show ");
-        showLabel.setStyle("-fx-font-weight: bold");
-        Text distancesLabel = new Text(" calculated distancese ");
-        distancesLabel.setStyle("-fx-font-weight: bold");
-
-        displacedThresholdLabel = new Label(" displaced threshold : " + String.valueOf(affectedRunway.getOriginalRunway().getDisplacedThreshold()));
-        TORALabel = new Label(" TORA : " + String.valueOf(affectedRunway.getTORA()));
-        LDALabel = new Label(" LDA : " + String.valueOf(affectedRunway.getLDA()));
-        ASDALabel = new Label( " ASDA : " + String.valueOf(affectedRunway.getASDA()));
-        TODALabel = new Label(" TODA : " + String.valueOf(affectedRunway.getTODA()));
-        obstacleLabel = new Label(" obstacle ");
-        obstacleDistancesLabel = new Label(" obstacle distances ");
-
-        labelsVBox.getChildren().addAll(displacedThresholdLabel, TORALabel, LDALabel, ASDALabel, TODALabel, obstacleLabel, obstacleDistancesLabel);
-        labelsVBox.setSpacing(5.0);
+        filtersVBoxThree = new VBox();
 
         ArrayList<CheckBox> filtersList = new ArrayList<CheckBox>();
-        displacedThresholdBox = new CheckBox(" ");
-        TORABox = new CheckBox(" ");
-        LDABox = new CheckBox(" ");
-        ASDABox = new CheckBox(" ");
-        TODABox = new CheckBox(" ");
-        obstacleBox = new CheckBox(" ");
-        obstacleDistancesBox = new CheckBox(" ");
-        filtersList.add(displacedThresholdBox); filtersList.add(TORABox); filtersList.add(LDABox); filtersList.add(ASDABox); filtersList.add(TODABox);
-        filtersList.add(obstacleBox); filtersList.add(obstacleDistancesBox);
+        ArrayList<CheckBox> filtersList2 = new ArrayList<CheckBox>();
+        ArrayList<CheckBox> filtersList3 = new ArrayList<CheckBox>();
 
-        filtersVBox.getChildren().addAll(displacedThresholdBox, TORABox, LDABox, ASDABox, TODABox, obstacleBox, obstacleDistancesBox);
+        //Far Right VBox
+        displacedThresholdBox = new CheckBox(" displaced threshold ");
+        TORABox = new CheckBox("TORA");
+        LDABox = new CheckBox("LDA");
+        ASDABox = new CheckBox( "ASDA");
+        TODABox = new CheckBox("TODA");
+
+        //Middle VBox
+        obstacleBox = new CheckBox("obstacle");
+        obstacleDistancesBox = new CheckBox("obstacle distances");
+        RESABox = new CheckBox("RESA");
+        blastProtBox = new CheckBox("Blast protection");
+        TOCSBox = new CheckBox("TOCS");
+
+        filtersList.add(displacedThresholdBox); filtersList.add(TORABox); filtersList.add(LDABox); filtersList.add(ASDABox); filtersList.add(TODABox);
+        filtersList2.add(obstacleBox); filtersList2.add(obstacleDistancesBox); filtersList2.add(RESABox); filtersList2.add(blastProtBox); filtersList2.add(TOCSBox);
+
+        filtersVBox.getChildren().addAll(displacedThresholdBox, TORABox, LDABox, ASDABox, TODABox);
         filtersVBox.setSpacing(5.0);
+        filtersVBoxTwo.getChildren().addAll(obstacleBox, obstacleDistancesBox, RESABox, blastProtBox, TOCSBox);
+        filtersVBoxTwo.setSpacing(5.0);
 
         for(CheckBox checkBox : filtersList) {
             checkBox.selectedProperty().addListener(
@@ -370,34 +474,25 @@ public class RunwayGraphics {
                     }
             );
         }
+        for(CheckBox checkBox : filtersList2) {
+            checkBox.selectedProperty().addListener(
+                    (ObservableValue<? extends Boolean> ov, Boolean oldVal, Boolean newVal) -> {
+                        draw();
+                    }
+            );
+        }
+
 
         //only for styling purposes
-        filtersGridPaneContainer = new HBox();
-        filtersGridPaneContainer.getChildren().add(filtersGridPane);
-        filtersGridPaneContainer.setMargin(filtersGridPane, new Insets(5.0, 5.0, 5.0, 5.0));
-        filtersGridPaneContainer.setBackground(hudBackground);
+        filtersVBoxContainer = new HBox();
+        filtersVBoxContainer.getChildren().addAll(filtersVBoxTwo, filtersVBox);
+        filtersVBoxContainer.setMargin(filtersVBox, new Insets(5.0, 5.0, 5.0, 5.0));
+        filtersVBoxContainer.setMargin(filtersVBoxTwo, new Insets(5.0, 5.0, 5.0, 5.0));
+        //filtersVBoxContainer.setMargin(filtersVBoxThree, new Insets(5.0, 5.0, 5.0, 5.0));
+        filtersVBoxContainer.setBackground(hudBackground);
 
-        ColumnConstraints col1 = new ColumnConstraints();
-        ColumnConstraints col2 = new ColumnConstraints();
-        col2.setHalignment(HPos.CENTER);
-        filtersGridPane.getColumnConstraints().addAll(col1,col1,col2);
-
-        //filler panes for styling
-        Pane pane1 = new Pane();
-        Pane pane2 = new Pane();
-        filtersGridPane.add(distancesLabel, 0, 0, 1, 1);
-        filtersGridPane.add(showLabel, 2, 0, 1, 1);
-        filtersGridPane.add(filtersVBox, 2, 2, 1, 1);
-        filtersGridPane.add(labelsVBox, 0, 2, 1, 1);
-        filtersGridPane.add(pane1, 0, 1, 3, 1);
-        filtersGridPane.add(pane2, 1, 0, 1, 3);
-        pane1.minWidth(0.5);
-        pane2.minHeight(0.5);
-        pane1.setStyle("-fx-border-color: black");
-        pane2.setStyle("-fx-border-color: black");
-
-        runwayDisplayAnchor.setTopAnchor(filtersGridPane, 0.0);
-        runwayDisplayAnchor.setRightAnchor(filtersGridPaneContainer, 0.0);
+        runwayDisplayAnchor.setTopAnchor(filtersVBoxContainer, 0.0);
+        runwayDisplayAnchor.setRightAnchor(filtersVBoxContainer, 0.0);
 
         //----------VIEW SELECT----------
         //changing views
@@ -413,13 +508,13 @@ public class RunwayGraphics {
                 //required to avoid duplicates
                 runwayDisplayAnchor.getChildren().clear();
                 switch (newSelected.intValue()) {
-                    case 0: runwayDisplayAnchor.getChildren().addAll(topView, viewSelect, filtersGridPaneContainer);
+                    case 0: runwayDisplayAnchor.getChildren().addAll(topView, viewSelect, filtersVBoxContainer);
                         break;
-                    case 1: runwayDisplayAnchor.getChildren().addAll(sideView, viewSelect, filtersGridPaneContainer);
+                    case 1: runwayDisplayAnchor.getChildren().addAll(sideView, viewSelect, filtersVBoxContainer);
                         break;
                     case 3: splitView.getItems().clear();
                         splitView.getItems().addAll(topView, sideView);
-                        runwayDisplayAnchor.getChildren().addAll(splitView, viewSelect, filtersGridPaneContainer);
+                        runwayDisplayAnchor.getChildren().addAll(splitView, viewSelect, filtersVBoxContainer);
                         break;
                 }
             }
@@ -471,7 +566,7 @@ public class RunwayGraphics {
         negMargin = 0;
 
         //main square
-        topGc.setFill(grassColor);
+        topGc.setFill(Color.DARKSEAGREEN);
         topGc.fillRect(0, 0, canvasWidth, canvasHeight);
 
         //cleared area
