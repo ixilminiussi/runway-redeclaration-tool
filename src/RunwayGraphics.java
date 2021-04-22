@@ -67,7 +67,7 @@ public class RunwayGraphics {
     Background paneBackground, hudBackground;
 
     //color coding palette
-    Color displacedThresholdColor = Color.NAVY, TORAColor = Color.ORANGERED, LDAColor = Color.DARKMAGENTA, ASDAColor = Color.YELLOW, TODAColor = Color.SIENNA;
+    Color displacedThresholdColor = Color.NAVY, TORAColor = Color.ORANGERED, LDAColor = Color.DARKMAGENTA, ASDAColor = Color.MAROON, TODAColor = Color.SIENNA;
     Color clearwayColor, stopwayColor, RESAColor = Color.DEEPPINK;
     Color stripEndColor, blastProtColor, ALSColor, TOCSColor, runwayStripColor;
 
@@ -559,31 +559,33 @@ public class RunwayGraphics {
         runwayDisplayAnchor.setTopAnchor(filtersGridPane, 0.0);
         runwayDisplayAnchor.setRightAnchor(filtersGridPaneContainer, 0.0);
 
-        //----------VIEW SELECT----------
-        //changing views
-        viewSelect = new ChoiceBox<String>();
-        viewSelect.getItems().addAll("Top View", "Side View", new Separator(), "Split View");
-        viewSelect.setValue("Top View");
-        viewSelect.setBackground(hudBackground);
-        runwayDisplayAnchor.setTopAnchor(viewSelect, 0.0);
-        runwayDisplayAnchor.setLeftAnchor(viewSelect, 0.0);
-        viewSelect.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>(){
-            @Override
-            public void changed(ObservableValue ov, Number oldSelected, Number newSelected) {
-                //required to avoid duplicates
-                runwayDisplayAnchor.getChildren().clear();
-                switch (newSelected.intValue()) {
-                    case 0: runwayDisplayAnchor.getChildren().addAll(topView, viewSelect, filtersGridPaneContainer);
-                        break;
-                    case 1: runwayDisplayAnchor.getChildren().addAll(sideView, viewSelect, filtersGridPaneContainer);
-                        break;
-                    case 3: splitView.getItems().clear();
-                        splitView.getItems().addAll(topView, sideView);
-                        runwayDisplayAnchor.getChildren().addAll(splitView, viewSelect, filtersGridPaneContainer);
-                        break;
+        if (affectedRunway == null) {
+            //----------VIEW SELECT----------
+            //changing views
+            viewSelect = new ChoiceBox<String>();
+            viewSelect.getItems().addAll("Top View", "Side View", new Separator(), "Split View");
+            viewSelect.setValue("Top View");
+            viewSelect.setBackground(hudBackground);
+            runwayDisplayAnchor.setTopAnchor(viewSelect, 0.0);
+            runwayDisplayAnchor.setLeftAnchor(viewSelect, 0.0);
+            viewSelect.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>(){
+                @Override
+                public void changed(ObservableValue ov, Number oldSelected, Number newSelected) {
+                    //required to avoid duplicates
+                    runwayDisplayAnchor.getChildren().clear();
+                    switch (newSelected.intValue()) {
+                        case 0: runwayDisplayAnchor.getChildren().addAll(topView, viewSelect, filtersGridPaneContainer);
+                            break;
+                        case 1: runwayDisplayAnchor.getChildren().addAll(sideView, viewSelect, filtersGridPaneContainer);
+                            break;
+                        case 3: splitView.getItems().clear();
+                            splitView.getItems().addAll(topView, sideView);
+                            runwayDisplayAnchor.getChildren().addAll(splitView, viewSelect, filtersGridPaneContainer);
+                            break;
+                    }
                 }
-            }
-        });
+            }); 
+        }
     }
 
     public void drawTopView(int canvasWidth, int canvasHeight) {
