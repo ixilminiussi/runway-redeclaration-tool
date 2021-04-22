@@ -1,3 +1,5 @@
+
+
 import java.awt.*;
 import java.awt.Label;
 import java.awt.event.MouseEvent;
@@ -345,14 +347,24 @@ public class RunwayGraphics {
         double y = getLengthRelativeToRunway(y1);
         double length = getLengthRelativeToRunway(height1*50);
         double height = getLengthRelativeToRunway(height1);
+        double length2 = getLengthRelativeToRunway(length1);
 
-        topGc.setStroke(OUTLINE_COLOR);
-        topGc.setFill(createGrid(fill, fill));
-
-        topGc.translate(posMargin + THRESHOLD_MARGIN, topGc.getCanvas().getHeight() / 2);
-        topGc.fillRect(x, -y, length, height);
-        topGc.strokeRect(x, -y, length, height);
-        topGc.translate(-(posMargin + THRESHOLD_MARGIN), -topGc.getCanvas().getHeight() / 2);
+        if (fill == DANGER_COLOR) {
+            topGc.setStroke(OUTLINE_COLOR);
+            topGc.setFill(createGrid(fill, fill));
+            topGc.translate(posMargin + THRESHOLD_MARGIN, topGc.getCanvas().getHeight() / 2);
+            topGc.fillRect(x, -y, length, height);
+            topGc.strokeRect(x, -y, length, height);
+            topGc.translate(-(posMargin + THRESHOLD_MARGIN), -topGc.getCanvas().getHeight() / 2);
+        }
+        if (fill == SAFE_COLOR) {
+            topGc.setStroke(OUTLINE_COLOR);
+            topGc.setFill(createGrid(fill, fill));
+            topGc.translate(posMargin + THRESHOLD_MARGIN, topGc.getCanvas().getHeight() / 2);
+            topGc.fillRect(x, -y, length2, height);
+            topGc.strokeRect(x, -y, length2, height);
+            topGc.translate(-(posMargin + THRESHOLD_MARGIN), -topGc.getCanvas().getHeight() / 2);
+        }
     }
 
     public void drawObstacle(double arg1, double arg2, double arg3, double arg4) {
