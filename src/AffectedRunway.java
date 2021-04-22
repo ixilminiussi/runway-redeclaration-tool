@@ -1,5 +1,3 @@
-package sample;
-
 public class AffectedRunway {
     private int TORA, TODA, ASDA, LDA;
     private Runway originalRunway;
