@@ -108,6 +108,7 @@ public class RunwayGraphics {
 
     //draws all elements from start, taking parameters/runway into account
     public void draw() {
+        obstruction = affectedRunway.getObstruction();
 
         drawTopView(CANVAS_WIDTH, 400);
         drawSideView(CANVAS_WIDTH, 300);
@@ -303,13 +304,15 @@ public class RunwayGraphics {
 
     public void showRESA() {
 
-        double NewLDA = affectedRunway.getLDA();
+        Obstruction obst = affectedRunway.getObstruction();
+        double dist = getLengthRelativeToRunway(obst.getDistanceFromThreshold());
+        double NewTORA = affectedRunway.getTORA();
         double RESA = affectedRunway.getOriginalRunway().getRESA();
         double height = obstruction.getHeight();
         System.out.println("RESA: " + affectedRunway.getOriginalRunway().getRESA());
         System.out.println("strip end: " + affectedRunway.getOriginalRunway().getStripEnd());
 
-        double a = CANVAS_WIDTH - negMargin - (getLengthRelativeToRunway(NewLDA));
+        double a = CANVAS_WIDTH - negMargin - (getLengthRelativeToRunway(NewTORA));
 
 
         drawMeasurement(topGc, String.valueOf(RESA), a, 0, -getLengthRelativeToRunway(240), Orientation.HORIZONTAL, RESAColor);
