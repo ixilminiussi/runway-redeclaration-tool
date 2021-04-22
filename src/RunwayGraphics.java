@@ -1,5 +1,3 @@
-
-
 import java.awt.*;
 import java.awt.Label;
 import java.awt.event.MouseEvent;
@@ -150,7 +148,7 @@ public class RunwayGraphics {
 
     public void showMeasurements() {
 
-        
+
         if (obstacleBox.isSelected()) {
             showObstacle();
         }
@@ -262,7 +260,7 @@ public class RunwayGraphics {
     }
 
     public void showLDA() {
-        
+
         double LDA = affectedRunway.getLDA();
 
         drawMeasurement(topGc, String.valueOf(LDA), CANVAS_WIDTH - negMargin, 0, -getLengthRelativeToRunway(LDA), Orientation.HORIZONTAL, LDAColor);
@@ -273,7 +271,7 @@ public class RunwayGraphics {
     }
 
     public void showASDA() {
-        
+
         double ASDA = affectedRunway.getASDA();
         int offset = 0;
         int margin = 0;
@@ -289,13 +287,13 @@ public class RunwayGraphics {
     }
 
     public void showTODA() {
-        
+
         double TODA = affectedRunway.getTODA();
         int offset = 0; //assumes that if there is a clearway/stopway, their length is too small to be taken in count, proned to change
 
         if (hasClearway()) { offset += CLEARWAY_MARGIN; }
         if (hasStopway()) { offset += STOPWAY_MARGIN; }
-        
+
         drawMeasurement(topGc, String.valueOf(TODA), CANVAS_WIDTH, 0, -getLengthRelativeToRunway(TODA) - offset, Orientation.HORIZONTAL, TODAColor);
         drawMeasurement(sideGc, String.valueOf(TODA), CANVAS_WIDTH, 0, -getLengthRelativeToRunway(TODA) - offset, Orientation.HORIZONTAL, TODAColor);
 
@@ -401,7 +399,7 @@ public class RunwayGraphics {
         double delimiter = 5;
 
         switch (o) {
-            
+
             case HORIZONTAL :
                 //main line
                 gc.setLineDashes(5,5);
@@ -597,7 +595,7 @@ public class RunwayGraphics {
                             break;
                     }
                 }
-            }); 
+            });
         }
     }
 
@@ -675,7 +673,7 @@ public class RunwayGraphics {
         if (hasRESA()) {
             posMargin += RESA_MARGIN;
         }
-        
+
         //draws clearway if original runway has one(simply leaves a blank space)
         if (hasClearway()) {
             negMargin += CLEARWAY_MARGIN;
@@ -779,7 +777,7 @@ public class RunwayGraphics {
         if (hasRESA()) {
             posMargin += RESA_MARGIN;
         }
-        
+
         //draws clearway if original runway has one(simply leaves a blank space)
         if (hasClearway()) {
             negMargin += CLEARWAY_MARGIN;
