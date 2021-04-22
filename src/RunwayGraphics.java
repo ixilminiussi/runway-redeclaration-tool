@@ -205,6 +205,7 @@ public class RunwayGraphics {
 
     public void showObstacleDistances() {
 
+        obstruction = affectedRunway.getObstruction();
         double OrigTODA = affectedRunway.getOriginalRunway().getTODA();
         double NewTODA = affectedRunway.getTODA();
         double OrigTORA = affectedRunway.getOriginalRunway().getTORA();
