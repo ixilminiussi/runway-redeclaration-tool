@@ -94,6 +94,7 @@ public class ConfigPanel extends ScrollPane {
         }
 
         String name = nameTextField.textProperty().getValue();
+
         String airport = airportTextField.textProperty().getValue();
         return new Runway(name, airport, runwayValues.get(0),
                 runwayValues.get(1), runwayValues.get(2), runwayValues.get(3),
@@ -112,7 +113,7 @@ public class ConfigPanel extends ScrollPane {
                 String val = textField.textProperty().getValue();
                 if (!(val.equals("") && (optionalFields.contains(textField)))) {
                     int value = Integer.parseInt(val);
-                    if (value < 0 || value >= 999999) {
+                    if (value >= 999999) {
                         return false;
                     }
                 }
@@ -120,6 +121,23 @@ public class ConfigPanel extends ScrollPane {
             for (TextField textField : runwayStringTextFields) {
                 String val = textField.textProperty().getValue();
                 if (val.length() <= 0 || val.length() >= 32) { // arbitrary limit to name size
+                    return false;
+                }
+            }
+
+            String runName = nameTextField.textProperty().getValue();
+            try {
+                int deg = Integer.parseInt(runName + "0");
+                if(deg < 0 || deg > 360) {
+                    return false;
+                }
+            } catch (NumberFormatException e) {
+                try {
+                    int deg = Integer.parseInt(runName.substring(0, 2) + "0");
+                    if(deg < 0 || deg > 360) {
+                        return false;
+                    }
+                } catch (NumberFormatException e2) {
                     return false;
                 }
             }

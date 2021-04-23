@@ -207,7 +207,7 @@ public class RunwayGraphics {
             showTODA();
             spaceCount ++;
         }
-        if (RESABox.isSelected()) {
+        if (RESABox.isSelected() && !affectedRunway.isUnchanged()) {
             showRESA();
             spaceCount++;
         }
@@ -600,7 +600,8 @@ public class RunwayGraphics {
         Button showCalc = new Button("Break Down Calculations");
         showCalc.setOnAction((event) -> {
             Stage stage2 = new Stage();
-            Scene scene2 = new Scene(affectedRunway.getCalculationDisplay(), 720, 480);
+            GridPane calcs = affectedRunway.getCalculationDisplay();
+            Scene scene2 = new Scene(calcs, 720, 300);
             stage2.setScene(scene2);
             stage2.show();
         });
