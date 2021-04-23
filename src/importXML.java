@@ -102,8 +102,8 @@ public class importXML {
         String name = getTagValue(n, "name");
         int height = getPositiveIntTagValue(n, "height");
         int length = getPositiveIntTagValue(n, "length");
-        int distanceFromThreshold = getPositiveIntTagValue(n, "distFromThreshold");
-        int distanceFromCentre = getPositiveIntTagValue(n, "distFromCentre");
+        int distanceFromThreshold = Integer.parseInt(getTagValue(n, "distFromThreshold"));
+        int distanceFromCentre = Integer.parseInt(getTagValue(n, "distFromCentre"));
         return new Obstruction(name, height, length, distanceFromThreshold, distanceFromCentre);
     }
 
