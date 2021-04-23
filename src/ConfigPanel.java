@@ -106,18 +106,32 @@ public class ConfigPanel extends ScrollPane {
     // check if the config currently has any invalid fields
     public Boolean areFieldsValid() {
         try {
-            ArrayList<TextField> tempList = new ArrayList<>();
-            tempList.addAll(runwayIntTextFields);
-            tempList.addAll(obstIntTextFields);
-            for (TextField textField : tempList) {
+            for (TextField textField : obstIntTextFields) {
                 String val = textField.textProperty().getValue();
-                if (!(val.equals("") && (optionalFields.contains(textField)))) {
+                if (textField == obstHeightTextField || textField == obstLengthTextField) {
+                    int value = Integer.parseInt(val);
+                    if (value <= 0 || value >= 999999) {
+                        return false;
+                    }
+                }
+                else {
                     int value = Integer.parseInt(val);
                     if (value >= 999999) {
                         return false;
                     }
                 }
             }
+            
+            for (TextField textField : runwayIntTextFields) {
+        		String val = textField.textProperty().getValue();
+            	if (!(val.equals("") && (optionalFields.contains(textField)))) {
+            		int value = Integer.parseInt(val);
+            		if (value < 0 || value >= 999999) {
+            			return false;
+            		}
+                }
+            }
+            
             for (TextField textField : runwayStringTextFields) {
                 String val = textField.textProperty().getValue();
                 if (val.length() <= 0 || val.length() >= 32) { // arbitrary limit to name size
@@ -137,6 +151,14 @@ public class ConfigPanel extends ScrollPane {
                     if(deg < 0 || deg > 360) {
                         return false;
                     }
+                    if (runName.length() > 3) {
+                    	return false;
+                    }
+                    String letter = runName.substring(2);
+                    if (runName.length() == 3 && !(letter.equals("L") || letter.equals("R") || letter.equals("C"))) {
+                    	return false;
+                    }
+                    
                 } catch (NumberFormatException e2) {
                     return false;
                 }
@@ -591,4 +613,21 @@ public class ConfigPanel extends ScrollPane {
     public ArrayList<Runway> getPresetRunways() {
         return presetRunways;
     }
+
+	public ArrayList<TextField> getRunwayIntTextFields() {
+		return runwayIntTextFields;
+	}
+	
+	public ArrayList<TextField> getRunwayStringTextFields() {
+		return runwayStringTextFields;
+	}
+	
+	public ArrayList<TextField> getObstIntTextFields() {
+		return obstIntTextFields;
+	}
+	
+	public ArrayList<TextField> getOptionalFields() {
+		return optionalFields;
+	}
 }
+
