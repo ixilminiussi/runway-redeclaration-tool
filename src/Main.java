@@ -195,7 +195,7 @@ public class Main extends Application {
     private void setupMenus(MenuBar menuBar) {
         Menu file = new Menu("File");
         Menu settings = new Menu("Settings");
-        menuBar.getMenus().addAll(file, settings);
+        menuBar.getMenus().addAll(file);
         MenuItem importNewPresets = new MenuItem("Import New Presets");
         importNewPresets.setOnAction((event) -> {
             String path = fileChooserGetPath();
