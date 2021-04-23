@@ -177,7 +177,8 @@ public class Main extends Application {
         main.add(configPanel, 2, 0, 1, 3);
 
         runwayGraphics = new RunwayGraphics();
-        runwayGraphics.draw(currentRunway);
+        if(currentRunway != null)
+            runwayGraphics.draw(currentRunway);
         main.add(runwayGraphics.getRunwayGraphics(), 0, 0, 2, 4);
 
 
