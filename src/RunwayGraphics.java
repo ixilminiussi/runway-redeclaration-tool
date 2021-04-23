@@ -590,7 +590,7 @@ public class RunwayGraphics {
         filtersGridPane.add(RESABox, 3, 6);
         filtersGridPane.add(obstacleBox, 3, 7);
 
-        Button compass = new Button("Toggle Rotation Mode");
+        Button compass = new Button("Match Bearing Rotation");
         compass.setOnAction((event) -> {
             drawRotated(affectedRunway);
         });
