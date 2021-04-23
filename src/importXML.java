@@ -128,10 +128,9 @@ public class importXML {
         int blastAllowance = getPositiveIntTagValue(n, "blastAllowance");
         int stopway = getPositiveIntTagValue(n, "stopway");
         int clearway = getPositiveIntTagValue(n, "clearway");
-        Directions direction = Directions.valueOf(getTagValue(n, "direction"));
 
         return new Runway(name, airport, TORA, TODA, ASDA, LDA, displacedThreshold, stripEnd, EGR, RESA,
-                blastAllowance, stopway, clearway, direction);
+                blastAllowance, stopway, clearway);
     }
 
 

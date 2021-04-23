@@ -3,10 +3,10 @@ public class TestCalculations {
 
     public static void main(String[] args) {
     	//Setup Runways
-    	Runway x09R = new Runway("09R", "Heathrow", 3660, 3660, 3660, 3353, 307, 60, 50, 240, 300, 0, 0, null);
-    	Runway x27L = new Runway("27L", "Heathrow", 3660, 3660, 3660, 3660, 0, 60, 50, 240, 300, 0, 0, null);
-    	Runway x09L = new Runway("09L", "Heathrow", 3902, 3902, 3902, 3595, 306, 60, 50, 240, 300, 0, 0, null);
-    	Runway x27R = new Runway("27R", "Heathrow", 3884, 3962, 3884, 3884, 0, 60, 50, 240, 300, 0, 78, null);
+    	Runway x09R = new Runway("09R", "Heathrow", 3660, 3660, 3660, 3353, 307, 60, 50, 240, 300, 0, 0);
+    	Runway x27L = new Runway("27L", "Heathrow", 3660, 3660, 3660, 3660, 0, 60, 50, 240, 300, 0, 0);
+    	Runway x09L = new Runway("09L", "Heathrow", 3902, 3902, 3902, 3595, 306, 60, 50, 240, 300, 0, 0);
+    	Runway x27R = new Runway("27R", "Heathrow", 3884, 3962, 3884, 3884, 0, 60, 50, 240, 300, 0, 78);
     	
     	x09R.setSlopeRatio(x09R.getEGR());
     	x27L.setSlopeRatio(x27L.getEGR());

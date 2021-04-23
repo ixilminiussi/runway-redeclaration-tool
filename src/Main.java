@@ -1,7 +1,9 @@
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -115,7 +117,7 @@ public class Main extends Application {
             return "OBSTRUCTION: ";
         }
         ArrayList<String> changes = new ArrayList<>();
-        if(oldObst.getName() != obst.getName()) {
+        if(!oldObst.getName().equals(obst.getName())) {
             changes.add("Name changed to " + obst.getName());
         }
 
@@ -166,7 +168,9 @@ public class Main extends Application {
 
 
         historyPanel = new HistoryPanel();
+        historyPanel.setBackground(new Background(new BackgroundFill(Color.LIGHTGRAY, CornerRadii.EMPTY, Insets.EMPTY)));
         configPanel = new ConfigPanel(historyPanel);
+        configPanel.setBackground(new Background(new BackgroundFill(Color.LIGHTGRAY, CornerRadii.EMPTY, Insets.EMPTY)));
         currentRunway = configPanel.getAffectedRunway();
         main.add(configPanel, 2, 0, 1, 3);
 
@@ -193,33 +197,50 @@ public class Main extends Application {
         MenuItem importNewPresets = new MenuItem("Import New Presets");
         importNewPresets.setOnAction((event) -> {
             String path = fileChooserGetPath();
-            try {
-                importXML importXML = new importXML(path);
-                configPanel.addRunwaysFromXML(importXML.importRunwaysFromXML());
-                configPanel.addObstructionsFromXML(importXML.importObstructionsFromXML());
-                historyPanel.addHistoryEntry("PRESETS: Imported " + path);
-            } catch (Exception e) {
-                // error dialogue
+            if(path == null) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Import Error");
+                alert.setContentText("Please select a file");
+                alert.showAndWait();
+            } else {
+                try {
+                    importXML importXML = new importXML(path);
+                    configPanel.addRunwaysFromXML(importXML.importRunwaysFromXML());
+                    configPanel.addObstructionsFromXML(importXML.importObstructionsFromXML());
+                    historyPanel.addHistoryEntry("PRESETS: Imported " + path);
+                } catch (Exception e) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText("Import Error");
+                    alert.setContentText(e.getMessage());
+                    alert.showAndWait();
+                }
             }
+
+
         });
 
         MenuItem clearPresets = new MenuItem("Clear All Presets");
         clearPresets.setOnAction((event) -> {
             configPanel.clearPresets();
             historyPanel.addHistoryEntry("PRESETS: Cleared all");
-            // show "all presets cleared" dialogue
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("INFO");
+            alert.setHeaderText("Presets Cleared");
+            alert.showAndWait();
         });
 
-        MenuItem showCalculations = new MenuItem("Show Calculations");
-        showCalculations.setOnAction((event) -> {
-            Stage stage2 = new Stage();
-            Scene scene2 = new Scene(currentRunway.getCalculationDisplay(), 720, 480);
-            stage2.setScene(scene2);
-            stage2.show();
+//        MenuItem showCalculations = new MenuItem("Show Calculations");
+//        showCalculations
 
-        });
+//        MenuItem toggleCompass = new MenuItem("Toggle Compass");
+//        toggleCompass.setOnAction((event) -> {
+//            System.out.println("test");
+//            runwayGraphics.drawRotated(currentRunway);
+//        });
 
-        file.getItems().addAll(importNewPresets, clearPresets, showCalculations);
+        file.getItems().addAll(importNewPresets, clearPresets);
     }
 
     private String fileChooserGetPath() {
@@ -228,6 +249,9 @@ public class Main extends Application {
         String currentPath = Paths.get("src/xml").toAbsolutePath().normalize().toString();
         fileChooser.setInitialDirectory(new File(currentPath));
         File selectedFile = fileChooser.showOpenDialog(stage);
+        if(selectedFile == null) {
+            return null;
+        }
         return selectedFile.getAbsolutePath();
     }
 
