@@ -8,6 +8,8 @@
 import java.io.File;
 import java.util.ArrayList;
 import javax.xml.parsers.*;
+
+import javafx.scene.control.Alert;
 import org.w3c.dom.*;
 
 
@@ -31,6 +33,14 @@ public class importXML {
         // throws file not found exception if fails
         File inputFile = new File(filename);
 
+        // check if file empty
+        if (inputFile.length() == 0) {
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setHeaderText("Empty input file");
+            errorAlert.setContentText("The selected XML file for import is empty. Please choose a valid file.");
+            errorAlert.showAndWait();
+        }
+
         // initialise document
         // create a DocumentBuilder and load XML file as a document
         try {
@@ -41,6 +51,7 @@ public class importXML {
         } catch (Exception e) {
             throw new Exception("File not found");
         }
+
     }
 
 
