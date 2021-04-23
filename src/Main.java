@@ -54,8 +54,8 @@ public class Main extends Application {
                 }
                 Obstruction obstruction = configPanel.getObstruction();
                 currentRunway = runway.recalculate(obstruction);
-                runwayGraphics.setAffectedRunway(currentRunway);
-                runwayGraphics.draw();
+                System.out.println(currentRunway.getOriginalRunway());
+                runwayGraphics.draw(currentRunway);
             }
         });
 
@@ -72,9 +72,7 @@ public class Main extends Application {
                 historyPanel.addHistoryEntry(compareChanges(obstruction));
                 currentRunway.recalculate(obstruction);
                 System.out.println(currentRunway.getOriginalRunway());
-                runwayGraphics.setAffectedRunway(currentRunway);
-                runwayGraphics.draw();
-
+                runwayGraphics.draw(currentRunway);
             }
         });
     }
@@ -179,8 +177,7 @@ public class Main extends Application {
         main.add(configPanel, 2, 0, 1, 3);
 
         runwayGraphics = new RunwayGraphics();
-        runwayGraphics.setAffectedRunway(currentRunway);
-        runwayGraphics.draw();
+        runwayGraphics.draw(currentRunway);
         main.add(runwayGraphics.getRunwayGraphics(), 0, 0, 2, 4);
 
 
@@ -221,28 +218,38 @@ public class Main extends Application {
                     alert.setContentText(e.getMessage());
                     alert.showAndWait();
                 }
-            }
-        });
+        }});
 
         // export all runways and obstructions
-        MenuItem exportRunwaysAndObstructions = new MenuItem("Export objects");
+        MenuItem exportRunwaysAndObstructions = new MenuItem("Export Config");
         exportRunwaysAndObstructions.setOnAction((event) -> {
             FileChooser fileChooser = new FileChooser();
+            fileChooser.setInitialDirectory(new File(Paths.get("src/xml").toAbsolutePath().normalize().toString()));
+            fileChooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter("Runway/Obstruction Files", "*.xml"));
             fileChooser.setTitle("Export runways and obstructions");
-            String filename = fileChooser.showSaveDialog(stage).getAbsolutePath();
-
-            // ensure filename has .xml extension
-            if (!filename.substring(filename.length() - 4).equals(".xml")) {
-                filename = filename.concat(".xml");
-            }
-
-            try {
-                exportXML.exportBothToXML(filename, configPanel.getPresetObstructions(), configPanel.getPresetRunways());
-            } catch (Exception e) {
+            File exporttarget = fileChooser.showSaveDialog(stage);
+            if(exporttarget == null) {
                 Alert errorMessage = new Alert(Alert.AlertType.ERROR);
-                errorMessage.setContentText("An error occurred exporting the file");
+                errorMessage.setContentText("Create a file to save config into.");
                 errorMessage.show();
+            } else {
+
+                String filename = exporttarget.getAbsolutePath();
+
+                // ensure filename has .xml extension
+                if (!filename.substring(filename.length() - 4).equals(".xml")) {
+                    filename = filename.concat(".xml");
+                }
+
+                try {
+                    exportXML.exportBothToXML(filename, configPanel.getPresetObstructions(), configPanel.getPresetRunways());
+                } catch (Exception e) {
+                    Alert errorMessage = new Alert(Alert.AlertType.ERROR);
+                    errorMessage.setContentText("An error occurred exporting the file");
+                    errorMessage.show();
+                }
             }
+
         });
 
         MenuItem clearPresets = new MenuItem("Clear All Presets");

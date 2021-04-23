@@ -148,10 +148,6 @@ public class exportXML {
                 e = doc.createElement("clearway");
                 e.appendChild(doc.createTextNode(Integer.toString(runways.get(i).getClearway())));
                 runway.appendChild(e);
-
-                e = doc.createElement("direction");
-                e.appendChild(doc.createTextNode(runways.get(i).getDirection().name()));
-                runway.appendChild(e);
             }
 
             // write to XML
@@ -277,10 +273,6 @@ public class exportXML {
 
                 e = doc.createElement("clearway");
                 e.appendChild(doc.createTextNode(Integer.toString(runways.get(i).getClearway())));
-                runway.appendChild(e);
-
-                e = doc.createElement("direction");
-                e.appendChild(doc.createTextNode(runways.get(i).getDirection().name()));
                 runway.appendChild(e);
             }
 

@@ -8,30 +8,44 @@ public class AffectedRunway {
     private int TORA, TODA, ASDA, LDA;
     private Runway originalRunway;
     private Obstruction obstruction;
+    private Boolean unchanged;
 
     AffectedRunway(Runway originalRunway, Obstruction obstruction) {
         this.originalRunway = originalRunway;
+        System.out.println("Affected Runway: " + this.originalRunway);
         this.obstruction = obstruction;
         recalculate(obstruction);
     }
 
     public void recalculate (Obstruction obstruction) {
+
         // replace obstruction and change all values but original runway is the same
         // landing over / take off away
         this.obstruction = obstruction;
-        if (obstruction.getDistanceFromThreshold() < (originalRunway.getTORA() + originalRunway.getDisplacedThreshold())/2) {
-            TORA = Math.min(originalRunway.getTORA() - originalRunway.getBlastAllowance() - obstruction.getDistanceFromThreshold() - originalRunway.getDisplacedThreshold(),
-                    originalRunway.getTORA() - originalRunway.getStripEnd() - originalRunway.getRESA() - obstruction.getDistanceFromThreshold());
-            ASDA = TORA + originalRunway.getStopway();
-            TODA = TORA + originalRunway.getClearway();
-            LDA = originalRunway.getLDA() - obstruction.getDistanceFromThreshold() - originalRunway.getStripEnd() - (obstruction.getHeight() * originalRunway.getSlopeRatio());
-        }
-        //landing towards, take off towards
-        else{
-            TORA = obstruction.getDistanceFromThreshold() + originalRunway.getDisplacedThreshold() - (obstruction.getHeight() * originalRunway.getSlopeRatio()) - originalRunway.getStripEnd();
-            ASDA = TORA;
-            TODA = TORA;
-            LDA = obstruction.getDistanceFromThreshold() - originalRunway.getRESA() - originalRunway.getStripEnd();
+        if(obstruction.getDistanceFromCentre() > 75 || obstruction.getDistanceFromThreshold() > originalRunway.getTODA() + 60 || obstruction.getDistanceFromThreshold() < -60) {
+            TORA = originalRunway.getTORA();
+            ASDA = originalRunway.getASDA();
+            TODA = originalRunway.getTODA();
+            LDA = originalRunway.getLDA();
+            unchanged = true;
+        } else {
+            unchanged = false;
+            if (obstruction.getDistanceFromThreshold() < (originalRunway.getTORA() + originalRunway.getDisplacedThreshold()) / 2) {
+                TORA = Math.min(originalRunway.getTORA() - originalRunway.getBlastAllowance() - obstruction.getDistanceFromThreshold() - originalRunway.getDisplacedThreshold(),
+                        originalRunway.getTORA() - originalRunway.getStripEnd() - originalRunway.getRESA() - obstruction.getDistanceFromThreshold());
+                ASDA = TORA + originalRunway.getStopway();
+                TODA = TORA + originalRunway.getClearway();
+                LDA = originalRunway.getLDA() - obstruction.getDistanceFromThreshold() - originalRunway.getStripEnd() - (obstruction.getHeight() * 50);
+
+            }
+            //landing towards, take off towards
+            else {
+                TORA = obstruction.getDistanceFromThreshold() + originalRunway.getDisplacedThreshold() - (obstruction.getHeight() * originalRunway.getSlopeRatio()) - originalRunway.getStripEnd();
+                ASDA = TORA;
+                TODA = TORA;
+                LDA = obstruction.getDistanceFromThreshold() - originalRunway.getRESA() - originalRunway.getStripEnd();
+                System.out.println("NEW TORA: " + originalRunway.getTORA());
+            }
         }
     }
 
@@ -245,6 +259,10 @@ public class AffectedRunway {
 
     public void setLDA(int LDA) {
         this.LDA = LDA;
+    }
+
+    public boolean isUnchanged() {
+        return unchanged;
     }
 
     public Runway getOriginalRunway() {

@@ -13,9 +13,8 @@ public class ConfigPanel extends ScrollPane {
 
     private ComboBox<Runway> runwayPresetCombo;
     private ComboBox<Obstruction> obstPresetCombo;
-    private ComboBox<Directions> directionBox;
     private Label runwayConfigText, runwayText, nameText, airportText, TORAText, TODAText,
-            ASDAText, LDAText, displacedText, directionText, stripEndText, egrText, resaText,
+            ASDAText, LDAText, displacedText, stripEndText, egrText, resaText,
             blastText, stopwayText, clearwayText, obstConfigText, obstText, obstName, obstHeightText,
             obstLengthText, distThreshText, distCentreText;
     private TextField nameTextField, airportTextField, TORATextField,
@@ -95,33 +94,72 @@ public class ConfigPanel extends ScrollPane {
         }
 
         String name = nameTextField.textProperty().getValue();
+
         String airport = airportTextField.textProperty().getValue();
-        Directions direction = directionBox.getValue();
         return new Runway(name, airport, runwayValues.get(0),
                 runwayValues.get(1), runwayValues.get(2), runwayValues.get(3),
                 runwayValues.get(4), runwayValues.get(5), runwayValues.get(6),
                 runwayValues.get(7), runwayValues.get(8), runwayValues.get(9),
-                runwayValues.get(10), direction);
+                runwayValues.get(10));
     }
 
     // check if the config currently has any invalid fields
     public Boolean areFieldsValid() {
         try {
-            ArrayList<TextField> tempList = new ArrayList<>();
-            tempList.addAll(runwayIntTextFields);
-            tempList.addAll(obstIntTextFields);
-            for (TextField textField : tempList) {
+            for (TextField textField : obstIntTextFields) {
                 String val = textField.textProperty().getValue();
-                if (!(val.equals("") && (optionalFields.contains(textField)))) {
+                if (textField == obstHeightTextField || textField == obstLengthTextField) {
                     int value = Integer.parseInt(val);
-                    if (value < 0 || value >= 999999) {
+                    if (value <= 0 || value >= 999999) {
+                        return false;
+                    }
+                }
+                else {
+                    int value = Integer.parseInt(val);
+                    if (value >= 999999) {
                         return false;
                     }
                 }
             }
+            
+            for (TextField textField : runwayIntTextFields) {
+        		String val = textField.textProperty().getValue();
+            	if (!(val.equals("") && (optionalFields.contains(textField)))) {
+            		int value = Integer.parseInt(val);
+            		if (value < 0 || value >= 999999) {
+            			return false;
+            		}
+                }
+            }
+            
             for (TextField textField : runwayStringTextFields) {
                 String val = textField.textProperty().getValue();
                 if (val.length() <= 0 || val.length() >= 32) { // arbitrary limit to name size
+                    return false;
+                }
+            }
+
+            String runName = nameTextField.textProperty().getValue();
+            try {
+                int deg = Integer.parseInt(runName + "0");
+                if(deg < 0 || deg > 360) {
+                    return false;
+                }
+            } catch (NumberFormatException e) {
+                try {
+                    int deg = Integer.parseInt(runName.substring(0, 2) + "0");
+                    if(deg < 0 || deg > 360) {
+                        return false;
+                    }
+                    if (runName.length() > 3) {
+                    	return false;
+                    }
+                    String letter = runName.substring(2);
+                    if (runName.length() == 3 && !(letter.equals("L") || letter.equals("R") || letter.equals("C"))) {
+                    	return false;
+                    }
+                    
+                } catch (NumberFormatException e2) {
                     return false;
                 }
             }
@@ -157,7 +195,6 @@ public class ConfigPanel extends ScrollPane {
         ASDAText = new Label("ASDA: ");
         LDAText = new Label("LDA: ");
         displacedText = new Label("Displaced Threshold: ");
-        directionText = new Label("Direction: ");
         stripEndText = new Label("Strip End: ");
         egrText = new Label("EGR: ");
         resaText = new Label("RESA: ");
@@ -377,8 +414,6 @@ public class ConfigPanel extends ScrollPane {
 
     // initialise comboboxes
     private void createComboBoxes() {
-        directionBox = new ComboBox<>();
-        directionBox.getItems().addAll(Directions.LANDING, Directions.TAKING_OFF);
 
         runwayPresetCombo = new ComboBox<>();
         runwayPresetCombo.setPrefWidth(400);
@@ -429,7 +464,6 @@ public class ConfigPanel extends ScrollPane {
         ASDATextField.textProperty().setValue(Integer.toString(runway.getASDA()));
         LDATextField.textProperty().setValue(Integer.toString(runway.getLDA()));
         displacedTextField.textProperty().setValue(Integer.toString(runway.getDisplacedThreshold()));
-        directionBox.valueProperty().setValue(runway.getDirection());
         stripEndTextField.textProperty().setValue(Integer.toString(runway.getStripEnd()));
         egrTextField.textProperty().setValue(Integer.toString(runway.getEGR()));
         resaTextField.textProperty().setValue(Integer.toString(runway.getRESA()));
@@ -482,8 +516,6 @@ public class ConfigPanel extends ScrollPane {
         runwayConfigPane.add(LDATextField, 3, 3);
         runwayConfigPane.add(displacedText, 0, 4);
         runwayConfigPane.add(displacedTextField, 1, 4);
-        runwayConfigPane.add(directionText, 2, 4);
-        runwayConfigPane.add(directionBox, 3, 4);
 
         GridPane optionalGridPane = new GridPane();
         optionalGridPane.getColumnConstraints().addAll(col1, col2, col3, col4);
@@ -581,4 +613,21 @@ public class ConfigPanel extends ScrollPane {
     public ArrayList<Runway> getPresetRunways() {
         return presetRunways;
     }
+
+	public ArrayList<TextField> getRunwayIntTextFields() {
+		return runwayIntTextFields;
+	}
+	
+	public ArrayList<TextField> getRunwayStringTextFields() {
+		return runwayStringTextFields;
+	}
+	
+	public ArrayList<TextField> getObstIntTextFields() {
+		return obstIntTextFields;
+	}
+	
+	public ArrayList<TextField> getOptionalFields() {
+		return optionalFields;
+	}
 }
+
