@@ -49,8 +49,10 @@ public class Main extends Application {
                 alert.setContentText("One of the parameters in the runway or obstruction was invalid!");
                 alert.showAndWait();
             } else {
-                historyPanel.addHistoryEntry(compareChanges(runway));
-                Obstruction obstruction = currentRunway.getObstruction();
+                if(currentRunway != null) {
+                    historyPanel.addHistoryEntry(compareChanges(runway));
+                }
+                Obstruction obstruction = configPanel.getObstruction();
                 currentRunway = runway.recalculate(obstruction);
                 System.out.println(currentRunway.getOriginalRunway());
                 runwayGraphics.draw(currentRunway);
@@ -216,6 +218,46 @@ public class Main extends Application {
                     alert.setContentText(e.getMessage());
                     alert.showAndWait();
                 }
+            if(path == null) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Import Error");
+                alert.setContentText("Please select a file");
+                alert.showAndWait();
+            } else {
+                try {
+                    importXML importXML = new importXML(path);
+                    configPanel.addRunwaysFromXML(importXML.importRunwaysFromXML());
+                    configPanel.addObstructionsFromXML(importXML.importObstructionsFromXML());
+                    historyPanel.addHistoryEntry("PRESETS: Imported " + path);
+                } catch (Exception e) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error");
+                    alert.setHeaderText("Import Error");
+                    alert.setContentText(e.getMessage());
+                    alert.showAndWait();
+                }
+            }
+        });
+
+        // export all runways and obstructions
+        MenuItem exportRunwaysAndObstructions = new MenuItem("Export objects");
+        exportRunwaysAndObstructions.setOnAction((event) -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Export runways and obstructions");
+            String filename = fileChooser.showSaveDialog(stage).getAbsolutePath();
+
+            // ensure filename has .xml extension
+            if (!filename.substring(filename.length() - 4).equals(".xml")) {
+                filename = filename.concat(".xml");
+            }
+
+            try {
+                exportXML.exportBothToXML(filename, configPanel.getPresetObstructions(), configPanel.getPresetRunways());
+            } catch (Exception e) {
+                Alert errorMessage = new Alert(Alert.AlertType.ERROR);
+                errorMessage.setContentText("An error occurred exporting the file");
+                errorMessage.show();
             }
 
 
@@ -240,7 +282,7 @@ public class Main extends Application {
 //            runwayGraphics.drawRotated(currentRunway);
 //        });
 
-        file.getItems().addAll(importNewPresets, clearPresets);
+        file.getItems().addAll(importNewPresets, exportRunwaysAndObstructions, clearPresets);
     }
 
     private String fileChooserGetPath() {
