@@ -5,34 +5,50 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.File;
 import java.util.ArrayList;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class TestExportXML {
+	
+	exportXML testXML = new exportXML();
+	static ArrayList<Obstruction> obstructions = new ArrayList<Obstruction>();
+	static ArrayList<Runway> runways = new ArrayList<Runway>();
+	
+	
+	@BeforeAll
+	public static void setup() {
+    	Obstruction obs1 = new Obstruction("One", 12, 40, -50, 0);
+    	Obstruction obs2 = new Obstruction("Two", 12, 40, 3646, 0);
+    	Obstruction obs3 = new Obstruction("Three", 25, 40, 2853, -20);
+    	Obstruction obs4 = new Obstruction("Four", 25, 40, 500, -20);
+    	Obstruction obs5 = new Obstruction("Five", 15, 40, 150, 60);
+    	Obstruction obs6 = new Obstruction("Six", 15, 40, 3203, 60);
+    	Obstruction obs7 = new Obstruction("Seven", 20, 40, 3546, 20);
+    	Obstruction obs8 = new Obstruction("Eight", 20, 40, 50, 20);
+    	
+    	obstructions.add(obs1);
+    	obstructions.add(obs2);
+    	obstructions.add(obs3);
+    	obstructions.add(obs4);
+    	obstructions.add(obs5);
+    	obstructions.add(obs6);
+    	obstructions.add(obs7);
+    	obstructions.add(obs8);
+		
+		Runway x09R = new Runway("09R", "Heathrow", 3660, 3660, 3660, 3353, 307, 60, 50, 240, 300, 0, 0);
+		Runway x27L = new Runway("27L", "Heathrow", 3660, 3660, 3660, 3660, 0, 60, 50, 240, 300, 0, 0);
+		Runway x09L = new Runway("09L", "Heathrow", 3902, 3902, 3902, 3595, 306, 60, 50, 240, 300, 0, 0);
+		Runway x27R = new Runway("27R", "Heathrow", 3884, 3962, 3884, 3884, 0, 60, 50, 240, 300, 0, 78);
+		
+		runways.add(x09R);
+		runways.add(x27L);
+		runways.add(x09L);
+    	runways.add(x27R);
+	}
 
 	@Test
     public void testScenarioObstructionsExport() {
         try {       	
-        	exportXML testXML = new exportXML();
-        	
-        	ArrayList<Obstruction> obstructions = new ArrayList<Obstruction>();
-        	
-        	Obstruction obs1 = new Obstruction("One", 12, 0, -50, 0);
-        	Obstruction obs2 = new Obstruction("Two", 12, 0, 3646, 0);
-        	Obstruction obs3 = new Obstruction("Three", 25, 0, 2853, -20);
-        	Obstruction obs4 = new Obstruction("Four", 25, 0, 500, -20);
-        	Obstruction obs5 = new Obstruction("Five", 15, 0, 150, 60);
-        	Obstruction obs6 = new Obstruction("Six", 15, 0, 3203, 60);
-        	Obstruction obs7 = new Obstruction("Seven", 20, 0, 3546, 20);
-        	Obstruction obs8 = new Obstruction("Eight", 20, 0, 50, 20);
-        	
-        	obstructions.add(obs1);
-        	obstructions.add(obs2);
-        	obstructions.add(obs3);
-        	obstructions.add(obs4);
-        	obstructions.add(obs5);
-        	obstructions.add(obs6);
-        	obstructions.add(obs7);
-        	obstructions.add(obs8);
         	
         	String scenarioObstructions = "src/test_xml/scenarioObstructionsTemp.xml";
         	
@@ -64,24 +80,6 @@ class TestExportXML {
 	@Test
     public void testScenarioRunwaysExport() {
         try {       	  	
-        	exportXML testXML = new exportXML();
-        	
-        	ArrayList<Runway> runways = new ArrayList<Runway>();
-        	
-        	Runway x09R = new Runway("09R", "Heathrow", 3660, 3660, 3660, 3353, 307, 60, 50, 240, 300, 0, 0);
-        	Runway x27L = new Runway("27L", "Heathrow", 3660, 3660, 3660, 3660, 0, 60, 50, 240, 300, 0, 0);
-        	Runway x09L = new Runway("09L", "Heathrow", 3902, 3902, 3902, 3595, 306, 60, 50, 240, 300, 0, 0);
-        	Runway x27R = new Runway("27R", "Heathrow", 3884, 3962, 3884, 3884, 0, 60, 50, 240, 300, 0, 78);
-
-            x09R.setSlopeRatio(x09R.getEGR());
-            x27L.setSlopeRatio(x27L.getEGR());
-            x09L.setSlopeRatio(x09L.getEGR());
-            x27R.setSlopeRatio(x27R.getEGR());
-            
-            runways.add(x09R);
-            runways.add(x27L);
-            runways.add(x09L);
-            runways.add(x27R);
         	
         	String scenarioRunways = "src/test_xml/scenarioRunwaysTemp.xml";
         	
@@ -121,44 +119,6 @@ class TestExportXML {
 	@Test
 	public void testExportBoth() {
 		try {
-			exportXML testXML = new exportXML();
-			
-			ArrayList<Obstruction> obstructions = new ArrayList<Obstruction>();
-    	
-			Obstruction obs1 = new Obstruction("One", 12, 0, -50, 0);
-			Obstruction obs2 = new Obstruction("Two", 12, 0, 3646, 0);
-			Obstruction obs3 = new Obstruction("Three", 25, 0, 2853, -20);
-			Obstruction obs4 = new Obstruction("Four", 25, 0, 500, -20);
-			Obstruction obs5 = new Obstruction("Five", 15, 0, 150, 60);
-			Obstruction obs6 = new Obstruction("Six", 15, 0, 3203, 60);
-			Obstruction obs7 = new Obstruction("Seven", 20, 0, 3546, 20);
-    		Obstruction obs8 = new Obstruction("Eight", 20, 0, 50, 20);
-    	
-    		obstructions.add(obs1);
-    		obstructions.add(obs2);
-    		obstructions.add(obs3);
-    		obstructions.add(obs4);
-    		obstructions.add(obs5);
-    		obstructions.add(obs6);
-    		obstructions.add(obs7);
-    		obstructions.add(obs8);
-    		
-    		ArrayList<Runway> runways = new ArrayList<Runway>();
-    		
-    		Runway x09R = new Runway("09R", "Heathrow", 3660, 3660, 3660, 3353, 307, 60, 50, 240, 300, 0, 0);
-    		Runway x27L = new Runway("27L", "Heathrow", 3660, 3660, 3660, 3660, 0, 60, 50, 240, 300, 0, 0);
-    		Runway x09L = new Runway("09L", "Heathrow", 3902, 3902, 3902, 3595, 306, 60, 50, 240, 300, 0, 0);
-    		Runway x27R = new Runway("27R", "Heathrow", 3884, 3962, 3884, 3884, 0, 60, 50, 240, 300, 0, 78);
-    		
-    		x09R.setSlopeRatio(x09R.getEGR());
-    		x27L.setSlopeRatio(x27L.getEGR());
-    		x09L.setSlopeRatio(x09L.getEGR());
-    		x27R.setSlopeRatio(x27R.getEGR());
-    		
-    		runways.add(x09R);
-    		runways.add(x27L);
-    		runways.add(x09L);
-        	runways.add(x27R);
            
         	String scenarioObstructions = "src/test_xml/scenarioTemp.xml";
     	
