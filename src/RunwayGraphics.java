@@ -143,6 +143,45 @@ public class RunwayGraphics {
 
     }
 
+    public void saveCanvasToPNG(String exporttarget) {
+        /**FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(new File(FileSystemView.getFileSystemView().getDefaultDirectory().getPath()));
+        fileChooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter("PNG Files", "*.png"));
+        fileChooser.setTitle("Export runway calculations to PNG");
+        File exporttarget = fileChooser.showSaveDialog(stage); **/
+        if(exporttarget == null) {
+            Alert errorMessage = new Alert(Alert.AlertType.ERROR);
+            errorMessage.setContentText("Create a file to save runway into.");
+            errorMessage.show();
+        } else {
+            String filename = exporttarget; //String filename = exporttarget.getAbsolutePath();
+            if (!filename.substring(filename.length() - 4).equals(".png")) {
+                filename = filename.concat(".png");
+            }
+            File out = new File(filename);
+            try {
+                if(currentView == null) {
+                    System.out.println(currentView);
+                    System.out.println(topViewCanvas);
+                }
+                WritableImage wim = new WritableImage((int) Math.round(currentView.getWidth()), (int) Math.round(currentView.getHeight()));
+                currentView.snapshot(null, wim);
+                ImageIO.write(SwingFXUtils.fromFXImage(wim, null), "png", out);
+                /**Alert success = new Alert(Alert.AlertType.INFORMATION);
+                success.setTitle("Image Exported Successfully");
+                success.setContentText("Image has been saved to " + filename);
+                success.show();**/
+            } catch (IOException e) {
+                Alert errorMessage = new Alert(Alert.AlertType.ERROR);
+                errorMessage.setTitle("Error Creating File");
+                errorMessage.setContentText(e.getMessage());
+                errorMessage.show();
+            }
+
+        }
+    }
+
+    
     public void saveCanvasToPNG() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(new File(FileSystemView.getFileSystemView().getDefaultDirectory().getPath()));
