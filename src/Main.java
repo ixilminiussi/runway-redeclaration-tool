@@ -46,7 +46,7 @@ public class Main extends Application {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Error");
                 alert.setHeaderText("Configuration Error");
-                alert.setContentText("One of the parameters in the runway or obstruction was invalid!");
+                alert.setContentText("One of the parameters in the runway or obstruction was invalid: " + configPanel.getInvalidText());
                 alert.showAndWait();
             } else {
                 if(currentRunway != null) {
@@ -66,7 +66,7 @@ public class Main extends Application {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Error");
                 alert.setHeaderText("Configuration Error");
-                alert.setContentText("One of the parameters in the runway or obstruction was invalid!");
+                alert.setContentText("One of the parameters in the runway or obstruction was invalid: "  + configPanel.getInvalidText());
                 alert.showAndWait();
             } else {
                 historyPanel.addHistoryEntry(compareChanges(obstruction));
