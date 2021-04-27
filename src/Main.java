@@ -176,7 +176,7 @@ public class Main extends Application {
         currentRunway = configPanel.getAffectedRunway();
         main.add(configPanel, 2, 0, 1, 3);
 
-        runwayGraphics = new RunwayGraphics();
+        runwayGraphics = new RunwayGraphics(stage);
         if(currentRunway != null)
             runwayGraphics.draw(currentRunway);
         main.add(runwayGraphics.getRunwayGraphics(), 0, 0, 2, 4);
@@ -246,7 +246,8 @@ public class Main extends Application {
                     exportXML.exportBothToXML(filename, configPanel.getPresetObstructions(), configPanel.getPresetRunways());
                 } catch (Exception e) {
                     Alert errorMessage = new Alert(Alert.AlertType.ERROR);
-                    errorMessage.setContentText("An error occurred exporting the file");
+                    errorMessage.setHeaderText("An error occurred exporting the file");
+                    errorMessage.setContentText(e.getMessage());
                     errorMessage.show();
                 }
             }

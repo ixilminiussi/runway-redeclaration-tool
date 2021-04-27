@@ -2,10 +2,14 @@ import java.awt.*;
 import java.awt.Label;
 import java.awt.event.MouseEvent;
 import java.beans.EventHandler;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Orientation;
@@ -13,6 +17,7 @@ import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.*;
 import javafx.scene.paint.*;
 import javafx.scene.canvas.*;
@@ -24,18 +29,24 @@ import javafx.scene.image.Image;
 import javafx.scene.shape.Line;
 import javafx.scene.Scene;
 import javafx.scene.text.Font;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
+import javax.imageio.ImageIO;
+import javax.swing.filechooser.FileSystemView;
 
 import static java.lang.Math.sqrt;
 
 public class RunwayGraphics {
 
     //where the graphics happen
+    Stage stage;
     AnchorPane runwayDisplayAnchor;
     StackPane topView, sideView;
     Canvas topViewCanvas, sideViewCanvas;
     GraphicsContext topGc, sideGc;
     SplitPane splitView;
+    Canvas currentView;
 
     //buttons
     HBox filtersGridPaneContainer;
@@ -89,12 +100,12 @@ public class RunwayGraphics {
         this.affectedRunway = affectedRunway;
     }
 
-    public RunwayGraphics() {
-
+    public RunwayGraphics(Stage stage) {
+        this.stage = stage;
         runwayDisplayAnchor = new AnchorPane();
         paneBackground = new Background(new BackgroundFill(BACKGROUND_COLOR, CornerRadii.EMPTY, Insets.EMPTY));
         hudBackground = new Background(new BackgroundFill(HUD_COLOR, CornerRadii.EMPTY, Insets.EMPTY));
-
+        currentView = topViewCanvas;
         setupSplitView();
         setupButtons();
 
@@ -132,6 +143,44 @@ public class RunwayGraphics {
 
     }
 
+    public void saveCanvasToPNG() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(new File(FileSystemView.getFileSystemView().getDefaultDirectory().getPath()));
+        fileChooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter("PNG Files", "*.png"));
+        fileChooser.setTitle("Export runway calculations to PNG");
+        File exporttarget = fileChooser.showSaveDialog(stage);
+        if(exporttarget == null) {
+            Alert errorMessage = new Alert(Alert.AlertType.ERROR);
+            errorMessage.setContentText("Create a file to save runway into.");
+            errorMessage.show();
+        } else {
+            String filename = exporttarget.getAbsolutePath();
+            if (!filename.substring(filename.length() - 4).equals(".png")) {
+                filename = filename.concat(".png");
+            }
+            File out = new File(filename);
+            try {
+                if(currentView == null) {
+                    System.out.println(currentView);
+                    System.out.println(topViewCanvas);
+                }
+                WritableImage wim = new WritableImage((int) Math.round(currentView.getWidth()), (int) Math.round(currentView.getHeight()));
+                currentView.snapshot(null, wim);
+                ImageIO.write(SwingFXUtils.fromFXImage(wim, null), "png", out);
+                Alert success = new Alert(Alert.AlertType.INFORMATION);
+                success.setTitle("Image Exported Successfully");
+                success.setContentText("Image has been saved to " + filename);
+                success.show();
+            } catch (IOException e) {
+                Alert errorMessage = new Alert(Alert.AlertType.ERROR);
+                errorMessage.setTitle("Error Creating File");
+                errorMessage.setContentText(e.getMessage());
+                errorMessage.show();
+            }
+
+        }
+    }
+
     //draws all elements from start, taking parameters/runway into account
     public void draw() {
         obstruction = affectedRunway.getObstruction();
@@ -161,11 +210,14 @@ public class RunwayGraphics {
         runwayDisplayAnchor.getChildren().clear();
         switch (viewSelect.getSelectionModel().getSelectedIndex()) {
             case 0: runwayDisplayAnchor.getChildren().addAll(topView, viewSelect, filtersGridPaneContainer);
+                currentView = topViewCanvas;
                 break;
             case 1: runwayDisplayAnchor.getChildren().addAll(sideView, viewSelect, filtersGridPaneContainer);
+                currentView = sideViewCanvas;
                 break;
             case 3: splitView.getItems().clear();
                 splitView.getItems().addAll(topView, sideView);
+                currentView = topViewCanvas;
                 runwayDisplayAnchor.getChildren().addAll(splitView, viewSelect, filtersGridPaneContainer);
                 break;
         }
@@ -481,8 +533,8 @@ public class RunwayGraphics {
         col3.setPercentWidth(20);
         col4.setPercentWidth(20);
         filtersGridPane.getColumnConstraints().addAll(col1, col2, col3, col4);
-        filtersGridPane.setVgap(3);
-        filtersGridPane.setHgap(30);
+        filtersGridPane.setVgap(10);
+        filtersGridPane.setHgap(40);
 
         Text showLabel = new Text("Show");
         Text oldLabel = new Text("Original Values");
@@ -597,7 +649,15 @@ public class RunwayGraphics {
 
         filtersGridPane.add(compass, 0, 8, 2, 1);
 
-        Button showCalc = new Button("Break Down Calculations");
+        Button export = new Button("Export");
+        export.setOnAction((actionEvent -> {
+            draw();
+            saveCanvasToPNG();
+        }));
+
+        filtersGridPane.add(export, 3, 8, 1, 1);
+
+        Button showCalc = new Button("View Calculations");
         showCalc.setOnAction((event) -> {
             Stage stage2 = new Stage();
             GridPane calcs = affectedRunway.getCalculationDisplay();
@@ -606,7 +666,7 @@ public class RunwayGraphics {
             stage2.show();
         });
 
-        filtersGridPane.add(showCalc, 2, 8, 2, 1);
+        filtersGridPane.add(showCalc, 1, 8, 2, 1);
 
 
         //        //only for styling purposes
@@ -739,11 +799,14 @@ public class RunwayGraphics {
                     runwayDisplayAnchor.getChildren().clear();
                     switch (newSelected.intValue()) {
                         case 0: runwayDisplayAnchor.getChildren().addAll(topView, viewSelect, filtersGridPaneContainer);
+                            currentView = topViewCanvas;
                             break;
                         case 1: runwayDisplayAnchor.getChildren().addAll(sideView, viewSelect, filtersGridPaneContainer);
+                            currentView = sideViewCanvas;
                             break;
                         case 3: splitView.getItems().clear();
                             splitView.getItems().addAll(topView, sideView);
+                            currentView = topViewCanvas;
                             runwayDisplayAnchor.getChildren().addAll(splitView, viewSelect, filtersGridPaneContainer);
                             break;
                     }
