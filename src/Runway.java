@@ -132,7 +132,7 @@ public class Runway {
     }
 
     public int getSlopeRatio() {
-        return slopeRatio;
+        return EGR;
     }
 
     public void setSlopeRatio(int slopeRatio) {
@@ -140,4 +140,3 @@ public class Runway {
     }
 
 }
-
