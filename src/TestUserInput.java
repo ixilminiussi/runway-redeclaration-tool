@@ -55,6 +55,8 @@ class TestUserInput {
     	assertEquals(false, test.areFieldsValid());
     }
     
+    //This test no longer applicable after changing validation to require TODA = TORA + CLEARYWAY and ASDA = TORA + STOPWAY
+    /**
     @Test
     public void validationTestsPositiveIntFields() {
     	
@@ -88,7 +90,7 @@ class TestUserInput {
     	    	
     	    	textField.setText("1");
          }
-    }
+    } **/
     
     
     @Test
