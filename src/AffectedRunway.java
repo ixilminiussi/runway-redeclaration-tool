@@ -65,7 +65,7 @@ public class AffectedRunway {
         ColumnConstraints col3 = new ColumnConstraints();
         col3.setPrefWidth(20);
         ColumnConstraints col4 = new ColumnConstraints();
-        col4.setPrefWidth(100);
+        col4.setPrefWidth(150);
         ColumnConstraints col5 = new ColumnConstraints();
         col5.setPrefWidth(20);
         ColumnConstraints col6 = new ColumnConstraints();
