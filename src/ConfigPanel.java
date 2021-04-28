@@ -110,27 +110,35 @@ public class ConfigPanel extends ScrollPane {
 
     // check if the config currently has any invalid fields
     public Boolean areFieldsValid() {
-
-    	//Rules for input
-    	int tora = Integer.parseInt(runwayIntTextFields.get(0).textProperty().getValue());
-    	int toda = Integer.parseInt(runwayIntTextFields.get(1).textProperty().getValue());
-    	int asda = Integer.parseInt(runwayIntTextFields.get(2).textProperty().getValue());
-    	int stopway = Integer.parseInt(runwayIntTextFields.get(9).textProperty().getValue());
-    	int clearway = Integer.parseInt(runwayIntTextFields.get(10).textProperty().getValue());
-    	
-    	//TODA = TORA + Clearway
-    	if (toda != tora + clearway) {
-    		invalidText = "TODA not equal to TORA + Clearway";
-    		return false;
-    	}
-    	
-    	//ASDA = TORA + Stopway
-    	if (asda != tora + stopway) {
-    		invalidText = "ASDA not equal to TORA + Stopway";
-    		return false;
-    	}
-    	
         try {
+        	
+        	//Rules for input
+        	int tora = Integer.parseInt(runwayIntTextFields.get(0).textProperty().getValue());
+        	int toda = Integer.parseInt(runwayIntTextFields.get(1).textProperty().getValue());
+        	int asda = Integer.parseInt(runwayIntTextFields.get(2).textProperty().getValue());
+        	int stopway = Integer.parseInt(runwayIntTextFields.get(9).textProperty().getValue());
+        	int clearway = Integer.parseInt(runwayIntTextFields.get(10).textProperty().getValue());
+        	
+        	if (tora < 50) {
+        		invalidText = "TORA below minimum value";
+        		return false;
+        	}
+        	
+        	/**
+        	//TODA = TORA + Clearway
+        	if (toda != tora + clearway) {
+        		invalidText = "TODA not equal to TORA + Clearway";
+        		return false;
+        	}
+        	
+        	//ASDA = TORA + Stopway
+        	if (asda != tora + stopway) {
+        		invalidText = "ASDA not equal to TORA + Stopway";
+        		return false;
+        	}
+        	
+        	**/
+
             for (TextField textField : obstIntTextFields) {
                 String val = textField.textProperty().getValue();
                 if (textField == obstHeightTextField || textField == obstLengthTextField) {
@@ -201,6 +209,7 @@ public class ConfigPanel extends ScrollPane {
             String obstName = obstNameTextField.textProperty().getValue();
             return obstName.length() > 0 && obstName.length() < 64;
         } catch (NumberFormatException e) {
+        	invalidText = "non integer input in a field requiring an integer";
             return false;
         }
     }
