@@ -61,7 +61,7 @@ public class AffectedRunway {
         ColumnConstraints col1 = new ColumnConstraints();
         col1.setPrefWidth(20);
         ColumnConstraints col2 = new ColumnConstraints();
-        col2.setPrefWidth(100);
+        col2.setPrefWidth(150);
         ColumnConstraints col3 = new ColumnConstraints();
         col3.setPrefWidth(20);
         ColumnConstraints col4 = new ColumnConstraints();
@@ -163,7 +163,7 @@ public class AffectedRunway {
                 gridPane.add(new Label("-"), 5, 8);
                 gridPane.add(new Label(Integer.toString(originalRunway.getStripEnd())), 6, 8);
                 gridPane.add(new Label("-"), 7, 8);
-                gridPane.add(new Label(originalRunway.getDisplacedThreshold() + "*" + originalRunway.getSlopeRatio()), 8, 8);
+                gridPane.add(new Label(obstruction.getHeight() + "*" + originalRunway.getSlopeRatio()), 8, 8);
 
                 gridPane.add(new Label("="), 1, 9);
                 gridPane.add(new Label(Integer.toString(LDA)),2,9);
@@ -184,7 +184,7 @@ public class AffectedRunway {
             gridPane.add(new Label("+"), 3, 11);
             gridPane.add(new Label(Integer.toString(originalRunway.getDisplacedThreshold())), 4, 11);
             gridPane.add(new Label("-"), 5, 11);
-            gridPane.add(new Label(originalRunway.getDisplacedThreshold() + "*" + originalRunway.getSlopeRatio()), 6, 11);
+            gridPane.add(new Label(obstruction.getHeight() + "*" + originalRunway.getSlopeRatio()), 6, 11);
             gridPane.add(new Label("-"), 7, 11);
             gridPane.add(new Label(Integer.toString(originalRunway.getStripEnd())), 8, 11);
 
