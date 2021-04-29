@@ -176,7 +176,7 @@ public class Main extends Application {
         currentRunway = configPanel.getAffectedRunway();
         main.add(configPanel, 2, 0, 1, 3);
 
-        runwayGraphics = new RunwayGraphics();
+        runwayGraphics = new RunwayGraphics(new Theme("default"));
         runwayGraphics.draw();
         main.add(runwayGraphics.getRunwayGraphics(), 0, 0, 2, 4);
 
@@ -273,6 +273,12 @@ public class Main extends Application {
 //        });
 
         file.getItems().addAll(importNewPresets, exportRunwaysAndObstructions, clearPresets);
+
+        MenuItem accessibility = new MenuItem("Accessibility");
+        accessibility.setOnAction((event) -> {
+
+        });
+        settings.getItems().addAll(accessibility);
     }
 
     private String fileChooserGetPath() {
