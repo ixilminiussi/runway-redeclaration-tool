@@ -427,8 +427,8 @@ public class RunwayGraphics {
         double a = CANVAS_WIDTH - negMargin - (getLengthRelativeToRunway(NewTORA));
 
 
-        drawMeasurement(topGc, "RESA: " + RESA, a, 0, -getLengthRelativeToRunway(240), Orientation.HORIZONTAL, RESAColor);
-        drawMeasurement(sideGc, "RESA: " + RESA, a, 0, -getLengthRelativeToRunway(240), Orientation.HORIZONTAL, RESAColor);
+        drawMeasurement(topGc, "RESA: " + RESA, a, 0, -getLengthRelativeToRunway(RESA), Orientation.HORIZONTAL, RESAColor);
+        drawMeasurement(sideGc, "RESA: " + RESA, a, 0, -getLengthRelativeToRunway(RESA), Orientation.HORIZONTAL, RESAColor);
 
         topGc.translate(0, spacing);
         sideGc.translate(0, spacing);
