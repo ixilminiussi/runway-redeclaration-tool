@@ -177,7 +177,7 @@ public class Main extends Application {
         main.add(configPanel, 2, 0, 1, 3);
 
         runwayGraphics = new RunwayGraphics();
-        runwayGraphics.draw(currentRunway);
+        runwayGraphics.draw();
         main.add(runwayGraphics.getRunwayGraphics(), 0, 0, 2, 4);
 
 
@@ -260,6 +260,7 @@ public class Main extends Application {
             alert.setTitle("INFO");
             alert.setHeaderText("Presets Cleared");
             alert.showAndWait();
+            runwayGraphics.clearRunway();
         });
 
 //        MenuItem showCalculations = new MenuItem("Show Calculations");

@@ -30,6 +30,9 @@ import static java.lang.Math.sqrt;
 
 public class RunwayGraphics {
 
+    //used for when we clear the current runway, will draw a runway which is clearly not meant to be looked at 
+    AffectedRunway placeHolderRunway;
+
     //where the graphics happen
     AnchorPane runwayDisplayAnchor;
     StackPane topView, sideView;
@@ -91,6 +94,8 @@ public class RunwayGraphics {
 
     public RunwayGraphics() {
 
+        placeHolderRunway = new AffectedRunway(new Runway("N/A","N/A",0,0,0,0,0,0,0,1,1,1,1),new Obstruction("N/A", 0, 0, 0, 0));
+        affectedRunway = placeHolderRunway;
         runwayDisplayAnchor = new AnchorPane();
         paneBackground = new Background(new BackgroundFill(BACKGROUND_COLOR, CornerRadii.EMPTY, Insets.EMPTY));
         hudBackground = new Background(new BackgroundFill(HUD_COLOR, CornerRadii.EMPTY, Insets.EMPTY));
@@ -106,6 +111,11 @@ public class RunwayGraphics {
     public void draw(AffectedRunway affectedRunway) {
 
         this.affectedRunway = affectedRunway;
+        draw();
+    }
+
+    public void clearRunway() {
+        this.affectedRunway = placeHolderRunway;
         draw();
     }
 
@@ -489,7 +499,7 @@ public class RunwayGraphics {
         Text newLabel = new Text("New Values");
         Text typeLabel = new Text("Measurement");
 
-        if(affectedRunway != null) {
+        if(affectedRunway != null && affectedRunway != placeHolderRunway) {
             displacedThresholdLabel = new Text(String.valueOf(affectedRunway.getOriginalRunway().getDisplacedThreshold()) + "m");
             TORALabel = new Text(String.valueOf(affectedRunway.getTORA()) + "m");
             LDALabel = new Text(String.valueOf(affectedRunway.getLDA()) + "m");
@@ -505,20 +515,20 @@ public class RunwayGraphics {
 
         } else {
 
-            displacedThresholdLabel = new Text("m");
-            TORALabel = new Text("m");
-            LDALabel = new Text("m");
-            ASDALabel = new Text("m");
-            TODALabel = new Text("m");
+            displacedThresholdLabel = new Text("N/A");
+            TORALabel = new Text("N/A");
+            LDALabel = new Text("N/A");
+            ASDALabel = new Text("N/A");
+            TODALabel = new Text("N/A");
             obstacleLabel = new Text(" obstacle ");
             obstacleDistancesLabel = new Text(" obstacle distances ");
-            RESALabel = new Text("m");
-            oldtoda = new Text("m");
-            oldtora = new Text("m");
-            oldlda = new Text("m");
-            oldasda = new Text("m");
+            RESALabel = new Text("N/A");
+            oldtoda = new Text("N/A");
+            oldtora = new Text("N/A");
+            oldlda = new Text("N/A");
+            oldasda = new Text("N/A");
 
-                        // checkboxes
+            // checkboxes
             ArrayList<CheckBox> filtersList = new ArrayList<CheckBox>();
             displacedThresholdBox = new CheckBox();
             TORABox = new CheckBox();
@@ -533,7 +543,7 @@ public class RunwayGraphics {
             filtersList.add(obstacleBox); filtersList.add(RESABox);
 
             for(CheckBox checkBox : filtersList) {
-                checkBox.setSelected(true);
+                checkBox.setSelected(false);
                 checkBox.selectedProperty().addListener(
                         (ObservableValue<? extends Boolean> ov, Boolean oldVal, Boolean newVal) -> {
                             draw();
@@ -723,7 +733,7 @@ public class RunwayGraphics {
 //        runwayDisplayAnchor.setTopAnchor(filtersGridPane, 0.0);
 //        runwayDisplayAnchor.setRightAnchor(filtersGridPaneContainer, 0.0);
 
-        if (affectedRunway == null) {
+        if (affectedRunway == null || affectedRunway == placeHolderRunway) {
             //----------VIEW SELECT----------
             //changing views
             viewSelect = new ChoiceBox<String>();
