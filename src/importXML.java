@@ -64,15 +64,12 @@ public class importXML {
         // get a list of all runways from the XML files
         NodeList runwayNodes = doc.getElementsByTagName("runway");
 
-        // if list empty, throw exception
-        if (runwayNodes.getLength() == 0) {
-            throw new NullPointerException("Empty list - XML file contains no runways");
-        }
-
         // iterate over all runways and add them as objects to array list
         ArrayList<Runway> runwayObjects = new ArrayList<Runway>();
-        for (int i = 0, len = runwayNodes.getLength(); i < len; i++) {
-            runwayObjects.add(newRunwayFromElement((Element) runwayNodes.item(i)));
+        if (runwayNodes.getLength() != 0) {
+            for (int i = 0, len = runwayNodes.getLength(); i < len; i++) {
+                runwayObjects.add(newRunwayFromElement((Element) runwayNodes.item(i)));
+            }
         }
 
         return runwayObjects;
@@ -87,17 +84,17 @@ public class importXML {
     public ArrayList<Obstruction> importObstructionsFromXML() {
         // get a list of all runways from the XML files
         NodeList obstructionNodes = doc.getElementsByTagName("obstruction");
-
-        // if list empty, throw exception
-        if (obstructionNodes.getLength() == 0) {
-            throw new NullPointerException("Empty list - XML file contains no obstructions");
-        }
-
         // iterate over all runways and add them as objects to array list
         ArrayList<Obstruction> obstructionObjects = new ArrayList<Obstruction>();
-        for (int i = 0, len = obstructionNodes.getLength(); i < len; i++) {
-            obstructionObjects.add(newObsFromElement((Element) obstructionNodes.item(i)));
+
+
+        if (obstructionNodes.getLength() != 0) {
+            for (int i = 0, len = obstructionNodes.getLength(); i < len; i++) {
+                obstructionObjects.add(newObsFromElement((Element) obstructionNodes.item(i)));
+            }
         }
+
+
 
         return obstructionObjects;
     }
