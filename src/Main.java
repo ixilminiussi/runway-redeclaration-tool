@@ -44,6 +44,7 @@ public class Main extends Application {
          * v - iterate through view modes
          * e - export menu
          * i - import menu
+         * l - clear all presets
          */
         stage.getScene().setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.V) {
@@ -65,6 +66,15 @@ public class Main extends Application {
             }
             if (e.getCode() == KeyCode.E) {
                 exportToXML();
+            }
+            if (e.getCode() == KeyCode.L) {
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to clear all presets?",
+                        ButtonType.YES, ButtonType.NO);
+                alert.showAndWait();
+
+                if (alert.getResult() == ButtonType.YES) {
+                    clearPresets();
+                }
             }
         });
     }
@@ -142,7 +152,6 @@ public class Main extends Application {
         }
 
         return "RUNWAY: " + String.join(", ", changes);
-
     }
 
     public String compareChanges(Obstruction obst) {
@@ -242,12 +251,7 @@ public class Main extends Application {
 
         MenuItem clearPresets = new MenuItem("Clear All Presets");
         clearPresets.setOnAction((event) -> {
-            configPanel.clearPresets();
-            historyPanel.addHistoryEntry("PRESETS: Cleared all");
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("INFO");
-            alert.setHeaderText("Presets Cleared");
-            alert.showAndWait();
+            clearPresets();
         });
 
 //        MenuItem showCalculations = new MenuItem("Show Calculations");
@@ -326,5 +330,14 @@ public class Main extends Application {
                 errorMessage.show();
             }
         }
+    }
+
+    private void clearPresets() {
+        configPanel.clearPresets();
+        historyPanel.addHistoryEntry("PRESETS: Cleared all");
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("INFO");
+        alert.setHeaderText("Presets Cleared");
+        alert.showAndWait();
     }
 }
