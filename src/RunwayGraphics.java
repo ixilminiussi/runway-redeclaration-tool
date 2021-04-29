@@ -67,9 +67,6 @@ public class RunwayGraphics {
     int negMargin = 0; //the margin before the runway ends
     int spacing = 20;
 
-    //color palette
-    Background paneBackground, hudBackground;
-
     double orgSceneX, orgSceneY;
     double orgTranslateX, orgTranslateY;
 
@@ -90,15 +87,13 @@ public class RunwayGraphics {
         placeHolderRunway = new AffectedRunway(new Runway("N/A","N/A",0,0,0,0,0,0,0,1,1,1,1),new Obstruction("N/A", 0, 0, 0, 0));
         affectedRunway = placeHolderRunway;
         runwayDisplayAnchor = new AnchorPane();
-        paneBackground = new Background(new BackgroundFill(theme.getBackgroundColor(), CornerRadii.EMPTY, Insets.EMPTY));
-        hudBackground = new Background(new BackgroundFill(theme.getHUDColor(), CornerRadii.EMPTY, Insets.EMPTY));
 
         setupSplitView();
         setupButtons();
 
         //where the graphics happen
-        runwayDisplayAnchor.setBorder(new Border(new BorderStroke(Color.LIGHTSTEELBLUE, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
-        runwayDisplayAnchor.setBackground(paneBackground);
+        runwayDisplayAnchor.setBorder(new Border(new BorderStroke(theme.getHUDColor(), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+        runwayDisplayAnchor.setBackground(new Background(new BackgroundFill(theme.getBackgroundColor(), CornerRadii.EMPTY, Insets.EMPTY)));
     }
 
     public void draw(AffectedRunway affectedRunway) {
@@ -138,6 +133,10 @@ public class RunwayGraphics {
     //draws all elements from start, taking parameters/runway into account
     public void draw() {
         obstruction = affectedRunway.getObstruction();
+
+        filtersGridPaneContainer.setBackground(new Background(new BackgroundFill(theme.getHUDColor(), CornerRadii.EMPTY, Insets.EMPTY)));
+        runwayDisplayAnchor.setBackground(new Background(new BackgroundFill(theme.getBackgroundColor(), CornerRadii.EMPTY, Insets.EMPTY)));
+        splitView.setBackground(new Background(new BackgroundFill(theme.getBackgroundColor(), CornerRadii.EMPTY, Insets.EMPTY)));
 
         drawTopView(CANVAS_WIDTH, 400, false);
         drawSideView(CANVAS_WIDTH, 300);
@@ -411,7 +410,7 @@ public class RunwayGraphics {
 
         gc.translate(0, gc.getCanvas().getHeight()/2);
         gc.setStroke(color);
-        gc.setLineWidth(1.0);
+        gc.setLineWidth(2.0);
 
         double delimiter = 5;
 
@@ -437,6 +436,7 @@ public class RunwayGraphics {
 
                 gc.setTextBaseline(VPos.TOP);
                 gc.setTextAlign(TextAlignment.CENTER);
+                gc.setLineWidth(1.0);
                 gc.strokeText(label, x + (length/2), y);
                 break;
             case VERTICAL :
@@ -453,7 +453,7 @@ public class RunwayGraphics {
                 Text text = new Text(label);
                 gc.setTextBaseline(VPos.CENTER);
                 gc.setTextAlign(TextAlignment.LEFT);
-                gc.setFont(new Font(20));
+                gc.setLineWidth(1.0);
                 gc.strokeText(label, x + 4, y + (length/2));
                 break;
         }
@@ -491,6 +491,11 @@ public class RunwayGraphics {
         Text oldLabel = new Text("Original Values");
         Text newLabel = new Text("New Values");
         Text typeLabel = new Text("Measurement");
+
+        showLabel.setFill(theme.getOutlineColor());
+        oldLabel.setFill(theme.getOutlineColor());
+        newLabel.setFill(theme.getOutlineColor());
+        typeLabel.setFill(theme.getOutlineColor());
 
         if(affectedRunway != null && affectedRunway != placeHolderRunway) {
             displacedThresholdLabel = new Text(String.valueOf(affectedRunway.getOriginalRunway().getDisplacedThreshold()) + "m");
@@ -565,13 +570,27 @@ public class RunwayGraphics {
         filtersGridPane.add(newLabel, 2, 0);
         filtersGridPane.add(showLabel, 3, 0);
 
-        filtersGridPane.add(new Text("TODA:"), 0, 1);
-        filtersGridPane.add(new Text("TORA:"), 0, 2);
-        filtersGridPane.add(new Text("LDA:"), 0, 3);
-        filtersGridPane.add(new Text("ASDA:"), 0, 4);
-        filtersGridPane.add(new Text("Displaced Threshold:"), 0, 5);
-        filtersGridPane.add(new Text("RESA:"), 0, 6);
-        filtersGridPane.add(new Text("Obstacle:"), 0, 7);
+        Text TODAText = new Text("TODA:");
+        TODAText.setFill(theme.getOutlineColor());
+        filtersGridPane.add(TODAText, 0, 1);
+        Text TORAText = new Text("TORA:");
+        TORAText.setFill(theme.getOutlineColor());
+        filtersGridPane.add(TORAText, 0, 2);
+        Text LDAText = new Text("LDA:");
+        LDAText.setFill(theme.getOutlineColor());
+        filtersGridPane.add(LDAText, 0, 3);
+        Text ASDAText = new Text("ASDA");
+        ASDAText.setFill(theme.getOutlineColor());
+        filtersGridPane.add(ASDAText, 0, 4);
+        Text displacedThresholdText = new Text("Displaced Threshold:");
+        displacedThresholdText.setFill(theme.getOutlineColor());
+        filtersGridPane.add(displacedThresholdText, 0, 5);
+        Text RESAText = new Text("RESA:");
+        RESAText.setFill(theme.getOutlineColor());
+        filtersGridPane.add(RESAText, 0, 6);
+        Text obstacleText = new Text("obstacle:");
+        obstacleText.setFill(theme.getOutlineColor());
+        filtersGridPane.add(obstacleText, 0, 7);
 
         filtersGridPane.add(oldtoda, 1, 1);
         filtersGridPane.add(oldtora, 1, 2);
@@ -616,115 +635,10 @@ public class RunwayGraphics {
         filtersGridPaneContainer = new HBox();
         filtersGridPaneContainer.getChildren().add(filtersGridPane);
         filtersGridPaneContainer.setMargin(filtersGridPane, new Insets(10.0, 10.0, 10.0, 10.0));
-        filtersGridPaneContainer.setBackground(hudBackground);
+        filtersGridPaneContainer.setBackground(new Background(new BackgroundFill(theme.getHUDColor(), CornerRadii.EMPTY, Insets.EMPTY)));
 
         runwayDisplayAnchor.setTopAnchor(filtersGridPane, 0.0);
         runwayDisplayAnchor.setRightAnchor(filtersGridPaneContainer, 0.0);
-
-        //---------FILTERS----------
-        //checkboxes to add measurements, currently for testing, eventually to give control to the user as to which information he wants to see/hide
-//        filtersGridPane = new GridPane();
-//
-//        Text showLabel = new Text(" show ");
-//        showLabel.setStyle("-fx-font-weight: bold");
-//        Text distancesLabel = new Text("Calculated Distances");
-//        distancesLabel.setStyle("-fx-font-weight: bold");
-//
-//        //allows us to separate between the first call of setupButtons and the later ones
-//        if (affectedRunway != null) {
-//
-//            displacedThresholdLabel = new Text(" displaced threshold : " + String.valueOf(affectedRunway.getOriginalRunway().getDisplacedThreshold()) + "m");
-//            TORALabel = new Text(" TORA : " + String.valueOf(affectedRunway.getTORA()) + "m");
-//            LDALabel = new Text(" LDA : " + String.valueOf(affectedRunway.getLDA()) + "m");
-//            ASDALabel = new Text( " ASDA : " + String.valueOf(affectedRunway.getASDA()) + "m");
-//            TODALabel = new Text(" TODA : " + String.valueOf(affectedRunway.getTODA()) + "m");
-//            obstacleLabel = new Text(" obstacle ");
-//            obstacleDistancesLabel = new Text(" obstacle distances ");
-//            RESALabel = new Text(" RESA : " + String.valueOf(affectedRunway.getOriginalRunway().getRESA()) + "m");
-//        } else {
-//
-//            displacedThresholdLabel = new Text(" displaced threshold : " + "m");
-//            TORALabel = new Text(" TORA : m");
-//            LDALabel = new Text(" LDA : m");
-//            ASDALabel = new Text( " ASDA : m");
-//            TODALabel = new Text(" TODA : m");
-//            obstacleLabel = new Text(" obstacle ");
-//            obstacleDistancesLabel = new Text(" obstacle distances ");
-//            RESALabel = new Text(" RESA : m");
-//
-//            // checkboxes
-//            ArrayList<CheckBox> filtersList = new ArrayList<CheckBox>();
-//            displacedThresholdBox = new CheckBox();
-//            TORABox = new CheckBox();
-//            LDABox = new CheckBox();
-//            ASDABox = new CheckBox();
-//            TODABox = new CheckBox();
-//            obstacleBox = new CheckBox();
-//            obstacleDistancesBox = new CheckBox();
-//            RESABox = new CheckBox();
-//
-//            filtersList.add(displacedThresholdBox); filtersList.add(TORABox); filtersList.add(LDABox); filtersList.add(ASDABox); filtersList.add(TODABox);
-//            filtersList.add(obstacleBox); filtersList.add(obstacleDistancesBox); filtersList.add(RESABox);
-//
-//            for(CheckBox checkBox : filtersList) {
-//                checkBox.setSelected(true);
-//                checkBox.selectedProperty().addListener(
-//                        (ObservableValue<? extends Boolean> ov, Boolean oldVal, Boolean newVal) -> {
-//                            draw();
-//                        }
-//                );
-//            }
-//        }
-//
-//        //colors the text with appropriate colors
-//        displacedThresholdLabel.setFill(displacedThresholdColor);
-//        TORALabel.setFill(TORAColor);
-//        LDALabel.setFill(LDAColor);
-//        ASDALabel.setFill(ASDAColor);
-//        TODALabel.setFill(TODAColor);
-//        RESALabel.setFill(RESAColor);
-//        obstacleLabel.setFill(dangerColor);
-//        obstacleDistancesLabel.setFill(dangerColor);
-//
-//        //only for styling purposes
-//        filtersGridPaneContainer = new HBox();
-//        filtersGridPaneContainer.getChildren().add(filtersGridPane);
-//        filtersGridPaneContainer.setMargin(filtersGridPane, new Insets(5.0, 5.0, 5.0, 5.0));
-//        filtersGridPaneContainer.setBackground(hudBackground);
-//
-//        //filler panes for styling
-//        Pane pane1 = new Pane();
-//        Pane pane2 = new Pane();
-//        filtersGridPane.add(distancesLabel, 0, 0, 1, 1);
-//        filtersGridPane.add(showLabel, 2, 0, 1, 1);
-//        filtersGridPane.add(pane1, 0, 1, 3, 1);
-//        filtersGridPane.add(pane2, 1, 0, 1, 12);
-//
-//        filtersGridPane.add(displacedThresholdBox, 2, 2, 1, 1);
-//        filtersGridPane.add(TORABox, 2, 3, 1, 1);
-//        filtersGridPane.add(LDABox, 2, 4, 1, 1);
-//        filtersGridPane.add(ASDABox, 2, 5, 1, 1);
-//        filtersGridPane.add(TODABox, 2, 6, 1, 1);
-//        filtersGridPane.add(obstacleBox, 2, 7, 1, 1);
-//        filtersGridPane.add(obstacleDistancesBox, 2, 8, 1, 1);
-//        filtersGridPane.add(RESABox, 2, 9, 1, 1);
-//
-//        filtersGridPane.add(displacedThresholdLabel, 0, 2, 1, 1);
-//        filtersGridPane.add(TORALabel, 0, 3, 1, 1);
-//        filtersGridPane.add(LDALabel, 0, 4, 1, 1);
-//        filtersGridPane.add(ASDALabel, 0, 5, 1, 1);
-//        filtersGridPane.add(TODALabel, 0, 6, 1, 1);
-//        filtersGridPane.add(obstacleLabel, 0, 7, 1, 1);
-//        filtersGridPane.add(obstacleDistancesLabel, 0, 8, 1, 1);
-//        filtersGridPane.add(RESALabel, 0, 9, 1, 1);
-//
-//        pane1.minWidth(1);
-//        pane2.minHeight(1);
-//        pane1.setStyle("-fx-border-color: black");
-//        pane2.setStyle("-fx-border-color: black");
-//
-//        runwayDisplayAnchor.setTopAnchor(filtersGridPane, 0.0);
-//        runwayDisplayAnchor.setRightAnchor(filtersGridPaneContainer, 0.0);
 
         if (affectedRunway == null || affectedRunway == placeHolderRunway) {
             //----------VIEW SELECT----------
@@ -732,7 +646,7 @@ public class RunwayGraphics {
             viewSelect = new ChoiceBox<String>();
             viewSelect.getItems().addAll("Top View", "Side View", new Separator(), "Split View");
             viewSelect.setValue("Top View");
-            viewSelect.setBackground(hudBackground);
+            viewSelect.setBackground(new Background(new BackgroundFill(Color.LIGHTBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
             runwayDisplayAnchor.setTopAnchor(viewSelect, 0.0);
             runwayDisplayAnchor.setLeftAnchor(viewSelect, 0.0);
             viewSelect.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>(){
@@ -1000,7 +914,7 @@ public class RunwayGraphics {
 
         splitView = new SplitPane();
         splitView.setOrientation(Orientation.VERTICAL);
-        splitView.setBackground(paneBackground);
+        splitView.setBackground(new Background(new BackgroundFill(theme.getBackgroundColor(), CornerRadii.EMPTY, Insets.EMPTY)));
     }
 
     //taken from https://stackoverflow.com/questions/39297719/javafx-create-hatchstyles-something-like-of-c-sharp-net

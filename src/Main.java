@@ -176,7 +176,7 @@ public class Main extends Application {
         currentRunway = configPanel.getAffectedRunway();
         main.add(configPanel, 2, 0, 1, 3);
 
-        runwayGraphics = new RunwayGraphics(new Theme("default"));
+        runwayGraphics = new RunwayGraphics(new Theme("dark"));
         runwayGraphics.draw();
         main.add(runwayGraphics.getRunwayGraphics(), 0, 0, 2, 4);
 
@@ -195,7 +195,8 @@ public class Main extends Application {
     private void setupMenus(MenuBar menuBar) {
         Menu file = new Menu("File");
         Menu settings = new Menu("Settings");
-        menuBar.getMenus().addAll(file, settings);
+        Menu theme = new Menu("Theme");
+        menuBar.getMenus().addAll(file, settings, theme);
         MenuItem importNewPresets = new MenuItem("Import New Presets");
         importNewPresets.setOnAction((event) -> {
             String path = fileChooserGetPath();
@@ -273,12 +274,21 @@ public class Main extends Application {
 //        });
 
         file.getItems().addAll(importNewPresets, exportRunwaysAndObstructions, clearPresets);
+        
+        MenuItem defaultTheme = new MenuItem("default Theme");
+        MenuItem darkTheme = new MenuItem("dark Theme");
+        MenuItem monochromeTheme = new MenuItem("monochrome Theme");
 
-        MenuItem accessibility = new MenuItem("Accessibility");
-        accessibility.setOnAction((event) -> {
-
+        theme.getItems().addAll(defaultTheme, darkTheme, monochromeTheme);
+        defaultTheme.setOnAction((event) -> {
+            runwayGraphics.changeTheme(new Theme("default"));
         });
-        settings.getItems().addAll(accessibility);
+        darkTheme.setOnAction((event) -> {
+            runwayGraphics.changeTheme(new Theme("dark"));
+        });
+        monochromeTheme.setOnAction((event) -> {
+            runwayGraphics.changeTheme(new Theme("monochrome"));
+        });
     }
 
     private String fileChooserGetPath() {
