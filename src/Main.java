@@ -2,11 +2,14 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.awt.event.KeyEvent;
+import java.beans.EventHandler;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -35,6 +38,35 @@ public class Main extends Application {
         stage.setScene(new Scene(root, 1000, 600));
         stage.setMaximized(true);
         stage.show();
+
+
+        /** keyboard shortcuts
+         * v - iterate through view modes
+         * e - export menu
+         * i - import menu
+         */
+        stage.getScene().setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.V) {
+                int currentView = runwayGraphics.viewSelect.getSelectionModel().getSelectedIndex();
+                switch (currentView) {
+                    case 0:
+                        runwayGraphics.viewSelect.setValue("Side View");
+                        break;
+                    case 1:
+                        runwayGraphics.viewSelect.setValue("Split View");
+                        break;
+                    case 3:
+                        runwayGraphics.viewSelect.setValue("Top View");
+                        break;
+                }
+            }
+            if (e.getCode() == KeyCode.I) {
+                importNewXML();
+            }
+            if (e.getCode() == KeyCode.E) {
+                exportToXML();
+            }
+        });
     }
 
     // add functionality to buttons in config panel to update the graphical view
@@ -199,59 +231,13 @@ public class Main extends Application {
         menuBar.getMenus().addAll(file);
         MenuItem importNewPresets = new MenuItem("Import New Presets");
         importNewPresets.setOnAction((event) -> {
-            String path = fileChooserGetPath();
-            if(path == null) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Error");
-                alert.setHeaderText("Import Error");
-                alert.setContentText("Please select a file");
-                alert.showAndWait();
-            } else {
-                try {
-                    importXML importXML = new importXML(path);
-                    configPanel.addRunwaysFromXML(importXML.importRunwaysFromXML());
-                    configPanel.addObstructionsFromXML(importXML.importObstructionsFromXML());
-                    historyPanel.addHistoryEntry("PRESETS: Imported " + path);
-                } catch (Exception e) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Error");
-                    alert.setHeaderText("Import Error");
-                    alert.setContentText(e.getMessage());
-                    alert.showAndWait();
-                }
-        }});
+            importNewXML();
+        });
 
         // export all runways and obstructions
         MenuItem exportRunwaysAndObstructions = new MenuItem("Export Config");
         exportRunwaysAndObstructions.setOnAction((event) -> {
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setInitialDirectory(new File(Paths.get("src/xml").toAbsolutePath().normalize().toString()));
-            fileChooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter("Runway/Obstruction Files", "*.xml"));
-            fileChooser.setTitle("Export runways and obstructions");
-            File exporttarget = fileChooser.showSaveDialog(stage);
-            if(exporttarget == null) {
-                Alert errorMessage = new Alert(Alert.AlertType.ERROR);
-                errorMessage.setContentText("Create a file to save config into.");
-                errorMessage.show();
-            } else {
-
-                String filename = exporttarget.getAbsolutePath();
-
-                // ensure filename has .xml extension
-                if (!filename.substring(filename.length() - 4).equals(".xml")) {
-                    filename = filename.concat(".xml");
-                }
-
-                try {
-                    exportXML.exportBothToXML(filename, configPanel.getPresetObstructions(), configPanel.getPresetRunways());
-                } catch (Exception e) {
-                    Alert errorMessage = new Alert(Alert.AlertType.ERROR);
-                    errorMessage.setHeaderText("An error occurred exporting the file");
-                    errorMessage.setContentText(e.getMessage());
-                    errorMessage.show();
-                }
-            }
-
+            exportToXML();
         });
 
         MenuItem clearPresets = new MenuItem("Clear All Presets");
@@ -288,4 +274,57 @@ public class Main extends Application {
         return selectedFile.getAbsolutePath();
     }
 
+    private void importNewXML() {
+        String path = fileChooserGetPath();
+        if(path == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Import Error");
+            alert.setContentText("Please select a file");
+            alert.showAndWait();
+        } else {
+            try {
+                importXML importXML = new importXML(path);
+                configPanel.addRunwaysFromXML(importXML.importRunwaysFromXML());
+                configPanel.addObstructionsFromXML(importXML.importObstructionsFromXML());
+                historyPanel.addHistoryEntry("PRESETS: Imported " + path);
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Import Error");
+                alert.setContentText(e.getMessage());
+                alert.showAndWait();
+            }
+        }
+    }
+
+    private void exportToXML() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(new File(Paths.get("src/xml").toAbsolutePath().normalize().toString()));
+        fileChooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter("Runway/Obstruction Files", "*.xml"));
+        fileChooser.setTitle("Export runways and obstructions");
+        File exporttarget = fileChooser.showSaveDialog(stage);
+        if(exporttarget == null) {
+            Alert errorMessage = new Alert(Alert.AlertType.ERROR);
+            errorMessage.setContentText("Create a file to save config into.");
+            errorMessage.show();
+        } else {
+
+            String filename = exporttarget.getAbsolutePath();
+
+            // ensure filename has .xml extension
+            if (!filename.substring(filename.length() - 4).equals(".xml")) {
+                filename = filename.concat(".xml");
+            }
+
+            try {
+                exportXML.exportBothToXML(filename, configPanel.getPresetObstructions(), configPanel.getPresetRunways());
+            } catch (Exception e) {
+                Alert errorMessage = new Alert(Alert.AlertType.ERROR);
+                errorMessage.setHeaderText("An error occurred exporting the file");
+                errorMessage.setContentText(e.getMessage());
+                errorMessage.show();
+            }
+        }
+    }
 }

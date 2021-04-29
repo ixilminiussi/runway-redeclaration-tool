@@ -261,6 +261,8 @@ public class RunwayGraphics {
                 break;
         }
 
+
+
         showMeasurements();
     }
 

@@ -27,7 +27,7 @@ public class importXML {
      * @param filename The filename of the XML file to be imported
      * @throws Exception If file could not be opened
      */
-    importXML(String filename) throws Exception {
+    public importXML(String filename) throws Exception {
         this.filename = filename;
 
         // throws file not found exception if fails
@@ -191,4 +191,5 @@ public class importXML {
         importXML testing = new importXML("src/testing/testRunwayBlanks.xml");
         ArrayList<Runway> runwaysTest = testing.importRunwaysFromXML();
     }
+
 }
