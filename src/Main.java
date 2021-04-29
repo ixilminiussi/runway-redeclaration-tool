@@ -1,11 +1,13 @@
 import javafx.application.Application;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.awt.event.KeyEvent;
@@ -44,6 +46,7 @@ public class Main extends Application {
          * v - iterate through view modes
          * e - export menu
          * i - import menu
+         * l - clear all presets
          */
         stage.getScene().setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.V) {
@@ -65,6 +68,15 @@ public class Main extends Application {
             }
             if (e.getCode() == KeyCode.E) {
                 exportToXML();
+            }
+            if (e.getCode() == KeyCode.L) {
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to clear all presets?",
+                        ButtonType.YES, ButtonType.NO);
+                alert.showAndWait();
+
+                if (alert.getResult() == ButtonType.YES) {
+                    clearPresets();
+                }
             }
         });
     }
@@ -142,7 +154,6 @@ public class Main extends Application {
         }
 
         return "RUNWAY: " + String.join(", ", changes);
-
     }
 
     public String compareChanges(Obstruction obst) {
@@ -227,8 +238,9 @@ public class Main extends Application {
 
     private void setupMenus(MenuBar menuBar) {
         Menu file = new Menu("File");
+        Menu accessibility = new Menu("Accessibility");
         Menu settings = new Menu("Settings");
-        menuBar.getMenus().addAll(file);
+        menuBar.getMenus().addAll(file, accessibility);
         MenuItem importNewPresets = new MenuItem("Import New Presets");
         importNewPresets.setOnAction((event) -> {
             importNewXML();
@@ -242,12 +254,7 @@ public class Main extends Application {
 
         MenuItem clearPresets = new MenuItem("Clear All Presets");
         clearPresets.setOnAction((event) -> {
-            configPanel.clearPresets();
-            historyPanel.addHistoryEntry("PRESETS: Cleared all");
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("INFO");
-            alert.setHeaderText("Presets Cleared");
-            alert.showAndWait();
+            clearPresets();
         });
 
 //        MenuItem showCalculations = new MenuItem("Show Calculations");
@@ -260,6 +267,13 @@ public class Main extends Application {
 //        });
 
         file.getItems().addAll(importNewPresets, exportRunwaysAndObstructions, clearPresets);
+
+        MenuItem viewShortcuts = new MenuItem("View shortcuts");
+        viewShortcuts.setOnAction((event) -> {
+            displayShortcutsWindow();
+        });
+
+        accessibility.getItems().addAll(viewShortcuts);
     }
 
     private String fileChooserGetPath() {
@@ -326,5 +340,57 @@ public class Main extends Application {
                 errorMessage.show();
             }
         }
+    }
+
+    private void clearPresets() {
+        configPanel.clearPresets();
+        historyPanel.addHistoryEntry("PRESETS: Cleared all");
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("INFO");
+        alert.setHeaderText("Presets Cleared");
+        alert.showAndWait();
+    }
+
+    public void displayShortcutsWindow() {
+        Stage shortcutsWindow = new Stage();
+        shortcutsWindow.setTitle("Keyboard shortcuts");
+
+        GridPane gp = new GridPane();
+
+        gp.setAlignment(Pos.CENTER);
+        gp.setPadding(new Insets(10));
+
+        ColumnConstraints col0 = new ColumnConstraints();
+        col0.setMinWidth(2);
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setMinWidth(1);
+        ColumnConstraints col2 = new ColumnConstraints();
+        col1.setMinWidth(80);
+
+        gp.setMinSize(150, 100);
+
+        gp.getColumnConstraints().addAll(col0,col1, col2);
+
+        gp.add(new Label("E"), 0, 0);
+        gp.add(new Label(" "), 1, 0);
+        gp.add(new Label("Export menu"), 2,0);
+
+        gp.add(new Label("I"), 0, 1);
+        gp.add(new Label(" "), 1, 1);
+        gp.add(new Label("Import menu"), 2,1);
+
+        gp.add(new Label("L"), 0, 2);
+        gp.add(new Label(" "), 1, 2);
+        gp.add(new Label("Clear all presets"), 2,2);
+
+        gp.add(new Label("V"), 0, 3);
+        gp.add(new Label(" "), 1, 3);
+        gp.add(new Label("Next view"), 2,3);
+
+        Scene scene = new Scene(gp);
+        shortcutsWindow.setScene(scene);
+
+        shortcutsWindow.initModality(Modality.APPLICATION_MODAL);
+        shortcutsWindow.show();
     }
 }
