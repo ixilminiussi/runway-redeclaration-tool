@@ -1,3 +1,5 @@
+//package sample;
+
 import java.awt.*;
 import java.awt.Label;
 import java.awt.event.MouseEvent;
@@ -28,6 +30,7 @@ import javafx.scene.text.*;
 import javafx.scene.image.Image;
 import javafx.scene.shape.Line;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -76,7 +79,7 @@ public class RunwayGraphics {
     int runwayPL;
     int posMargin = 0; //the margin before the runway starts
     int negMargin = 0; //the margin before the runway ends
-    int spacing = 20;
+    int spacing = 25;
 
     //color palette
     final Color ROAD_COLOR = Color.LIGHTGRAY, STRIPE_COLOR = Color.WHITE, WARNING_COLOR = Color.GOLDENROD;
@@ -108,7 +111,7 @@ public class RunwayGraphics {
     public RunwayGraphics(Stage stage, Theme theme) {
         this.theme = theme;
         this.stage = stage;
-        placeHolderRunway = new AffectedRunway(new Runway("N/A","N/A",0,0,0,0,0,0,0,1,1,1,1),new Obstruction("N/A", 0, 0, 0, 0));
+        placeHolderRunway = new AffectedRunway(new Runway("N/A","N/A",10,0,0,0,0,0,0,1,1,1,1),new Obstruction("N/A", 0, 0, 0, 0));
         affectedRunway = placeHolderRunway;
         runwayDisplayAnchor = new AnchorPane();
         paneBackground = new Background(new BackgroundFill(BACKGROUND_COLOR, CornerRadii.EMPTY, Insets.EMPTY));
@@ -156,7 +159,7 @@ public class RunwayGraphics {
 
     }
 
-    public void saveCanvasToPNG(String exporttarget) {
+    public void saveCanvasImage(String exporttarget) {
         /**FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(new File(FileSystemView.getFileSystemView().getDefaultDirectory().getPath()));
         fileChooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter("PNG Files", "*.png"));
@@ -168,9 +171,7 @@ public class RunwayGraphics {
             errorMessage.show();
         } else {
             String filename = exporttarget; //String filename = exporttarget.getAbsolutePath();
-            if (!filename.substring(filename.length() - 4).equals(".png")) {
-                filename = filename.concat(".png");
-            }
+            String fileType = filename.substring(filename.length() - 3);
             File out = new File(filename);
             try {
                 if(currentView == null) {
@@ -179,7 +180,7 @@ public class RunwayGraphics {
                 }
                 WritableImage wim = new WritableImage((int) Math.round(currentView.getWidth()), (int) Math.round(currentView.getHeight()));
                 currentView.snapshot(null, wim);
-                ImageIO.write(SwingFXUtils.fromFXImage(wim, null), "png", out);
+                ImageIO.write(SwingFXUtils.fromFXImage(wim, null), fileType, out);
                 /**Alert success = new Alert(Alert.AlertType.INFORMATION);
                 success.setTitle("Image Exported Successfully");
                 success.setContentText("Image has been saved to " + filename);
@@ -195,11 +196,11 @@ public class RunwayGraphics {
     }
 
 
-    public void saveCanvasToPNG() {
+    public void saveCanvasImage() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(new File(FileSystemView.getFileSystemView().getDefaultDirectory().getPath()));
-        fileChooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter("PNG Files", "*.png"));
-        fileChooser.setTitle("Export runway calculations to PNG");
+        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("PNG Files", "*.png"), new FileChooser.ExtensionFilter("JPG Files", "*.jpg"), new FileChooser.ExtensionFilter("GIF Files", "*.gif"));
+        fileChooser.setTitle("Export runway calculations");
         File exporttarget = fileChooser.showSaveDialog(stage);
         if(exporttarget == null) {
             Alert errorMessage = new Alert(Alert.AlertType.ERROR);
@@ -207,9 +208,10 @@ public class RunwayGraphics {
             errorMessage.show();
         } else {
             String filename = exporttarget.getAbsolutePath();
-            if (!filename.substring(filename.length() - 4).equals(".png")) {
+            /**if (!filename.substring(filename.length() - 4).equals(".png")) {
                 filename = filename.concat(".png");
-            }
+            }**/
+            String fileType = filename.substring(filename.length() - 3);
             File out = new File(filename);
             try {
                 if(currentView == null) {
@@ -217,8 +219,10 @@ public class RunwayGraphics {
                     System.out.println(topViewCanvas);
                 }
                 WritableImage wim = new WritableImage((int) Math.round(currentView.getWidth()), (int) Math.round(currentView.getHeight()));
-                currentView.snapshot(null, wim);
-                ImageIO.write(SwingFXUtils.fromFXImage(wim, null), "png", out);
+                SnapshotParameters params = new SnapshotParameters();
+                params.setFill(theme.getHUDColor());
+                currentView.snapshot(params, wim);
+                ImageIO.write(SwingFXUtils.fromFXImage(wim, null), fileType, out);
                 Alert success = new Alert(Alert.AlertType.INFORMATION);
                 success.setTitle("Image Exported Successfully");
                 success.setContentText("Image has been saved to " + filename);
@@ -242,7 +246,7 @@ public class RunwayGraphics {
         splitView.setBackground(new Background(new BackgroundFill(theme.getBackgroundColor(), CornerRadii.EMPTY, Insets.EMPTY)));
 
         drawTopView(CANVAS_WIDTH, 400, false);
-        drawSideView(CANVAS_WIDTH, 300);
+        drawSideView(CANVAS_WIDTH, 400);
 
         setupButtons();
 
@@ -272,6 +276,11 @@ public class RunwayGraphics {
                 currentView = sideViewCanvas;
                 break;
             case 3: splitView.getItems().clear();
+            	setupSplitView();
+            	runwayDisplayAnchor.setTopAnchor(splitView, 0.0);
+            	runwayDisplayAnchor.setBottomAnchor(splitView, 0.0);
+            	runwayDisplayAnchor.setLeftAnchor(splitView, 0.0);
+            	runwayDisplayAnchor.setRightAnchor(splitView, 0.0);
                 splitView.getItems().addAll(topView, sideView);
                 currentView = topViewCanvas;
                 runwayDisplayAnchor.getChildren().addAll(splitView, viewSelect, filtersGridPaneContainer);
@@ -284,7 +293,8 @@ public class RunwayGraphics {
     }
 
     public void showMeasurements() {
-
+    	
+    	showTitle();
 
         if (obstacleBox.isSelected()) {
             showObstacle();
@@ -329,7 +339,7 @@ public class RunwayGraphics {
 
         obstruction = affectedRunway.getObstruction();
         //affectedRunway.recalculate(obstruction);
-        drawObstacle(obstruction.getDistanceFromThreshold(), obstruction.getDistanceFromCentre(), obstruction.getLength(), obstruction.getHeight());
+        drawObstacle(obstruction.getDistanceFromThreshold() + affectedRunway.getOriginalRunway().getDisplacedThreshold(), obstruction.getDistanceFromCentre(), obstruction.getLength(), obstruction.getHeight());
         double OrigTODA = affectedRunway.getOriginalRunway().getTODA();
         double NewTODA = affectedRunway.getTODA();
         double OrigTORA = affectedRunway.getOriginalRunway().getTORA();
@@ -346,15 +356,18 @@ public class RunwayGraphics {
         double red = runwayLength - NewLDA;
         double green = NewLDA;
 
-        if (obDistance > (runwayLength/2)) {
-            drawDangerZones(0, 200 ,green, 50, theme.getSafeColor(), "", obDistance);
-            drawDangerZones(green, 200, red, 50, theme.getDangerColor(), "", obDistance);
-            drawTriangle(obstruction.getDistanceFromThreshold(), obstruction.getHeight(), 2);
+        int threshold = affectedRunway.getOriginalRunway().getDisplacedThreshold();
+        int b = (int) getLengthRelativeToRunway(threshold);
+
+        if (obDistance + threshold > (runwayLength/2)) {
+            drawDangerZones(0 + threshold, 200 ,green, 50, theme.getSafeColor(), "LDA", obDistance);
+            drawDangerZones(green + threshold, 200, red, 50, theme.getDangerColor(), "ALS/TOCS", obDistance);
+            drawTriangle(obstruction.getDistanceFromThreshold() + affectedRunway.getOriginalRunway().getDisplacedThreshold(), obstruction.getHeight(), 2);
         }
-        if (obDistance <= (runwayLength/2)) {
-            drawDangerZones(0, 200, red, 50, theme.getDangerColor(), "", obDistance);
-            drawDangerZones(red, 200, green, 50, theme.getSafeColor(), "", obDistance);
-            drawTriangle(obstruction.getDistanceFromThreshold(), obstruction.getHeight(), 1);
+        if (obDistance + threshold <= (runwayLength/2)) {
+            drawDangerZones(0 + threshold, 200, red - threshold, 50, theme.getDangerColor(), "ALS/TOCS", obDistance);
+            drawDangerZones((0 + threshold) + (red - threshold), 200, green, 50, theme.getSafeColor(), "LDA", obDistance);
+            drawTriangle(obstruction.getDistanceFromThreshold() + affectedRunway.getOriginalRunway().getDisplacedThreshold(), obstruction.getHeight(), 1);
         }
     }
 
@@ -402,18 +415,50 @@ public class RunwayGraphics {
         }
 
     }
+    
+    public void showTitle() {
+
+        String title = affectedRunway.getOriginalRunway().getName() + " - " + affectedRunway.getOriginalRunway().getAirport();
+
+        Text text = new Text(title);
+        
+        topGc.setFont(new Font(20));
+        topGc.setTextAlign(TextAlignment.CENTER);
+        topGc.setLineWidth(1.7);
+        //topGc.setStroke(theme.getRESAColor());
+        
+        topGc.strokeText(title, CANVAS_WIDTH / 2, 50);
+
+        topGc.setFont(new Font(15));
+        topGc.setTextAlign(TextAlignment.LEFT);
+        topGc.setLineWidth(1.2);
+         
+        sideGc.setFont(new Font(20));
+        sideGc.setTextAlign(TextAlignment.CENTER);
+        sideGc.setLineWidth(1.7);
+//      sideGc.setStroke(theme.getRESAColor());
+        
+        sideGc.strokeText(title, CANVAS_WIDTH / 2, 50);
+        
+        sideGc.setFont(new Font(15));
+        sideGc.setTextAlign(TextAlignment.LEFT);
+        sideGc.setLineWidth(1.2);
+    }
 
     public void showTORA() {
 
         double TORA = affectedRunway.getTORA();
         int runwayLength = affectedRunway.getOriginalRunway().getTORA();
         int obDistance = obstruction.getDistanceFromThreshold();
+        int threshold = affectedRunway.getOriginalRunway().getDisplacedThreshold();
+        int b = (int) getLengthRelativeToRunway(threshold);
+        //System.out.println(threshold);
 
-        if (obDistance > (runwayLength/2)) {
-            drawMeasurement(topGc, "TORA: " + TORA, posMargin + THRESHOLD_MARGIN, 0, getLengthRelativeToRunway(TORA), Orientation.HORIZONTAL, theme.getTORAColor());
-            drawMeasurement(sideGc, "TORA: " + TORA, posMargin + THRESHOLD_MARGIN, 0, getLengthRelativeToRunway(TORA), Orientation.HORIZONTAL, theme.getTORAColor());
+        if (obDistance + threshold > (runwayLength/2)) {
+            drawMeasurement(topGc, "TORA: " + TORA, posMargin + THRESHOLD_MARGIN + b, 0, getLengthRelativeToRunway(TORA), Orientation.HORIZONTAL, theme.getTORAColor());
+            drawMeasurement(sideGc, "TORA: " + TORA, posMargin + THRESHOLD_MARGIN + b, 0, getLengthRelativeToRunway(TORA), Orientation.HORIZONTAL, theme.getTORAColor());
         }
-        if (obDistance <= (runwayLength/2)) {
+        if (obDistance + threshold <= (runwayLength/2)) {
             drawMeasurement(topGc, "TORA: " + TORA, CANVAS_WIDTH - negMargin, 0, -getLengthRelativeToRunway(TORA), Orientation.HORIZONTAL, theme.getTORAColor());
             drawMeasurement(sideGc, "TORA: " + TORA, CANVAS_WIDTH - negMargin, 0, -getLengthRelativeToRunway(TORA), Orientation.HORIZONTAL, theme.getTORAColor());
         }
@@ -427,12 +472,14 @@ public class RunwayGraphics {
         double LDA = affectedRunway.getLDA();
         int runwayLength = affectedRunway.getOriginalRunway().getTORA();
         int obDistance = obstruction.getDistanceFromThreshold();
+        int threshold = affectedRunway.getOriginalRunway().getDisplacedThreshold();
+        int b = (int) getLengthRelativeToRunway(threshold);
 
-        if (obDistance > (runwayLength/2)) {
-            drawMeasurement(topGc, "LDA: " + LDA, posMargin + THRESHOLD_MARGIN, 0, getLengthRelativeToRunway(LDA), Orientation.HORIZONTAL, theme.getLDAColor());
-            drawMeasurement(sideGc, "LDA: " + LDA, posMargin + THRESHOLD_MARGIN, 0, getLengthRelativeToRunway(LDA), Orientation.HORIZONTAL, theme.getLDAColor());
+        if (obDistance + threshold> (runwayLength/2)) {
+            drawMeasurement(topGc, "LDA: " + LDA, posMargin + THRESHOLD_MARGIN + b, 0, getLengthRelativeToRunway(LDA), Orientation.HORIZONTAL, theme.getLDAColor());
+            drawMeasurement(sideGc, "LDA: " + LDA, posMargin + THRESHOLD_MARGIN + b, 0, getLengthRelativeToRunway(LDA), Orientation.HORIZONTAL, theme.getLDAColor());
         }
-        if (obDistance <= (runwayLength/2)) {
+        if (obDistance + threshold <= (runwayLength/2)) {
             drawMeasurement(topGc, "LDA: " + LDA, CANVAS_WIDTH - negMargin, 0, -getLengthRelativeToRunway(LDA), Orientation.HORIZONTAL, theme.getLDAColor());
             drawMeasurement(sideGc, "LDA: " + LDA, CANVAS_WIDTH - negMargin, 0, -getLengthRelativeToRunway(LDA), Orientation.HORIZONTAL, theme.getLDAColor());
         }
@@ -451,12 +498,14 @@ public class RunwayGraphics {
         if (hasStopway()) { offset += STOPWAY_MARGIN; }
         int runwayLength = affectedRunway.getOriginalRunway().getTORA();
         int obDistance = obstruction.getDistanceFromThreshold();
+        int threshold = affectedRunway.getOriginalRunway().getDisplacedThreshold();
+        int b = (int) getLengthRelativeToRunway(threshold);
 
-        if (obDistance > (runwayLength/2)) {
-            drawMeasurement(topGc, "ASDA: " + ASDA, posMargin + THRESHOLD_MARGIN, 0, getLengthRelativeToRunway(ASDA) , Orientation.HORIZONTAL, theme.getASDAColor());
-            drawMeasurement(sideGc, "ASDA: " + ASDA, posMargin + THRESHOLD_MARGIN, 0, getLengthRelativeToRunway(ASDA) , Orientation.HORIZONTAL, theme.getASDAColor());
+        if (obDistance + threshold > (runwayLength/2)) {
+            drawMeasurement(topGc, "ASDA: " + ASDA, posMargin + THRESHOLD_MARGIN + b, 0, getLengthRelativeToRunway(ASDA) , Orientation.HORIZONTAL, theme.getASDAColor());
+            drawMeasurement(sideGc, "ASDA: " + ASDA, posMargin + THRESHOLD_MARGIN + b, 0, getLengthRelativeToRunway(ASDA) , Orientation.HORIZONTAL, theme.getASDAColor());
         }
-        if (obDistance <= (runwayLength/2)) {
+        if (obDistance + threshold <= (runwayLength/2)) {
             drawMeasurement(topGc, "ASDA: " + ASDA, CANVAS_WIDTH - margin, 0, -getLengthRelativeToRunway(ASDA) - offset , Orientation.HORIZONTAL, theme.getASDAColor());
             drawMeasurement(sideGc, "ASDA: " + ASDA, CANVAS_WIDTH - margin, 0, -getLengthRelativeToRunway(ASDA) - offset, Orientation.HORIZONTAL, theme.getASDAColor());
         }
@@ -474,12 +523,14 @@ public class RunwayGraphics {
         if (hasStopway()) { offset += STOPWAY_MARGIN; }
         int runwayLength = affectedRunway.getOriginalRunway().getTORA();
         int obDistance = obstruction.getDistanceFromThreshold();
+        int threshold = affectedRunway.getOriginalRunway().getDisplacedThreshold();
+        int b = (int) getLengthRelativeToRunway(threshold);
 
-        if (obDistance > (runwayLength/2)) {
-            drawMeasurement(topGc, "TODA: " + TODA, posMargin + THRESHOLD_MARGIN, 0, getLengthRelativeToRunway(TODA), Orientation.HORIZONTAL, theme.getTODAColor());
-            drawMeasurement(sideGc, "TODA: " + TODA, posMargin + THRESHOLD_MARGIN, 0, getLengthRelativeToRunway(TODA), Orientation.HORIZONTAL, theme.getTODAColor());
+        if (obDistance + threshold > (runwayLength/2)) {
+            drawMeasurement(topGc, "TODA: " + TODA, posMargin + THRESHOLD_MARGIN + b, 0, getLengthRelativeToRunway(TODA), Orientation.HORIZONTAL, theme.getTODAColor());
+            drawMeasurement(sideGc, "TODA: " + TODA, posMargin + THRESHOLD_MARGIN + b, 0, getLengthRelativeToRunway(TODA), Orientation.HORIZONTAL, theme.getTODAColor());
         }
-        if (obDistance <= (runwayLength/2)) {
+        if (obDistance + threshold <= (runwayLength/2)) {
             drawMeasurement(topGc, "TODA: " + TODA, CANVAS_WIDTH, 0, -getLengthRelativeToRunway(TODA) - offset, Orientation.HORIZONTAL, theme.getTODAColor());
             drawMeasurement(sideGc, "TODA: " + TODA, CANVAS_WIDTH, 0, -getLengthRelativeToRunway(TODA) - offset, Orientation.HORIZONTAL, theme.getTODAColor());
         }
@@ -495,11 +546,9 @@ public class RunwayGraphics {
         double NewTORA = affectedRunway.getTORA();
         double NewLDA = affectedRunway.getLDA();
         double RESA = affectedRunway.getOriginalRunway().getRESA();
-        /*
-        double height = obstruction.getHeight();
-        System.out.println("RESA: " + affectedRunway.getOriginalRunway().getRESA());
-        System.out.println("strip end: " + affectedRunway.getOriginalRunway().getStripEnd());
-        */
+        int threshold = affectedRunway.getOriginalRunway().getDisplacedThreshold();
+        int c = (int) getLengthRelativeToRunway(threshold);
+
 
         double a = CANVAS_WIDTH - negMargin - (getLengthRelativeToRunway(NewTORA));
         double b = getLengthRelativeToRunway(NewLDA + 60);
@@ -507,11 +556,11 @@ public class RunwayGraphics {
         int runwayLength = affectedRunway.getOriginalRunway().getTORA();
         int obDistance = obstruction.getDistanceFromThreshold();
 
-        if (obDistance > (runwayLength/2)) {
-            drawMeasurement(topGc, "RESA: " + RESA, posMargin + THRESHOLD_MARGIN + b, 0, getLengthRelativeToRunway(RESA), Orientation.HORIZONTAL, theme.getRESAColor());
-            drawMeasurement(sideGc, "RESA: " + RESA, posMargin + THRESHOLD_MARGIN + b, 0, getLengthRelativeToRunway(RESA), Orientation.HORIZONTAL, theme.getRESAColor());
+        if (obDistance + threshold > (runwayLength/2)) {
+            drawMeasurement(topGc, "RESA: " + RESA, posMargin + THRESHOLD_MARGIN + b + c, 0, getLengthRelativeToRunway(RESA), Orientation.HORIZONTAL, theme.getRESAColor());
+            drawMeasurement(sideGc, "RESA: " + RESA, posMargin + THRESHOLD_MARGIN + b + c, 0, getLengthRelativeToRunway(RESA), Orientation.HORIZONTAL, theme.getRESAColor());
         }
-        if (obDistance <= (runwayLength/2)) {
+        if (obDistance + threshold<= (runwayLength/2)) {
             drawMeasurement(topGc, "RESA: " + RESA, CANVAS_WIDTH - b, 0, -getLengthRelativeToRunway(RESA), Orientation.HORIZONTAL, theme.getRESAColor());
             drawMeasurement(sideGc, "RESA: " + RESA, CANVAS_WIDTH - b, 0, -getLengthRelativeToRunway(RESA), Orientation.HORIZONTAL, theme.getRESAColor());
         }
@@ -543,14 +592,18 @@ public class RunwayGraphics {
         int runwayLength = affectedRunway.getOriginalRunway().getTORA();
 
         if (fill == theme.getDangerColor()) {
+        	topGc.setTextAlign(TextAlignment.CENTER);
+        	if (length2 > 0) topGc.strokeText(label, x + posMargin + THRESHOLD_MARGIN + (length2 / 2), (topGc.getCanvas().getHeight() / 2) -y - 5);
             topGc.setStroke(theme.getOutlineColor());
             topGc.setFill(createGrid(fill, fill));
             topGc.translate(posMargin + THRESHOLD_MARGIN, topGc.getCanvas().getHeight() / 2);
-            topGc.fillRect(x, -y, newLength, newHeight);
-            topGc.strokeRect(x, -y, newLength, newHeight);
+            topGc.fillRect(x, -y, length2, newHeight);
+            topGc.strokeRect(x, -y, length2, newHeight);
             topGc.translate(-(posMargin + THRESHOLD_MARGIN), -topGc.getCanvas().getHeight() / 2);
         }
         if (fill == theme.getSafeColor()) {
+            topGc.setTextAlign(TextAlignment.CENTER);
+            if (length2 > 0) topGc.strokeText(label, x + posMargin + THRESHOLD_MARGIN + (length2 / 2), (topGc.getCanvas().getHeight() / 2) -y - 5);
             topGc.setStroke(theme.getOutlineColor());
             topGc.setFill(createGrid(fill, fill));
             topGc.translate(posMargin + THRESHOLD_MARGIN, topGc.getCanvas().getHeight() / 2);
@@ -797,11 +850,18 @@ public class RunwayGraphics {
         });
 
         filtersGridPane.add(compass, 0, 8, 2, 1);
+        
+        Button resetView = new Button("Reset View");
+        resetView.setOnAction((event) -> {
+            draw();
+        });
+
+        filtersGridPane.add(resetView, 2, 8, 2, 1);
 
         Button export = new Button("Export");
         export.setOnAction((actionEvent -> {
             draw();
-            saveCanvasToPNG();
+            saveCanvasImage();
         }));
 
         filtersGridPane.add(export, 3, 8, 1, 1);
@@ -849,6 +909,11 @@ public class RunwayGraphics {
                             currentView = sideViewCanvas;
                             break;
                         case 3: splitView.getItems().clear();
+                        	setupSplitView();
+                        	runwayDisplayAnchor.setTopAnchor(splitView, 0.0);
+                        	runwayDisplayAnchor.setBottomAnchor(splitView, 0.0);
+                        	runwayDisplayAnchor.setLeftAnchor(splitView, 0.0);
+                        	runwayDisplayAnchor.setRightAnchor(splitView, 0.0);
                             splitView.getItems().addAll(topView, sideView);
                             currentView = topViewCanvas;
                             runwayDisplayAnchor.getChildren().addAll(splitView, viewSelect, filtersGridPaneContainer);
@@ -881,6 +946,7 @@ public class RunwayGraphics {
             double newTranslateX = orgTranslateX + offsetX;
             //double newTranslateY = orgTranslateY + offsetY;
             ((Canvas) (e.getSource())).setTranslateX(newTranslateX);
+            runwayDisplayAnchor.toBack();
             //((Canvas) (e.getSource())).setTranslateY(newTranslateY);
         });
 
@@ -1013,6 +1079,7 @@ public class RunwayGraphics {
             double newTranslateX = orgTranslateX + offsetX;
             //double newTranslateY = orgTranslateY + offsetY;
             ((Canvas) (e.getSource())).setTranslateX(newTranslateX);
+            runwayDisplayAnchor.toBack();
             //((Canvas) (e.getSource())).setTranslateY(newTranslateY);
         });
 
