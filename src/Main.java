@@ -1,12 +1,17 @@
 import javafx.application.Application;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.awt.event.KeyEvent;
+import java.beans.EventHandler;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -35,6 +40,45 @@ public class Main extends Application {
         stage.setScene(new Scene(root, 1000, 600));
         stage.setMaximized(true);
         stage.show();
+
+
+        /** keyboard shortcuts
+         * v - iterate through view modes
+         * e - export menu
+         * i - import menu
+         * l - clear all presets
+         */
+        stage.getScene().setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.V) {
+                int currentView = runwayGraphics.viewSelect.getSelectionModel().getSelectedIndex();
+                switch (currentView) {
+                    case 0:
+                        runwayGraphics.viewSelect.setValue("Side View");
+                        break;
+                    case 1:
+                        runwayGraphics.viewSelect.setValue("Split View");
+                        break;
+                    case 3:
+                        runwayGraphics.viewSelect.setValue("Top View");
+                        break;
+                }
+            }
+            if (e.getCode() == KeyCode.I) {
+                importNewXML();
+            }
+            if (e.getCode() == KeyCode.E) {
+                exportToXML();
+            }
+            if (e.getCode() == KeyCode.L) {
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to clear all presets?",
+                        ButtonType.YES, ButtonType.NO);
+                alert.showAndWait();
+
+                if (alert.getResult() == ButtonType.YES) {
+                    clearPresets();
+                }
+            }
+        });
     }
 
     // add functionality to buttons in config panel to update the graphical view
@@ -46,7 +90,7 @@ public class Main extends Application {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Error");
                 alert.setHeaderText("Configuration Error");
-                alert.setContentText("One of the parameters in the runway or obstruction was invalid!");
+                alert.setContentText("One of the parameters in the runway or obstruction was invalid: " + configPanel.getInvalidText());
                 alert.showAndWait();
             } else {
                 if(currentRunway != null) {
@@ -66,7 +110,7 @@ public class Main extends Application {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Error");
                 alert.setHeaderText("Configuration Error");
-                alert.setContentText("One of the parameters in the runway or obstruction was invalid!");
+                alert.setContentText("One of the parameters in the runway or obstruction was invalid: "  + configPanel.getInvalidText());
                 alert.showAndWait();
             } else {
                 historyPanel.addHistoryEntry(compareChanges(obstruction));
@@ -110,7 +154,6 @@ public class Main extends Application {
         }
 
         return "RUNWAY: " + String.join(", ", changes);
-
     }
 
     public String compareChanges(Obstruction obst) {
@@ -178,6 +221,9 @@ public class Main extends Application {
 
         runwayGraphics = new RunwayGraphics(new Theme("dark"));
         runwayGraphics.draw();
+        runwayGraphics = new RunwayGraphics(stage);
+        if(currentRunway != null)
+            runwayGraphics.draw(currentRunway);
         main.add(runwayGraphics.getRunwayGraphics(), 0, 0, 2, 4);
 
 
@@ -194,74 +240,25 @@ public class Main extends Application {
 
     private void setupMenus(MenuBar menuBar) {
         Menu file = new Menu("File");
+        Menu accessibility = new Menu("Accessibility");
         Menu settings = new Menu("Settings");
         Menu theme = new Menu("Theme");
         menuBar.getMenus().addAll(file, settings, theme);
+        menuBar.getMenus().addAll(file, accessibility);
         MenuItem importNewPresets = new MenuItem("Import New Presets");
         importNewPresets.setOnAction((event) -> {
-            String path = fileChooserGetPath();
-            if(path == null) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Error");
-                alert.setHeaderText("Import Error");
-                alert.setContentText("Please select a file");
-                alert.showAndWait();
-            } else {
-                try {
-                    importXML importXML = new importXML(path);
-                    configPanel.addRunwaysFromXML(importXML.importRunwaysFromXML());
-                    configPanel.addObstructionsFromXML(importXML.importObstructionsFromXML());
-                    historyPanel.addHistoryEntry("PRESETS: Imported " + path);
-                } catch (Exception e) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Error");
-                    alert.setHeaderText("Import Error");
-                    alert.setContentText(e.getMessage());
-                    alert.showAndWait();
-                }
-        }});
+            importNewXML();
+        });
 
         // export all runways and obstructions
         MenuItem exportRunwaysAndObstructions = new MenuItem("Export Config");
         exportRunwaysAndObstructions.setOnAction((event) -> {
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setInitialDirectory(new File(Paths.get("src/xml").toAbsolutePath().normalize().toString()));
-            fileChooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter("Runway/Obstruction Files", "*.xml"));
-            fileChooser.setTitle("Export runways and obstructions");
-            File exporttarget = fileChooser.showSaveDialog(stage);
-            if(exporttarget == null) {
-                Alert errorMessage = new Alert(Alert.AlertType.ERROR);
-                errorMessage.setContentText("Create a file to save config into.");
-                errorMessage.show();
-            } else {
-
-                String filename = exporttarget.getAbsolutePath();
-
-                // ensure filename has .xml extension
-                if (!filename.substring(filename.length() - 4).equals(".xml")) {
-                    filename = filename.concat(".xml");
-                }
-
-                try {
-                    exportXML.exportBothToXML(filename, configPanel.getPresetObstructions(), configPanel.getPresetRunways());
-                } catch (Exception e) {
-                    Alert errorMessage = new Alert(Alert.AlertType.ERROR);
-                    errorMessage.setContentText("An error occurred exporting the file");
-                    errorMessage.show();
-                }
-            }
-
+            exportToXML();
         });
 
         MenuItem clearPresets = new MenuItem("Clear All Presets");
         clearPresets.setOnAction((event) -> {
-            configPanel.clearPresets();
-            historyPanel.addHistoryEntry("PRESETS: Cleared all");
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("INFO");
-            alert.setHeaderText("Presets Cleared");
-            alert.showAndWait();
-            runwayGraphics.clearRunway();
+            clearPresets();
         });
 
 //        MenuItem showCalculations = new MenuItem("Show Calculations");
@@ -274,7 +271,131 @@ public class Main extends Application {
 //        });
 
         file.getItems().addAll(importNewPresets, exportRunwaysAndObstructions, clearPresets);
-        
+
+        MenuItem viewShortcuts = new MenuItem("View shortcuts");
+        viewShortcuts.setOnAction((event) -> {
+            displayShortcutsWindow();
+        });
+
+        accessibility.getItems().addAll(viewShortcuts);
+    }
+
+    private String fileChooserGetPath() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter("Runway/Obstruction Files", "*.xml"));
+        String currentPath = Paths.get("src/xml").toAbsolutePath().normalize().toString();
+        fileChooser.setInitialDirectory(new File(currentPath));
+        File selectedFile = fileChooser.showOpenDialog(stage);
+        if(selectedFile == null) {
+            return null;
+        }
+        return selectedFile.getAbsolutePath();
+    }
+
+    private void importNewXML() {
+        String path = fileChooserGetPath();
+        if(path == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Import Error");
+            alert.setContentText("Please select a file");
+            alert.showAndWait();
+        } else {
+            try {
+                importXML importXML = new importXML(path);
+                configPanel.addRunwaysFromXML(importXML.importRunwaysFromXML());
+                configPanel.addObstructionsFromXML(importXML.importObstructionsFromXML());
+                historyPanel.addHistoryEntry("PRESETS: Imported " + path);
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Import Error");
+                alert.setContentText(e.getMessage());
+                alert.showAndWait();
+            }
+        }
+    }
+
+    private void exportToXML() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(new File(Paths.get("src/xml").toAbsolutePath().normalize().toString()));
+        fileChooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter("Runway/Obstruction Files", "*.xml"));
+        fileChooser.setTitle("Export runways and obstructions");
+        File exporttarget = fileChooser.showSaveDialog(stage);
+        if(exporttarget == null) {
+            Alert errorMessage = new Alert(Alert.AlertType.ERROR);
+            errorMessage.setContentText("Create a file to save config into.");
+            errorMessage.show();
+        } else {
+
+            String filename = exporttarget.getAbsolutePath();
+
+            // ensure filename has .xml extension
+            if (!filename.substring(filename.length() - 4).equals(".xml")) {
+                filename = filename.concat(".xml");
+            }
+
+            try {
+                exportXML.exportBothToXML(filename, configPanel.getPresetObstructions(), configPanel.getPresetRunways());
+            } catch (Exception e) {
+                Alert errorMessage = new Alert(Alert.AlertType.ERROR);
+                errorMessage.setHeaderText("An error occurred exporting the file");
+                errorMessage.setContentText(e.getMessage());
+                errorMessage.show();
+            }
+        }
+    }
+
+    private void clearPresets() {
+        configPanel.clearPresets();
+        historyPanel.addHistoryEntry("PRESETS: Cleared all");
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("INFO");
+        alert.setHeaderText("Presets Cleared");
+        alert.showAndWait();
+        runwayGraphics.clearRunway();
+    }
+
+    public void displayShortcutsWindow() {
+        Stage shortcutsWindow = new Stage();
+        shortcutsWindow.setTitle("Keyboard shortcuts");
+
+        GridPane gp = new GridPane();
+
+        gp.setAlignment(Pos.CENTER);
+        gp.setPadding(new Insets(10));
+
+        ColumnConstraints col0 = new ColumnConstraints();
+        col0.setMinWidth(2);
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setMinWidth(1);
+        ColumnConstraints col2 = new ColumnConstraints();
+        col1.setMinWidth(80);
+
+        gp.setMinSize(150, 100);
+
+        gp.getColumnConstraints().addAll(col0,col1, col2);
+
+        gp.add(new Label("E"), 0, 0);
+        gp.add(new Label(" "), 1, 0);
+        gp.add(new Label("Export menu"), 2,0);
+
+        gp.add(new Label("I"), 0, 1);
+        gp.add(new Label(" "), 1, 1);
+        gp.add(new Label("Import menu"), 2,1);
+
+        gp.add(new Label("L"), 0, 2);
+        gp.add(new Label(" "), 1, 2);
+        gp.add(new Label("Clear all presets"), 2,2);
+
+        gp.add(new Label("V"), 0, 3);
+        gp.add(new Label(" "), 1, 3);
+        gp.add(new Label("Next view"), 2,3);
+
+        Scene scene = new Scene(gp);
+        shortcutsWindow.setScene(scene);
+        file.getItems().addAll(importNewPresets, exportRunwaysAndObstructions, clearPresets);
+
         MenuItem defaultTheme = new MenuItem("default Theme");
         MenuItem darkTheme = new MenuItem("dark Theme");
         MenuItem monochromeTheme = new MenuItem("monochrome Theme");
@@ -291,16 +412,7 @@ public class Main extends Application {
         });
     }
 
-    private String fileChooserGetPath() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter("Runway/Obstruction Files", "*.xml"));
-        String currentPath = Paths.get("src/xml").toAbsolutePath().normalize().toString();
-        fileChooser.setInitialDirectory(new File(currentPath));
-        File selectedFile = fileChooser.showOpenDialog(stage);
-        if(selectedFile == null) {
-            return null;
-        }
-        return selectedFile.getAbsolutePath();
+        shortcutsWindow.initModality(Modality.APPLICATION_MODAL);
+        shortcutsWindow.show();
     }
-
 }

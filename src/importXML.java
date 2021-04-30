@@ -8,6 +8,8 @@
 import java.io.File;
 import java.util.ArrayList;
 import javax.xml.parsers.*;
+
+import javafx.scene.control.Alert;
 import org.w3c.dom.*;
 
 
@@ -25,11 +27,19 @@ public class importXML {
      * @param filename The filename of the XML file to be imported
      * @throws Exception If file could not be opened
      */
-    importXML(String filename) throws Exception {
+    public importXML(String filename) throws Exception {
         this.filename = filename;
 
         // throws file not found exception if fails
         File inputFile = new File(filename);
+
+        // check if file empty
+        if (inputFile.length() == 0) {
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+            errorAlert.setHeaderText("Empty input file");
+            errorAlert.setContentText("The selected XML file for import is empty. Please choose a valid file.");
+            errorAlert.showAndWait();
+        }
 
         // initialise document
         // create a DocumentBuilder and load XML file as a document
@@ -41,6 +51,7 @@ public class importXML {
         } catch (Exception e) {
             throw new Exception("File not found");
         }
+
     }
 
 
@@ -53,15 +64,12 @@ public class importXML {
         // get a list of all runways from the XML files
         NodeList runwayNodes = doc.getElementsByTagName("runway");
 
-        // if list empty, throw exception
-        if (runwayNodes.getLength() == 0) {
-            throw new NullPointerException("Empty list - XML file contains no runways");
-        }
-
         // iterate over all runways and add them as objects to array list
         ArrayList<Runway> runwayObjects = new ArrayList<Runway>();
-        for (int i = 0, len = runwayNodes.getLength(); i < len; i++) {
-            runwayObjects.add(newRunwayFromElement((Element) runwayNodes.item(i)));
+        if (runwayNodes.getLength() != 0) {
+            for (int i = 0, len = runwayNodes.getLength(); i < len; i++) {
+                runwayObjects.add(newRunwayFromElement((Element) runwayNodes.item(i)));
+            }
         }
 
         return runwayObjects;
@@ -76,17 +84,17 @@ public class importXML {
     public ArrayList<Obstruction> importObstructionsFromXML() {
         // get a list of all runways from the XML files
         NodeList obstructionNodes = doc.getElementsByTagName("obstruction");
-
-        // if list empty, throw exception
-        if (obstructionNodes.getLength() == 0) {
-            throw new NullPointerException("Empty list - XML file contains no obstructions");
-        }
-
         // iterate over all runways and add them as objects to array list
         ArrayList<Obstruction> obstructionObjects = new ArrayList<Obstruction>();
-        for (int i = 0, len = obstructionNodes.getLength(); i < len; i++) {
-            obstructionObjects.add(newObsFromElement((Element) obstructionNodes.item(i)));
+
+
+        if (obstructionNodes.getLength() != 0) {
+            for (int i = 0, len = obstructionNodes.getLength(); i < len; i++) {
+                obstructionObjects.add(newObsFromElement((Element) obstructionNodes.item(i)));
+            }
         }
+
+
 
         return obstructionObjects;
     }
@@ -180,4 +188,5 @@ public class importXML {
         importXML testing = new importXML("src/testing/testRunwayBlanks.xml");
         ArrayList<Runway> runwaysTest = testing.importRunwaysFromXML();
     }
+
 }

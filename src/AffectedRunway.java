@@ -5,7 +5,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 
 public class AffectedRunway {
-    private int TORA, TODA, ASDA, LDA;
+    private int TORA, TODA, ASDA, LDA, RESA;
     private Runway originalRunway;
     private Obstruction obstruction;
     private Boolean unchanged;
@@ -30,12 +30,13 @@ public class AffectedRunway {
             unchanged = true;
         } else {
             unchanged = false;
+            RESA = originalRunway.getRESA();
             if (obstruction.getDistanceFromThreshold() < (originalRunway.getTORA() + originalRunway.getDisplacedThreshold()) / 2) {
                 TORA = Math.min(originalRunway.getTORA() - originalRunway.getBlastAllowance() - obstruction.getDistanceFromThreshold() - originalRunway.getDisplacedThreshold(),
                         originalRunway.getTORA() - originalRunway.getStripEnd() - originalRunway.getRESA() - obstruction.getDistanceFromThreshold());
                 ASDA = TORA + originalRunway.getStopway();
                 TODA = TORA + originalRunway.getClearway();
-                LDA = originalRunway.getLDA() - obstruction.getDistanceFromThreshold() - originalRunway.getStripEnd() - (obstruction.getHeight() * 50);
+                LDA = originalRunway.getLDA() - obstruction.getDistanceFromThreshold() - originalRunway.getStripEnd() - (obstruction.getHeight() * originalRunway.getEGR());
 
             }
             //landing towards, take off towards
@@ -43,7 +44,7 @@ public class AffectedRunway {
                 TORA = obstruction.getDistanceFromThreshold() + originalRunway.getDisplacedThreshold() - (obstruction.getHeight() * originalRunway.getSlopeRatio()) - originalRunway.getStripEnd();
                 ASDA = TORA;
                 TODA = TORA;
-                LDA = obstruction.getDistanceFromThreshold() - originalRunway.getRESA() - originalRunway.getStripEnd();
+                LDA = obstruction.getDistanceFromThreshold() - RESA - originalRunway.getStripEnd();
                 System.out.println("NEW TORA: " + originalRunway.getTORA());
             }
         }
@@ -61,11 +62,11 @@ public class AffectedRunway {
         ColumnConstraints col1 = new ColumnConstraints();
         col1.setPrefWidth(20);
         ColumnConstraints col2 = new ColumnConstraints();
-        col2.setPrefWidth(100);
+        col2.setPrefWidth(150);
         ColumnConstraints col3 = new ColumnConstraints();
         col3.setPrefWidth(20);
         ColumnConstraints col4 = new ColumnConstraints();
-        col4.setPrefWidth(100);
+        col4.setPrefWidth(150);
         ColumnConstraints col5 = new ColumnConstraints();
         col5.setPrefWidth(20);
         ColumnConstraints col6 = new ColumnConstraints();
@@ -163,7 +164,7 @@ public class AffectedRunway {
                 gridPane.add(new Label("-"), 5, 8);
                 gridPane.add(new Label(Integer.toString(originalRunway.getStripEnd())), 6, 8);
                 gridPane.add(new Label("-"), 7, 8);
-                gridPane.add(new Label(originalRunway.getDisplacedThreshold() + "*" + originalRunway.getSlopeRatio()), 8, 8);
+                gridPane.add(new Label(obstruction.getHeight() + "*" + originalRunway.getSlopeRatio()), 8, 8);
 
                 gridPane.add(new Label("="), 1, 9);
                 gridPane.add(new Label(Integer.toString(LDA)),2,9);
@@ -184,7 +185,7 @@ public class AffectedRunway {
             gridPane.add(new Label("+"), 3, 11);
             gridPane.add(new Label(Integer.toString(originalRunway.getDisplacedThreshold())), 4, 11);
             gridPane.add(new Label("-"), 5, 11);
-            gridPane.add(new Label(originalRunway.getDisplacedThreshold() + "*" + originalRunway.getSlopeRatio()), 6, 11);
+            gridPane.add(new Label(obstruction.getHeight() + "*" + originalRunway.getSlopeRatio()), 6, 11);
             gridPane.add(new Label("-"), 7, 11);
             gridPane.add(new Label(Integer.toString(originalRunway.getStripEnd())), 8, 11);
 
@@ -260,6 +261,8 @@ public class AffectedRunway {
     public void setLDA(int LDA) {
         this.LDA = LDA;
     }
+
+    public int getRESA() { return RESA; }
 
     public boolean isUnchanged() {
         return unchanged;

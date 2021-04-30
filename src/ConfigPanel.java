@@ -28,6 +28,7 @@ public class ConfigPanel extends ScrollPane {
     private ArrayList<Runway> presetRunways;
     private ArrayList<Obstruction> presetObstructions;
     private HistoryPanel historyPanel;
+    private String invalidText;
 
     ConfigPanel(HistoryPanel historyPanel) {
         this.historyPanel = historyPanel;
@@ -67,6 +68,7 @@ public class ConfigPanel extends ScrollPane {
 
     // return currently outlined obstruction object
     public Obstruction getObstruction() {
+
         if(!areFieldsValid()) {
             return null;
         }
@@ -84,9 +86,12 @@ public class ConfigPanel extends ScrollPane {
     // return currently outlined runway object
     // TODO add proper support for defaults/optional fields (if blank use defaults)
     public Runway getRunway() {
+    	
+
         if(!areFieldsValid()) {
             return null;
         }
+        
         ArrayList<Integer> runwayValues = new ArrayList<>();
         for (TextField textField : runwayIntTextFields) {
             String val = textField.textProperty().getValue();
@@ -106,17 +111,47 @@ public class ConfigPanel extends ScrollPane {
     // check if the config currently has any invalid fields
     public Boolean areFieldsValid() {
         try {
+        	
+        	//Rules for input
+        	int tora = Integer.parseInt(runwayIntTextFields.get(0).textProperty().getValue());
+        	int toda = Integer.parseInt(runwayIntTextFields.get(1).textProperty().getValue());
+        	int asda = Integer.parseInt(runwayIntTextFields.get(2).textProperty().getValue());
+        	int stopway = Integer.parseInt(runwayIntTextFields.get(9).textProperty().getValue());
+        	int clearway = Integer.parseInt(runwayIntTextFields.get(10).textProperty().getValue());
+        	
+        	if (tora < 50) {
+        		invalidText = "TORA below minimum value";
+        		return false;
+        	}
+        	
+        	/**
+        	//TODA = TORA + Clearway
+        	if (toda != tora + clearway) {
+        		invalidText = "TODA not equal to TORA + Clearway";
+        		return false;
+        	}
+        	
+        	//ASDA = TORA + Stopway
+        	if (asda != tora + stopway) {
+        		invalidText = "ASDA not equal to TORA + Stopway";
+        		return false;
+        	}
+        	
+        	**/
+
             for (TextField textField : obstIntTextFields) {
                 String val = textField.textProperty().getValue();
                 if (textField == obstHeightTextField || textField == obstLengthTextField) {
                     int value = Integer.parseInt(val);
                     if (value <= 0 || value >= 999999) {
+                    	invalidText = "Object height or length cannot be negative";
                         return false;
                     }
                 }
                 else {
                     int value = Integer.parseInt(val);
                     if (value >= 999999) {
+                    	invalidText = "Distance from threshold or centre line above maximum allowed value";
                         return false;
                     }
                 }
@@ -127,6 +162,7 @@ public class ConfigPanel extends ScrollPane {
             	if (!(val.equals("") && (optionalFields.contains(textField)))) {
             		int value = Integer.parseInt(val);
             		if (value < 0 || value >= 999999) {
+            			invalidText = "One of the runway configuration values is negative or above the maximum allowed value";
             			return false;
             		}
                 }
@@ -135,6 +171,7 @@ public class ConfigPanel extends ScrollPane {
             for (TextField textField : runwayStringTextFields) {
                 String val = textField.textProperty().getValue();
                 if (val.length() <= 0 || val.length() >= 32) { // arbitrary limit to name size
+                	invalidText = "Invalid Airport name";
                     return false;
                 }
             }
@@ -143,23 +180,28 @@ public class ConfigPanel extends ScrollPane {
             try {
                 int deg = Integer.parseInt(runName + "0");
                 if(deg < 0 || deg > 360) {
+                	invalidText = "Invalid Runway name";
                     return false;
                 }
             } catch (NumberFormatException e) {
                 try {
                     int deg = Integer.parseInt(runName.substring(0, 2) + "0");
                     if(deg < 0 || deg > 360) {
+                    	invalidText = "Invalid Runway name";
                         return false;
                     }
                     if (runName.length() > 3) {
+                    	invalidText = "Invalid Runway name";
                     	return false;
                     }
                     String letter = runName.substring(2);
                     if (runName.length() == 3 && !(letter.equals("L") || letter.equals("R") || letter.equals("C"))) {
+                    	invalidText = "Invalid Runway name";
                     	return false;
                     }
                     
                 } catch (NumberFormatException e2) {
+                	invalidText = "Invalid Runway name";
                     return false;
                 }
             }
@@ -167,6 +209,7 @@ public class ConfigPanel extends ScrollPane {
             String obstName = obstNameTextField.textProperty().getValue();
             return obstName.length() > 0 && obstName.length() < 64;
         } catch (NumberFormatException e) {
+        	invalidText = "non integer input in a field requiring an integer";
             return false;
         }
     }
@@ -243,7 +286,7 @@ public class ConfigPanel extends ScrollPane {
         saveRunwayPreset.setOnMouseClicked((event) -> {
             Runway runway = getRunway();
             if(runway == null) {
-                configError("One of the parameters in the runway or obstruction was invalid!");
+                configError("One of the parameters in the runway or obstruction was invalid: " + invalidText);
             } else {
                 presetRunways.add(runway);
                 runwayPresetCombo.getItems().add(runway);
@@ -261,7 +304,7 @@ public class ConfigPanel extends ScrollPane {
         removeRunwayPreset.setOnMouseClicked((event) -> {
             Runway runway = getRunway();
             if(runway == null) {
-                configError("One of the parameters in the runway or obstruction was invalid!");
+                configError("One of the parameters in the runway or obstruction was invalid: " + invalidText);
             } else {
                 Runway toRemove = getRunwayFromName(runway.getName(), runway.getAirport());
                 if (toRemove == null) {
@@ -286,7 +329,7 @@ public class ConfigPanel extends ScrollPane {
         saveObstPreset.setOnMouseClicked((event) -> {
             Obstruction obstruction = getObstruction();
             if(obstruction == null) {
-                configError("One of the parameters in the runway or obstruction was invalid!");
+                configError("One of the parameters in the runway or obstruction was invalid: "  + invalidText);
             } else {
                 presetObstructions.add(obstruction);
                 obstPresetCombo.getItems().add(obstruction);
@@ -304,7 +347,7 @@ public class ConfigPanel extends ScrollPane {
         removeObstPreset.setOnMouseClicked((event) -> {
             Obstruction obstruction = getObstruction();
             if(obstruction == null) {
-                configError("One of the parameters in the runway or obstruction was invalid!");
+                configError("One of the parameters in the runway or obstruction was invalid: "  + invalidText);
             } else {
                 Obstruction toRemove = getObstructionFromName(obstruction.getName());
                 if (toRemove == null) {
@@ -629,5 +672,8 @@ public class ConfigPanel extends ScrollPane {
 	public ArrayList<TextField> getOptionalFields() {
 		return optionalFields;
 	}
+	
+	public String getInvalidText() {
+		return invalidText;
+	}
 }
-
