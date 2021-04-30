@@ -1,3 +1,5 @@
+//package sample;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -22,6 +24,7 @@ public class AffectedRunway {
         // replace obstruction and change all values but original runway is the same
         // landing over / take off away
         this.obstruction = obstruction;
+        int threshold = originalRunway.getDisplacedThreshold();
         if(obstruction.getDistanceFromCentre() > 75 || obstruction.getDistanceFromThreshold() > originalRunway.getTODA() + 60 || obstruction.getDistanceFromThreshold() < -60) {
             TORA = originalRunway.getTORA();
             ASDA = originalRunway.getASDA();
@@ -36,7 +39,8 @@ public class AffectedRunway {
                         originalRunway.getTORA() - originalRunway.getStripEnd() - originalRunway.getRESA() - obstruction.getDistanceFromThreshold());
                 ASDA = TORA + originalRunway.getStopway();
                 TODA = TORA + originalRunway.getClearway();
-                LDA = originalRunway.getLDA() - obstruction.getDistanceFromThreshold() - originalRunway.getStripEnd() - (obstruction.getHeight() * originalRunway.getEGR());
+                LDA = originalRunway.getLDA() - obstruction.getDistanceFromThreshold() - originalRunway.getStripEnd() - threshold - (obstruction.getHeight() * originalRunway.getEGR());
+                //LDA = 10;
 
             }
             //landing towards, take off towards
