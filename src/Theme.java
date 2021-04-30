@@ -6,6 +6,8 @@ import javafx.scene.paint.Color;
 public class Theme {
 
     ArrayList<Color> currentTheme = new ArrayList<Color>();
+
+    String name;
     
     //DEFAULT THEME
     Color roadColorDefault = Color.rgb(208, 211, 212), stripeColorDefault = Color.rgb(253, 254, 254), warningColorDefault = Color.rgb(243, 156, 18);
@@ -55,6 +57,7 @@ public class Theme {
     stopwayColorMonochrome, RESAColorMonochrome, stripEndColorMonochrome, blastProtColorMonochrome, ALSColorMonochrome, TOCSColorMonochrome, runwayStripColorMonochrome) );
     
     Theme (String name) {
+        this.name = name;
         switch(name) {
             case "default" : 
                 currentTheme = defaultTheme;
@@ -82,12 +85,7 @@ public class Theme {
         }
     }
 
-        //BASE COLORS
-        //Color roadColor, stripeColor, warningColor, clearedAreaColor, HUDColor, backgroundColor;
-        //Color outlineColor, obstacleColor1, obstacleColor2, grassColor, safeColor, dangerColor;
-
-        //Color displacedThresholdColor, TORAColor, LDAColor, ASDAColor, TODAColor, clearwayColor; 
-        //Color stopwayColor, RESAColor, stripEndColor, blastProtColor, ALSColor, TOCSColor, runwayStripColor;
+    public String getCurrentTheme() { return name; }
 
     public Color getRoadColor() { return currentTheme.get(0); }
     public Color getStripeColor() { return currentTheme.get(1); }

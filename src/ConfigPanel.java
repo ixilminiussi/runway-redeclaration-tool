@@ -119,8 +119,13 @@ public class ConfigPanel extends ScrollPane {
         	int stopway = Integer.parseInt(runwayIntTextFields.get(9).textProperty().getValue());
         	int clearway = Integer.parseInt(runwayIntTextFields.get(10).textProperty().getValue());
         	
-        	if (tora < 50) {
+        	if (tora < 400) {
         		invalidText = "TORA below minimum value";
+        		return false;
+        	}
+        	
+        	if (tora > 5000) {
+        		invalidText = "TORA above maximum value";
         		return false;
         	}
         	

@@ -1,5 +1,3 @@
-//package sample;
-
 import java.awt.*;
 import java.awt.Label;
 import java.awt.event.MouseEvent;
@@ -293,7 +291,7 @@ public class RunwayGraphics {
     }
 
     public void showMeasurements() {
-    	
+
     	showTitle();
 
         if (obstacleBox.isSelected()) {
@@ -415,31 +413,31 @@ public class RunwayGraphics {
         }
 
     }
-    
+
     public void showTitle() {
 
         String title = affectedRunway.getOriginalRunway().getName() + " - " + affectedRunway.getOriginalRunway().getAirport();
 
         Text text = new Text(title);
-        
+
         topGc.setFont(new Font(20));
         topGc.setTextAlign(TextAlignment.CENTER);
         topGc.setLineWidth(1.7);
         //topGc.setStroke(theme.getRESAColor());
-        
+
         topGc.strokeText(title, CANVAS_WIDTH / 2, 50);
 
         topGc.setFont(new Font(15));
         topGc.setTextAlign(TextAlignment.LEFT);
         topGc.setLineWidth(1.2);
-         
+
         sideGc.setFont(new Font(20));
         sideGc.setTextAlign(TextAlignment.CENTER);
         sideGc.setLineWidth(1.7);
 //      sideGc.setStroke(theme.getRESAColor());
-        
+
         sideGc.strokeText(title, CANVAS_WIDTH / 2, 50);
-        
+
         sideGc.setFont(new Font(15));
         sideGc.setTextAlign(TextAlignment.LEFT);
         sideGc.setLineWidth(1.2);
@@ -850,7 +848,7 @@ public class RunwayGraphics {
         });
 
         filtersGridPane.add(compass, 0, 8, 2, 1);
-        
+
         Button resetView = new Button("Reset View");
         resetView.setOnAction((event) -> {
             draw();
@@ -1211,6 +1209,10 @@ public class RunwayGraphics {
     public void changeTheme(Theme theme) {
         this.theme = theme;
         draw();
+    }
+
+    public Theme getTheme() {
+        return theme;
     }
 
     //important boolean functions
