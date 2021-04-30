@@ -109,7 +109,7 @@ public class RunwayGraphics {
     public RunwayGraphics(Stage stage, Theme theme) {
         this.theme = theme;
         this.stage = stage;
-        placeHolderRunway = new AffectedRunway(new Runway("N/A","N/A",0,0,0,0,0,0,0,1,1,1,1),new Obstruction("N/A", 0, 0, 0, 0));
+        placeHolderRunway = new AffectedRunway(new Runway("N/A","N/A",10,0,0,0,0,0,0,1,1,1,1),new Obstruction("N/A", 0, 0, 0, 0));
         affectedRunway = placeHolderRunway;
         runwayDisplayAnchor = new AnchorPane();
         paneBackground = new Background(new BackgroundFill(BACKGROUND_COLOR, CornerRadii.EMPTY, Insets.EMPTY));
