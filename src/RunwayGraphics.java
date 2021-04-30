@@ -1201,6 +1201,10 @@ public class RunwayGraphics {
         draw();
     }
 
+    public Theme getTheme() {
+        return theme;
+    }
+
     //important boolean functions
     boolean hasClearway() { return (affectedRunway.getOriginalRunway().getClearway() != 0); }
 

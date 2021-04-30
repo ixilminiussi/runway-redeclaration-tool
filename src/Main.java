@@ -13,8 +13,12 @@ import javafx.stage.Stage;
 import java.awt.event.KeyEvent;
 import java.beans.EventHandler;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 
 public class Main extends Application {
@@ -219,7 +223,7 @@ public class Main extends Application {
         currentRunway = configPanel.getAffectedRunway();
         main.add(configPanel, 2, 0, 1, 3);
 
-        runwayGraphics = new RunwayGraphics(stage, new Theme("default"));
+        runwayGraphics = new RunwayGraphics(stage, new Theme(getLastTheme()));
         if(currentRunway != null)
             runwayGraphics.draw(currentRunway);
         main.add(runwayGraphics.getRunwayGraphics(), 0, 0, 2, 4);
@@ -274,12 +278,15 @@ public class Main extends Application {
         theme.getItems().addAll(defaultTheme, darkTheme, monochromeTheme);
         defaultTheme.setOnAction((event) -> {
             runwayGraphics.changeTheme(new Theme("default"));
+            setLastTheme();
         });
         darkTheme.setOnAction((event) -> {
             runwayGraphics.changeTheme(new Theme("dark"));
+            setLastTheme();
         });
         monochromeTheme.setOnAction((event) -> {
             runwayGraphics.changeTheme(new Theme("monochrome"));
+            setLastTheme();
         });
 
 
@@ -408,5 +415,40 @@ public class Main extends Application {
 
         shortcutsWindow.initModality(Modality.APPLICATION_MODAL);
         shortcutsWindow.show();
+    }
+
+    public void setLastTheme() {
+        try {
+            File configFile = new File("src/bin/config.txt");
+            configFile.createNewFile();
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+        try {
+            FileWriter myWriter = new FileWriter("src/bin/config.txt");
+            myWriter.write(runwayGraphics.getTheme().getCurrentTheme());
+            myWriter.close();
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
+    }
+
+    public String getLastTheme() {
+        try {
+            File configFile = new File("src/bin/config.txt");
+            Scanner myReader = new Scanner(configFile);
+            while (myReader.hasNextLine()) {
+                String data = myReader.nextLine();
+                return data;
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("An error occurred.");
+            return "default";
+        }
+
+        return "default";
     }
 }
