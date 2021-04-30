@@ -63,26 +63,26 @@ class TestExportImage {
 	}
 	
 	//Comment out or remove @AfterAll to keep files after test
-	@AfterAll
+	//@AfterAll
 	public static void deleteTempFiles() {
     	for (int i = 0; i < obstructions.size(); i++) {
     		File file1 = new File("src/test_image/scenarioTestTopView" + (i + 1) + "Temp.png");
     		file1.delete();
     		
     		File file2 = new File("src/test_image/scenarioTestTopView" + (i + 1) + "Temp.jpg");
-    		file1.delete();
+    		file2.delete();
     		
-    		File file3 = new File("src/test_image/scenarioTestTopView" + (i + 1) + "Temp.docx");
-    		file1.delete();
+    		File file3 = new File("src/test_image/scenarioTestTopView" + (i + 1) + "Temp.gif");
+    		file3.delete();
     		
-    		/**File file4 = new File("src/test_image/scenarioTestSideView" + (i + 1) + "Temp.png");
-    		file2.delete();**/
+    		File file4 = new File("src/test_image/scenarioTestSideView" + (i + 1) + "Temp.png");
+    		file4.delete();
     		
-    		/**File file5 = new File("src/test_image/scenarioTestSideView" + (i + 1) + "Temp.jpg");
-    		file2.delete();**/
+    		File file5 = new File("src/test_image/scenarioTestSideView" + (i + 1) + "Temp.jpg");
+    		file5.delete();
     		
-    		/**File file6 = new File("src/test_image/scenarioTestSideView" + (i + 1) + "Temp.docx");
-    		file2.delete();**/
+    		File file6 = new File("src/test_image/scenarioTestSideView" + (i + 1) + "Temp.gif");
+    		file6.delete();
     	}
 	}
 	
@@ -147,10 +147,10 @@ class TestExportImage {
                         	}
                         	
                             test.runwayGraphics.draw(new AffectedRunway(runway, obstructions.get(i)));
-                        	testImage.saveCanvasToPNG("src/test_image/scenarioTestTopView" + (i + 1) + "Temp.png");
+                        	testImage.saveCanvasImage("src/test_image/scenarioTestTopView" + (i + 1) + "Temp.png");
                         	
-                        	//test.runwayGraphics.currentView = test.runwayGraphics.sideViewCanvas;
-                        	//testImage.saveCanvasToPNG("src/test_image/scenarioTestSideView" + (i + 1) + "Temp.png");
+                        	test.runwayGraphics.currentView = test.runwayGraphics.sideViewCanvas;
+                        	testImage.saveCanvasImage("src/test_image/scenarioTestSideView" + (i + 1) + "Temp.png");
                         	
                         }
                         latch.countDown();	
@@ -167,8 +167,8 @@ class TestExportImage {
         		File file1 = new File("src/test_image/scenarioTestTopView" + (i + 1) + "Temp.png");
         		assertTrue(file1.exists());
         		
-        		//File file2 = new File("src/test_image/scenarioTestSideView" + (i + 1) + "Temp.png");
-        		//assertTrue(file2.exists());
+        		File file2 = new File("src/test_image/scenarioTestSideView" + (i + 1) + "Temp.png");
+        		assertTrue(file2.exists());
         	}
         } catch (Exception e) {
         	fail("Error exporting to PNG: " + e.getMessage());
@@ -236,10 +236,10 @@ class TestExportImage {
                         	}
                         	
                             test.runwayGraphics.draw(new AffectedRunway(runway, obstructions.get(i)));
-                        	//testImage.saveCanvasToJPEG("src/test_image/scenarioTestTopView" + (i + 1) + "Temp.jpg");
+                        	testImage.saveCanvasImage("src/test_image/scenarioTestTopView" + (i + 1) + "Temp.jpg");
                         	
-                        	//test.runwayGraphics.currentView = test.runwayGraphics.sideViewCanvas;
-                        	//testImage.saveCanvasToJPEG("src/test_image/scenarioTestSideView" + (i + 1) + "Temp.jpg");
+                        	test.runwayGraphics.currentView = test.runwayGraphics.sideViewCanvas;
+                        	testImage.saveCanvasImage("src/test_image/scenarioTestSideView" + (i + 1) + "Temp.jpg");
                         }
                         latch.countDown();	
                     }
@@ -255,11 +255,99 @@ class TestExportImage {
         		File file1 = new File("src/test_image/scenarioTestTopView" + (i + 1) + "Temp.jpg");
         		assertTrue(file1.exists());
         		
-        		//File file2 = new File("src/test_image/scenarioTestSideView" + (i + 1) + "Temp.jpg");
-        		//assertTrue(file2.exists());
+        		File file2 = new File("src/test_image/scenarioTestSideView" + (i + 1) + "Temp.jpg");
+        		assertTrue(file2.exists());
         	}
         } catch (Exception e) {
         	fail("Error exporting to JPEG: " + e.getMessage());
+        }
+    }
+    
+    @Test
+    public void testExportGIF() throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+        Thread thread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                new JFXPanel();
+                Platform.runLater(new Runnable() {
+
+                    @Override
+                    public void run() {
+                    	
+                    	class Test extends Application {
+                    	Stage stage;
+                    	RunwayGraphics runwayGraphics;
+                    	Scene scene;
+                    	    @Override
+                    	    public void start(Stage stage) throws Exception {
+                    	    	this.stage = stage;
+                    	    }                    	  
+                    	}
+                    	
+                    	Test test = new Test();
+                    	try {
+							test.start(new Stage());
+						} catch (Exception e1) {
+							e1.printStackTrace();
+						}
+                    	
+                    	RunwayGraphics testImage = new RunwayGraphics(new Stage(), new Theme("dark"));
+                        test.runwayGraphics = testImage;
+            	    	test.scene = new Scene(test.runwayGraphics.getRunwayGraphics(), 1000, 1000);
+            	    	test.stage.setScene(test.scene);
+            
+            	        //test.stage.show();
+            	                                	
+                        for (int i = 0; i < obstructions.size(); i++) {
+                        		
+                        	Runway runway = runways.get(0);
+                        		
+                        	switch(i) {
+                        		case 3:
+                        		case 5:
+                        			runway = runways.get(0); //09R
+                        			break;
+                        		case 4:
+                        		case 6:
+                        			runway = runways.get(1); //27L
+                        			break;
+                        		case 1:
+                        		case 7:
+                        			runway = runways.get(2); //09L
+                        			break;
+                        		case 2:
+                        		case 8:
+                        			runway = runways.get(3); //27R
+                        			break;
+                        	}
+                        	
+                            test.runwayGraphics.draw(new AffectedRunway(runway, obstructions.get(i)));
+                        	testImage.saveCanvasImage("src/test_image/scenarioTestTopView" + (i + 1) + "Temp.gif");
+                        	
+                        	test.runwayGraphics.currentView = test.runwayGraphics.sideViewCanvas;
+                        	testImage.saveCanvasImage("src/test_image/scenarioTestSideView" + (i + 1) + "Temp.gif");
+                        }
+                        latch.countDown();	
+                    }
+                });
+            }
+        });
+        
+        thread.start();
+        latch.await();
+              
+        try {
+        	for (int i = 0; i < obstructions.size(); i++) {
+        		File file1 = new File("src/test_image/scenarioTestTopView" + (i + 1) + "Temp.gif");
+        		assertTrue(file1.exists());
+        		
+        		File file2 = new File("src/test_image/scenarioTestSideView" + (i + 1) + "Temp.gif");
+        		assertTrue(file2.exists());
+        	}
+        } catch (Exception e) {
+        	fail("Error exporting to GIF: " + e.getMessage());
         }
     }
 }
