@@ -219,9 +219,7 @@ public class Main extends Application {
         currentRunway = configPanel.getAffectedRunway();
         main.add(configPanel, 2, 0, 1, 3);
 
-        runwayGraphics = new RunwayGraphics(new Theme("dark"));
-        runwayGraphics.draw();
-        runwayGraphics = new RunwayGraphics(stage);
+        runwayGraphics = new RunwayGraphics(stage, new Theme("default"));
         if(currentRunway != null)
             runwayGraphics.draw(currentRunway);
         main.add(runwayGraphics.getRunwayGraphics(), 0, 0, 2, 4);
@@ -241,10 +239,8 @@ public class Main extends Application {
     private void setupMenus(MenuBar menuBar) {
         Menu file = new Menu("File");
         Menu accessibility = new Menu("Accessibility");
-        Menu settings = new Menu("Settings");
         Menu theme = new Menu("Theme");
-        menuBar.getMenus().addAll(file, settings, theme);
-        menuBar.getMenus().addAll(file, accessibility);
+        menuBar.getMenus().addAll(file, accessibility, theme);
         MenuItem importNewPresets = new MenuItem("Import New Presets");
         importNewPresets.setOnAction((event) -> {
             importNewXML();
@@ -269,8 +265,23 @@ public class Main extends Application {
 //            System.out.println("test");
 //            runwayGraphics.drawRotated(currentRunway);
 //        });
-
         file.getItems().addAll(importNewPresets, exportRunwaysAndObstructions, clearPresets);
+
+        MenuItem defaultTheme = new MenuItem("Default Theme");
+        MenuItem darkTheme = new MenuItem("Dark Theme");
+        MenuItem monochromeTheme = new MenuItem("Monochrome Theme");
+
+        theme.getItems().addAll(defaultTheme, darkTheme, monochromeTheme);
+        defaultTheme.setOnAction((event) -> {
+            runwayGraphics.changeTheme(new Theme("default"));
+        });
+        darkTheme.setOnAction((event) -> {
+            runwayGraphics.changeTheme(new Theme("dark"));
+        });
+        monochromeTheme.setOnAction((event) -> {
+            runwayGraphics.changeTheme(new Theme("monochrome"));
+        });
+
 
         MenuItem viewShortcuts = new MenuItem("View shortcuts");
         viewShortcuts.setOnAction((event) -> {
@@ -374,43 +385,26 @@ public class Main extends Application {
 
         gp.setMinSize(150, 100);
 
-        gp.getColumnConstraints().addAll(col0,col1, col2);
+        gp.getColumnConstraints().addAll(col0, col1, col2);
 
         gp.add(new Label("E"), 0, 0);
         gp.add(new Label(" "), 1, 0);
-        gp.add(new Label("Export menu"), 2,0);
+        gp.add(new Label("Export menu"), 2, 0);
 
         gp.add(new Label("I"), 0, 1);
         gp.add(new Label(" "), 1, 1);
-        gp.add(new Label("Import menu"), 2,1);
+        gp.add(new Label("Import menu"), 2, 1);
 
         gp.add(new Label("L"), 0, 2);
         gp.add(new Label(" "), 1, 2);
-        gp.add(new Label("Clear all presets"), 2,2);
+        gp.add(new Label("Clear all presets"), 2, 2);
 
         gp.add(new Label("V"), 0, 3);
         gp.add(new Label(" "), 1, 3);
-        gp.add(new Label("Next view"), 2,3);
+        gp.add(new Label("Next view"), 2, 3);
 
         Scene scene = new Scene(gp);
         shortcutsWindow.setScene(scene);
-        file.getItems().addAll(importNewPresets, exportRunwaysAndObstructions, clearPresets);
-
-        MenuItem defaultTheme = new MenuItem("default Theme");
-        MenuItem darkTheme = new MenuItem("dark Theme");
-        MenuItem monochromeTheme = new MenuItem("monochrome Theme");
-
-        theme.getItems().addAll(defaultTheme, darkTheme, monochromeTheme);
-        defaultTheme.setOnAction((event) -> {
-            runwayGraphics.changeTheme(new Theme("default"));
-        });
-        darkTheme.setOnAction((event) -> {
-            runwayGraphics.changeTheme(new Theme("dark"));
-        });
-        monochromeTheme.setOnAction((event) -> {
-            runwayGraphics.changeTheme(new Theme("monochrome"));
-        });
-    }
 
         shortcutsWindow.initModality(Modality.APPLICATION_MODAL);
         shortcutsWindow.show();

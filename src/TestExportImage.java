@@ -116,7 +116,7 @@ class TestExportImage {
 							e1.printStackTrace();
 						}
                     	
-                    	RunwayGraphics testImage = new RunwayGraphics(new Stage());
+                    	RunwayGraphics testImage = new RunwayGraphics(new Stage(), new Theme("dark"));
                         test.runwayGraphics = testImage;
             	    	test.scene = new Scene(test.runwayGraphics.getRunwayGraphics(), 1000, 1000);
             	    	test.stage.setScene(test.scene);
@@ -205,7 +205,7 @@ class TestExportImage {
 							e1.printStackTrace();
 						}
                     	
-                    	RunwayGraphics testImage = new RunwayGraphics(new Stage());
+                    	RunwayGraphics testImage = new RunwayGraphics(new Stage(), new Theme("dark"));
                         test.runwayGraphics = testImage;
             	    	test.scene = new Scene(test.runwayGraphics.getRunwayGraphics(), 1000, 1000);
             	    	test.stage.setScene(test.scene);
@@ -260,94 +260,6 @@ class TestExportImage {
         	}
         } catch (Exception e) {
         	fail("Error exporting to JPEG: " + e.getMessage());
-        }
-    }
-	
-    @Test
-    public void testExportDOC() throws InterruptedException {
-        CountDownLatch latch = new CountDownLatch(1);
-        Thread thread = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                new JFXPanel();
-                Platform.runLater(new Runnable() {
-
-                    @Override
-                    public void run() {
-                    	
-                    	class Test extends Application {
-                    	Stage stage;
-                    	RunwayGraphics runwayGraphics;
-                    	Scene scene;
-                    	    @Override
-                    	    public void start(Stage stage) throws Exception {
-                    	    	this.stage = stage;
-                    	    }                    	  
-                    	}
-                  
-                    	Test test = new Test();
-                    	try {
-							test.start(new Stage());
-						} catch (Exception e1) {
-							e1.printStackTrace();
-						}
-                    	
-                    	RunwayGraphics testImage = new RunwayGraphics(new Stage());
-                        test.runwayGraphics = testImage;
-            	    	test.scene = new Scene(test.runwayGraphics.getRunwayGraphics(), 1000, 1000);
-            	    	test.stage.setScene(test.scene);
-            
-            	        //test.stage.show();
-            	                                	
-                        for (int i = 0; i < obstructions.size(); i++) {
-                        		
-                        	Runway runway = runways.get(0);
-                        		
-                        	switch(i) {
-                        		case 3:
-                        		case 5:
-                        			runway = runways.get(0); //09R
-                        			break;
-                        		case 4:
-                        		case 6:
-                        			runway = runways.get(1); //27L
-                        			break;
-                        		case 1:
-                        		case 7:
-                        			runway = runways.get(2); //09L
-                        			break;
-                        		case 2:
-                        		case 8:
-                        			runway = runways.get(3); //27R
-                        			break;
-                        	}
-                        	
-                            test.runwayGraphics.draw(new AffectedRunway(runway, obstructions.get(i)));
-                        	//testImage.saveCanvasToDOC("src/test_image/scenarioTestTopView" + (i + 1) + "Temp.docx");
-                        	
-                        	//test.runwayGraphics.currentView = test.runwayGraphics.sideViewCanvas;
-                        	//testImage.saveCanvasToDOC("src/test_image/scenarioTestSideView" + (i + 1) + "Temp.docx");
-                        }
-                        latch.countDown();	
-                    }
-                });
-            }
-        });
-        
-        thread.start();
-        latch.await();
-              
-        try {
-        	for (int i = 0; i < obstructions.size(); i++) {
-        		File file1 = new File("src/test_image/scenarioTestTopView" + (i + 1) + "Temp.docx");
-        		assertTrue(file1.exists());
-        		
-        		//File file2 = new File("src/test_image/scenarioTestSideView" + (i + 1) + "Temp.docx");
-        		//assertTrue(file2.exists());
-        	}
-        } catch (Exception e) {
-        	fail("Error exporting to DOC: " + e.getMessage());
         }
     }
 }
