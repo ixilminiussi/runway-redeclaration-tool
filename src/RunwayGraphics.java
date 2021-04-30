@@ -337,7 +337,7 @@ public class RunwayGraphics {
 
         obstruction = affectedRunway.getObstruction();
         //affectedRunway.recalculate(obstruction);
-        drawObstacle(obstruction.getDistanceFromThreshold(), obstruction.getDistanceFromCentre(), obstruction.getLength(), obstruction.getHeight());
+        drawObstacle(obstruction.getDistanceFromThreshold() + affectedRunway.getOriginalRunway().getDisplacedThreshold(), obstruction.getDistanceFromCentre(), obstruction.getLength(), obstruction.getHeight());
         double OrigTODA = affectedRunway.getOriginalRunway().getTODA();
         double NewTODA = affectedRunway.getTODA();
         double OrigTORA = affectedRunway.getOriginalRunway().getTORA();
@@ -357,12 +357,12 @@ public class RunwayGraphics {
         if (obDistance > (runwayLength/2)) {
             drawDangerZones(0, 200 ,green, 50, theme.getSafeColor(), "LDA", obDistance);
             drawDangerZones(green, 200, red, 50, theme.getDangerColor(), "ALS/TOCS", obDistance);
-            drawTriangle(obstruction.getDistanceFromThreshold(), obstruction.getHeight(), 2);
+            drawTriangle(obstruction.getDistanceFromThreshold() + affectedRunway.getOriginalRunway().getDisplacedThreshold(), obstruction.getHeight(), 2);
         }
         if (obDistance <= (runwayLength/2)) {
             drawDangerZones(0, 200, red, 50, theme.getDangerColor(), "ALS/TOCS", obDistance);
             drawDangerZones(red, 200, green, 50, theme.getSafeColor(), "LDA", obDistance);
-            drawTriangle(obstruction.getDistanceFromThreshold(), obstruction.getHeight(), 1);
+            drawTriangle(obstruction.getDistanceFromThreshold() + affectedRunway.getOriginalRunway().getDisplacedThreshold(), obstruction.getHeight(), 1);
         }
     }
 
